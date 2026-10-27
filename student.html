@@ -1101,39 +1101,21 @@
         // Khởi tạo Firestore database
         const db = firebase.firestore();
 
-        // Hàm tải danh sách sách từ Firebase Firestore
-        async function loadBooksFromFirestore() {
-            try {
-                const querySnapshot = await db.collection('books').get();
-                let books = [];
+        // Hàm tải danh sách sách trực tiếp từ Firebase Firestore cho Sinh viên
+async function loadBooksFromFirestore() {
+    try {
+        const snapshot = await db.collection('books').get();
+        allBooks = [];
+        snapshot.forEach(doc => {
+            allBooks.push({ id: doc.id, ...doc.data() });
+        });
         
-                // Nếu kho trên Firebase chưa có sách nào, hệ thống tự động thêm sẵn dữ liệu mẫu cho DUE
-                if (querySnapshot.empty) {
-                    const sampleBooks = [
-                        { ten_sach: "Phân tích và Thiết kế Hệ thống Thông tin", ma_sach: "MIS101", tac_gia: "PGS.TS Nguyễn Văn A", chuyen_nganh: "Hệ thống thông tin", so_luong: 5 },
-                        { ten_sach: "Cơ sở dữ liệu doanh nghiệp với Odoo", ma_sach: "MIS102", tac_gia: "ThS. Trần Thị B", chuyen_nganh: "Hệ thống thông tin", so_luong: 3 },
-                        { ten_sach: "Kinh tế vi mô nâng cao", ma_sach: "ECO201", tac_gia: "Dr. John Doe", chuyen_nganh: "Kinh tế", so_luong: 4 },
-                        { ten_sach: "Quản trị Marketing số", ma_sach: "MKT301", tac_gia: "Prof. Michael", chuyen_nganh: "Marketing", so_luong: 6 },
-                        { ten_sach: "Tài chính doanh nghiệp hiện đại", ma_sach: "FIN202", tac_gia: "ThS. Lê Văn C", chuyen_nganh: "Tài chính - Ngân hàng", so_luong: 2 }
-                    ];
-            
-                    // Đẩy dữ liệu mẫu lên Firestore lần đầu tiên
-                    for (let book of sampleBooks) {
-                        await db.collection('books').add(book);
-                    }
-                    books = sampleBooks;
-                } else {
-                    querySnapshot.forEach((doc) => {
-                        books.push({ id: doc.id, ...doc.data() });
-                    });
-                }
-        
-                // Hiển thị danh sách lên giao diện (gọi hàm render có sẵn của bạn)
-                renderBookList(books);
-            } catch (err) {
-                console.error("Lỗi tải danh sách sách:", err);
-            }
-        }
+        // Gọi hàm render hiển thị danh sách sách ra giao diện sinh viên của bạn
+        renderBooks(); 
+    } catch (err) {
+        console.error("Lỗi tải sách cho sinh viên:", err);
+    }
+}
 
         // Gọi hàm tải sách khi trang được mở
         document.addEventListener("DOMContentLoaded", () => {
