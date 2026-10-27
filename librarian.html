@@ -15,11 +15,11 @@
     </style>
     
     <!-- 1. Nạp Firebase App -->
-    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
-    <!-- 2. Nạp Firebase Auth -->
-    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
-    <!-- 3. Nạp Firebase Firestore -->
-    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+<!-- 2. Nạp Firebase Auth -->
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
+<!-- 3. Nạp Firebase Firestore -->
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
 
     <script>
         // Cấu hình Firebase trực tiếp của DUE Smart Locker
@@ -41,46 +41,43 @@
         const auth = firebase.auth();
         const db = window.firebase ? firebase.firestore() : null;
 
-        // Tự động nạp 20 đầu sách mẫu nếu kho trống khi mở trang Thủ thư
-        window.addEventListener('DOMContentLoaded', async () => {
-            try {
-                const snapshot = await db.collection('books').limit(1).get();
-                if (snapshot.empty) {
-                    const sampleBooks = [
-                        { ma_vach: "DUE-MIS-01", ten_sach: "Phân tích và Thiết kế Hệ thống Thông tin", so_luong: 5, so_luong_con: 5, tac_gia: "PGS.TS Nguyễn Văn A", vi_tri_ke: "Tầng 2 - Kệ A1", gia_bia: 120000 },
-                        { ma_vach: "DUE-MIS-02", ten_sach: "Cơ sở dữ liệu doanh nghiệp với Odoo", so_luong: 4, so_luong_con: 4, tac_gia: "ThS. Trần Thị B", vi_tri_ke: "Tầng 2 - Kệ A2", gia_bia: 150000 },
-                        { ma_vach: "DUE-MIS-03", ten_sach: "Lập trình Python cho Quản trị", so_luong: 6, so_luong_con: 6, tac_gia: "Dr. John Doe", vi_tri_ke: "Tầng 2 - Kệ A3", gia_bia: 135000 },
-                        { ma_vach: "DUE-ECO-01", ten_sach: "Kinh tế vi mô nâng cao", so_luong: 5, so_luong_con: 5, tac_gia: "GS. Michael Porter", vi_tri_ke: "Tầng 1 - Kệ B1", gia_bia: 110000 },
-                        { ma_vach: "DUE-ECO-02", ten_sach: "Kinh tế vĩ mô trong kỷ nguyên số", so_luong: 4, so_luong_con: 4, tac_gia: "TS. Lê Văn C", vi_tri_ke: "Tầng 1 - Kệ B2", gia_bia: 125000 },
-                        { ma_vach: "DUE-ACC-01", ten_sach: "Nguyên lý Kế toán tài chính", so_luong: 8, so_luong_con: 8, tac_gia: "PGS.TS Phạm Thị D", vi_tri_ke: "Tầng 3 - Kệ C1", gia_bia: 140000 },
-                        { ma_vach: "DUE-ACC-02", ten_sach: "Kế toán quản trị doanh nghiệp", so_luong: 5, so_luong_con: 5, tac_gia: "ThS. Hoàng Văn E", vi_tri_ke: "Tầng 3 - Kệ C2", gia_bia: 145000 },
-                        { ma_vach: "DUE-MAR-01", ten_sach: "Quản trị Marketing hiện đại", so_luong: 7, so_luong_con: 7, tac_gia: "Philip Kotler", vi_tri_ke: "Tầng 1 - Kệ D1", gia_bia: 180000 },
-                        { ma_vach: "DUE-MAR-02", ten_sach: "Hành vi người tiêu dùng số", so_luong: 5, so_luong_con: 5, tac_gia: "TS. Ngô Thanh F", vi_tri_ke: "Tầng 1 - Kệ D2", gia_bia: 130000 },
-                        { ma_vach: "DUE-FIN-01", ten_sach: "Tài chính doanh nghiệp căn bản", so_luong: 6, so_luong_con: 6, tac_gia: "Eugene Fama", vi_tri_ke: "Tầng 3 - Kệ E1", gia_bia: 160000 },
-                        { ma_vach: "DUE-FIN-02", ten_sach: "Thị trường Chứng khoán & Đầu tư", so_luong: 4, so_luong_con: 4, tac_gia: "ThS. Bùi Minh G", vi_tri_ke: "Tầng 3 - Kệ E2", gia_bia: 155000 },
-                        { ma_vach: "DUE-LAW-01", ten_sach: "Luật Kinh tế Việt Nam", so_luong: 5, so_luong_con: 5, tac_gia: "PGS.TS Vũ Văn H", vi_tri_ke: "Tầng 4 - Kệ F1", gia_bia: 115000 },
-                        { ma_vach: "DUE-STA-01", ten_sach: "Thống kê ứng dụng trong kinh doanh", so_luong: 6, so_luong_con: 6, tac_gia: "TS. Đỗ Thị I", vi_tri_ke: "Tầng 2 - Kệ G1", gia_bia: 125000 },
-                        { ma_vach: "DUE-LOG-01", ten_sach: "Quản trị Chuỗi cung ứng Toàn cầu", so_luong: 5, so_luong_con: 5, tac_gia: "Donald Waters", vi_tri_ke: "Tầng 2 - Kệ H1", gia_bia: 170000 },
-                        { ma_vach: "DUE-HRM-01", ten_sach: "Quản trị Nguồn nhân lực chiến lược", so_luong: 5, so_luong_con: 5, tac_gia: "Gary Dessler", vi_tri_ke: "Tầng 4 - Kệ K1", gia_bia: 145000 },
-                        { ma_vach: "DUE-ECOM-01", ten_sach: "Thương mại điện tử và Chuyển đổi số", so_luong: 7, so_luong_con: 7, tac_gia: "Laudon & Traver", vi_tri_ke: "Tầng 2 - Kệ L1", gia_bia: 190000 },
-                        { ma_vach: "DUE-BUS-01", ten_sach: "Quản trị học đại cương", so_luong: 10, so_luong_con: 10, tac_gia: "Stephen Robbins", vi_tri_ke: "Tầng 1 - Kệ M1", gia_bia: 135000 },
-                        { ma_vach: "DUE-PR-01", ten_sach: "Quan hệ công chúng (PR) trong doanh nghiệp", so_luong: 4, so_luong_con: 4, tac_gia: "ThS. Phan Thị K", vi_tri_ke: "Tầng 1 - Kệ N1", gia_bia: 120000 },
-                        { ma_vach: "DUE-ENT-01", ten_sach: "Khởi nghiệp đổi mới sáng tạo", so_luong: 6, so_luong_con: 6, tac_gia: "Bill Aulet", vi_tri_ke: "Tầng 4 - Kệ P1", gia_bia: 150000 },
-                        { ma_vach: "DUE-MIS-04", ten_sach: "Hệ thống Hoạch định Nguồn lực Doanh nghiệp (ERP)", so_luong: 5, so_luong_con: 5, tac_gia: "TS. Nguyễn Văn L", vi_tri_ke: "Tầng 2 - Kệ A4", gia_bia: 165000 }
-                    ];
+        // Tự động nạp 20 đầu sách ngay khi mở trang Thủ thư
+window.addEventListener('DOMContentLoaded', async () => {
+    try {
+        const sampleBooks = [
+            { ma_vach: "DUE-MIS-01", ten_sach: "Phân tích và Thiết kế Hệ thống Thông tin", so_luong: 5, so_luong_con: 5, tac_gia: "PGS.TS Nguyễn Văn A", vi_tri_ke: "Tầng 2 - Kệ A1", gia_bia: 120000 },
+            { ma_vach: "DUE-MIS-02", ten_sach: "Cơ sở dữ liệu doanh nghiệp với Odoo", so_luong: 4, so_luong_con: 4, tac_gia: "ThS. Trần Thị B", vi_tri_ke: "Tầng 2 - Kệ A2", gia_bia: 150000 },
+            { ma_vach: "DUE-MIS-03", ten_sach: "Lập trình Python cho Quản trị", so_luong: 6, so_luong_con: 6, tac_gia: "Dr. John Doe", vi_tri_ke: "Tầng 2 - Kệ A3", gia_bia: 135000 },
+            { ma_vach: "DUE-ECO-01", ten_sach: "Kinh tế vi mô nâng cao", so_luong: 5, so_luong_con: 5, tac_gia: "GS. Michael Porter", vi_tri_ke: "Tầng 1 - Kệ B1", gia_bia: 110000 },
+            { ma_vach: "DUE-ECO-02", ten_sach: "Kinh tế vĩ mô trong kỷ nguyên số", so_luong: 4, so_luong_con: 4, tac_gia: "TS. Lê Văn C", vi_tri_ke: "Tầng 1 - Kệ B2", gia_bia: 125000 },
+            { ma_vach: "DUE-ACC-01", ten_sach: "Nguyên lý Kế toán tài chính", so_luong: 8, so_luong_con: 8, tac_gia: "PGS.TS Phạm Thị D", vi_tri_ke: "Tầng 3 - Kệ C1", gia_bia: 140000 },
+            { ma_vach: "DUE-ACC-02", ten_sach: "Kế toán quản trị doanh nghiệp", so_luong: 5, so_luong_con: 5, tac_gia: "ThS. Hoàng Văn E", vi_tri_ke: "Tầng 3 - Kệ C2", gia_bia: 145000 },
+            { ma_vach: "DUE-MAR-01", ten_sach: "Quản trị Marketing hiện đại", so_luong: 7, so_luong_con: 7, tac_gia: "Philip Kotler", vi_tri_ke: "Tầng 1 - Kệ D1", gia_bia: 180000 },
+            { ma_vach: "DUE-MAR-02", ten_sach: "Hành vi người tiêu dùng số", so_luong: 5, so_luong_con: 5, tac_gia: "TS. Ngô Thanh F", vi_tri_ke: "Tầng 1 - Kệ D2", gia_bia: 130000 },
+            { ma_vach: "DUE-FIN-01", ten_sach: "Tài chính doanh nghiệp căn bản", so_luong: 6, so_luong_con: 6, tac_gia: "Eugene Fama", vi_tri_ke: "Tầng 3 - Kệ E1", gia_bia: 160000 },
+            { ma_vach: "DUE-FIN-02", ten_sach: "Thị trường Chứng khoán & Đầu tư", so_luong: 4, so_luong_con: 4, tac_gia: "ThS. Bùi Minh G", vi_tri_ke: "Tầng 3 - Kệ E2", gia_bia: 155000 },
+            { ma_vach: "DUE-LAW-01", ten_sach: "Luật Kinh tế Việt Nam", so_luong: 5, so_luong_con: 5, tac_gia: "PGS.TS Vũ Văn H", vi_tri_ke: "Tầng 4 - Kệ F1", gia_bia: 115000 },
+            { ma_vach: "DUE-STA-01", ten_sach: "Thống kê ứng dụng trong kinh doanh", so_luong: 6, so_luong_con: 6, tac_gia: "TS. Đỗ Thị I", vi_tri_ke: "Tầng 2 - Kệ G1", gia_bia: 125000 },
+            { ma_vach: "DUE-LOG-01", ten_sach: "Quản trị Chuỗi cung ứng Toàn cầu", so_luong: 5, so_luong_con: 5, tac_gia: "Donald Waters", vi_tri_ke: "Tầng 2 - Kệ H1", gia_bia: 170000 },
+            { ma_vach: "DUE-HRM-01", ten_sach: "Quản trị Nguồn nhân lực chiến lược", so_luong: 5, so_luong_con: 5, tac_gia: "Gary Dessler", vi_tri_ke: "Tầng 4 - Kệ K1", gia_bia: 145000 },
+            { ma_vach: "DUE-ECOM-01", ten_sach: "Thương mại điện tử và Chuyển đổi số", so_luong: 7, so_luong_con: 7, tac_gia: "Laudon & Traver", vi_tri_ke: "Tầng 2 - Kệ L1", gia_bia: 190000 },
+            { ma_vach: "DUE-BUS-01", ten_sach: "Quản trị học đại cương", so_luong: 10, so_luong_con: 10, tac_gia: "Stephen Robbins", vi_tri_ke: "Tầng 1 - Kệ M1", gia_bia: 135000 },
+            { ma_vach: "DUE-PR-01", ten_sach: "Quan hệ công chúng (PR) trong doanh nghiệp", so_luong: 4, so_luong_con: 4, tac_gia: "ThS. Phan Thị K", vi_tri_ke: "Tầng 1 - Kệ N1", gia_bia: 120000 },
+            { ma_vach: "DUE-ENT-01", ten_sach: "Khởi nghiệp đổi mới sáng tạo", so_luong: 6, so_luong_con: 6, tac_gia: "Bill Aulet", vi_tri_ke: "Tầng 4 - Kệ P1", gia_bia: 150000 },
+            { ma_vach: "DUE-MIS-04", ten_sach: "Hệ thống Hoạch định Nguồn lực Doanh nghiệp (ERP)", so_luong: 5, so_luong_con: 5, tac_gia: "TS. Nguyễn Văn L", vi_tri_ke: "Tầng 2 - Kệ A4", gia_bia: 165000 }
+        ];
 
-                    for (let book of sampleBooks) {
-                        await db.collection('books').add({
-                            ...book,
-                            ngay_tao: firebase.firestore.FieldValue.serverTimestamp()
-                        });
-                    }
-                    console.log("🎉 Đã bơm thành công 20 đầu sách vào Firebase!");
-                }
-            } catch (e) {
-                console.error("Lỗi tự động nạp sách:", e);
-            }
-        });
+        for (let book of sampleBooks) {
+            await db.collection('books').add({
+                ...book,
+                ngay_tao: firebase.firestore.FieldValue.serverTimestamp()
+            });
+        }
+        console.log("🎉 Đã bơm thành công 20 đầu sách vào Firebase!");
+    } catch (e) {
+        console.error("Lỗi:", e);
+    }
+});
 
         async function loginWithFirebase(email, password) {
             let fullEmail = email.trim();
@@ -88,10 +85,6 @@
                 fullEmail = fullEmail + "@due.udn.vn";
             }
             return await auth.signInWithEmailAndPassword(fullEmail, password.trim());
-        }
-
-        async function logoutFirebase() {
-            return await auth.signOut();
         }
     </script>
 </head>
@@ -472,80 +465,373 @@
         }
 
         async function loadLibrarianData() {
-            try {
-                // Tải danh sách sách trực tiếp từ Cloud Firestore
-                const snapshot = await db.collection('books').get();
-                const rawBooks = [];
-                snapshot.forEach(doc => {
-                    rawBooks.push({ id: doc.id, ...doc.data() });
-                });
+    try {
+        // Tải danh sách sách trực tiếp từ Cloud Firestore thay vì gọi API Python
+        const snapshot = await db.collection('books').get();
+        const rawBooks = [];
+        snapshot.forEach(doc => {
+            rawBooks.push({ id: doc.id, ...doc.data() });
+        });
 
-                // Gom nhóm theo tên sách để hiển thị đúng giao diện kho hiện tại
-                const grouped = {};
-                rawBooks.forEach(b => {
-                    const name = b.ten_sach || "Sách chưa đặt tên";
-                    if (!grouped[name]) {
-                        grouped[name] = {
-                            ten_sach: name,
-                            tac_gia: b.tac_gia || "Đang cập nhật",
-                            vi_tri_ke: b.vi_tri_ke || "Kệ chính",
-                            ma_vach_dai_dien: b.ma_vach || "DUE-BOOK",
-                            tong_so_luong: 0,
-                            so_luong_co_san: 0,
-                            so_luong_dang_muon: 0
-                        };
-                    }
-                    grouped[name].tong_so_luong += (b.so_luong || 1);
-                    grouped[name].so_luong_co_san += (b.so_luong_con !== undefined ? b.so_luong_con : (b.so_luong || 1));
-                });
-
-                allGroupedBooks = Object.values(grouped);
-                renderFilteredLibrarianBooks();
-
-                // Các bảng khác hiển thị mặc định
-                document.getElementById('totalActiveBorrowBadge').innerText = "0";
-                document.getElementById('orderCount').innerText = "0 đơn";
-                document.getElementById('inspectCount').innerText = "0 cuốn";
-
-            } catch (err) {
-                console.error("Lỗi nạp dữ liệu thủ thư từ Firestore:", err);
+        // Gom nhóm theo tên sách để hiển thị đúng giao diện kho hiện tại
+        const grouped = {};
+        rawBooks.forEach(b => {
+            const name = b.ten_sach || "Sách chưa đặt tên";
+            if (!grouped[name]) {
+                grouped[name] = {
+                    ten_sach: name,
+                    tac_gia: b.tac_gia || "Đang cập nhật",
+                    vi_tri_ke: b.vi_tri_ke || "Kệ chính",
+                    ma_vach_dai_dien: b.ma_vach || "DUE-BOOK",
+                    tong_so_luong: 0,
+                    so_luong_co_san: 0,
+                    so_luong_dang_muon: 0
+                };
             }
-        }
+            grouped[name].tong_so_luong += (b.so_luong || 1);
+            grouped[name].so_luong_co_san += (b.so_luong_con !== undefined ? b.so_luong_con : (b.so_luong || 1));
+        });
 
+        allGroupedBooks = Object.values(grouped);
+        renderFilteredLibrarianBooks();
+
+        // Cập nhật các bảng khác tạm thời nếu chưa có API
+        document.getElementById('totalActiveBorrowBadge').innerText = "0";
+        document.getElementById('orderCount').innerText = "0 đơn";
+        document.getElementById('inspectCount').innerText = "0 cuốn";
+
+    } catch (err) {
+        console.error("Lỗi nạp dữ liệu thủ thư từ Firestore:", err);
+    }
+}
+
+        // Render đơn soạn: Gom nhóm sinh viên - sách
         function renderOrders(orders) {
             document.getElementById('orderCount').innerText = `${orders.length} đơn`;
+            const tbody = document.getElementById('ordersTableBody');
+            tbody.innerHTML = '';
+
+            if (orders.length === 0) {
+                tbody.innerHTML = `<tr><td colspan="6" class="p-6 text-center text-slate-400 text-xs">Hiện không có đơn nào đang chờ soạn hoặc chờ lấy.</td></tr>`;
+                return;
+            }
+
+            orders.forEach(group => {
+                const isReady = group.trang_thai_don === 'da_soan_xong';
+                const tokenSafe = group.qr_token;
+
+                let booksList = group.books || [];
+                if (booksList.length === 0 && group.ten_sach) {
+                    booksList = [{ ten_sach: group.ten_sach, vi_tri_ke: group.vi_tri_ke, ma_vach: '' }];
+                }
+
+                let booksHtml = '<div class="space-y-1.5 py-0.5">';
+                booksList.forEach((b, idx) => {
+                    booksHtml += `
+                        <div class="flex items-center gap-2 text-xs">
+                            <span class="w-4 h-4 rounded-full bg-orange-100 text-orange-700 font-bold flex items-center justify-center text-[10px] shrink-0">${idx + 1}</span>
+                            <span class="font-bold text-slate-800">${b.ten_sach}</span>
+                            <span class="bg-slate-100 text-slate-700 px-2 py-0.5 rounded text-[11px] font-mono border border-slate-200 shrink-0">
+                                <i class="fa-solid fa-location-dot text-orange-600 mr-1"></i>${b.vi_tri_ke}
+                            </span>
+                        </div>
+                    `;
+                });
+                booksHtml += '</div>';
+
+                tbody.innerHTML += `
+                    <tr class="hover:bg-slate-50 transition border-b border-slate-100">
+                        <td class="p-3.5 align-middle">
+                            <span class="text-sm font-black text-orange-600 bg-orange-50 px-2.5 py-1 rounded-xl border border-orange-200">${group.so_hoc}</span>
+                        </td>
+                        <td class="p-3.5 align-middle">
+                            <div class="font-bold text-slate-900 text-xs sm:text-sm">${group.ho_ten}</div>
+                            <div class="text-[11px] font-mono text-slate-400">${group.mssv}</div>
+                            <span class="inline-block mt-0.5 text-[10px] font-bold bg-blue-50 text-blue-700 px-2 py-0.5 rounded-md">
+                                ${booksList.length} cuốn
+                            </span>
+                        </td>
+                        <td class="p-3.5 align-middle">
+                            ${booksHtml}
+                        </td>
+                        <td class="p-3.5 align-middle text-xs text-slate-600 whitespace-nowrap">
+                            <div>${group.ngay_hen || 'Hôm nay'}</div>
+                            <div class="text-orange-600 font-bold mt-0.5">${group.khung_gio}</div>
+                        </td>
+                        <td class="p-3.5 align-middle whitespace-nowrap">
+                            <span class="px-2.5 py-1 rounded-full text-[11px] font-bold ${isReady ? 'bg-emerald-100 text-emerald-700' : 'bg-amber-100 text-amber-700'}">
+                                ${isReady ? 'Đã trong hộc' : 'Chờ nạp hộc'}
+                            </span>
+                        </td>
+                        <td class="p-3.5 align-middle text-right space-x-1.5 whitespace-nowrap">
+                            ${!isReady ? `
+                                <button onclick="markGroupReady('${tokenSafe}')" class="px-3 py-1.5 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl text-xs font-bold shadow-sm transition">
+                                    <i class="fa-solid fa-check mr-1"></i> Đã nạp hộc
+                                </button>
+                            ` : `
+                                <span class="text-xs text-emerald-600 font-bold mr-2"><i class="fa-solid fa-circle-check"></i> Sẵn sàng</span>
+                            `}
+                            <button onclick="cancelExpiredGroup('${tokenSafe}', '${group.so_hoc}', ${booksList.length})" class="px-2.5 py-1.5 bg-rose-50 hover:bg-rose-100 text-rose-600 rounded-xl text-xs font-bold transition" title="Sinh viên không đến nhận -> Thu hồi cả đơn">
+                                <i class="fa-solid fa-arrow-rotate-left mr-1"></i> Thu hồi
+                            </button>
+                        </td>
+                    </tr>
+                `;
+            });
         }
 
         async function markGroupReady(token) {
-            alert("Tính năng đang vận hành qua mây Firestore!");
+            try {
+                const res = await fetch('/api/librarian/ready-group', {
+                    method: 'POST',
+                    headers: {'Content-Type': 'application/json'},
+                    body: JSON.stringify({ qr_token: token })
+                });
+                if (res.ok) loadLibrarianData();
+            } catch (err) {
+                alert("Lỗi kết nối máy chủ!");
+            }
         }
 
         async function cancelExpiredGroup(token, lockerName, count) {
-            alert("Tính năng đang vận hành qua mây Firestore!");
+            if (!confirm(`Xác nhận sinh viên không đến nhận ${count} cuốn sách tại ${lockerName}?\n\nHệ thống sẽ thu hồi toàn bộ số sách này về kệ và mở trống hộc tủ.`)) return;
+            try {
+                const res = await fetch('/api/librarian/cancel-expired-group', {
+                    method: 'POST',
+                    headers: {'Content-Type': 'application/json'},
+                    body: JSON.stringify({ qr_token: token })
+                });
+                const data = await res.json();
+                alert(data.message);
+                loadLibrarianData();
+            } catch (err) {
+                alert("Lỗi kết nối máy chủ!");
+            }
         }
 
+        // ================= CỤM TAB 2: QUẢN LÝ SÁCH MƯỢN =================
         async function loadActiveBorrowsData() {
-            allActiveBorrows = [];
-            document.getElementById('totalActiveBorrowBadge').innerText = "0";
-            renderActiveBorrowsTable();
+            try {
+                const res = await fetch('/api/librarian/active-borrows');
+                if (res.ok) {
+                    allActiveBorrows = await res.json();
+                    document.getElementById('totalActiveBorrowBadge').innerText = allActiveBorrows.length;
+                    renderActiveBorrowsTable();
+                }
+            } catch(e) {
+                console.error("Lỗi nạp danh sách mượn:", e);
+            }
         }
 
         let expandedUserIds = [];
 
         function renderActiveBorrowsTable() {
+            const query = (document.getElementById('borrowSearchInput')?.value || '').toLowerCase().trim();
+            const filter = document.getElementById('borrowStatusFilter')?.value || 'all';
+
+            const groupedByUser = {};
+            allActiveBorrows.forEach(item => {
+                const key = item.mssv;
+                if (!groupedByUser[key]) {
+                    groupedByUser[key] = {
+                        user_id: item.user_id,
+                        ho_ten: item.ho_ten,
+                        mssv: item.mssv,
+                        email: item.email,
+                        has_late: false,
+                        total_fine: 0,
+                        nearest_due: item.han_tra,
+                        books: []
+                    };
+                }
+
+                if (item.is_late) {
+                    groupedByUser[key].has_late = true;
+                    groupedByUser[key].total_fine += (item.tien_phat || 0);
+                }
+
+                groupedByUser[key].books.push(item);
+            });
+
+            let userList = Object.values(groupedByUser).filter(u => {
+                const matchUser = u.ho_ten.toLowerCase().includes(query) || u.mssv.toLowerCase().includes(query);
+                const matchBook = u.books.some(b => 
+                    b.ten_sach.toLowerCase().includes(query) || 
+                    b.ma_vach.toLowerCase().includes(query)
+                );
+                const matchQuery = matchUser || matchBook;
+
+                if (!matchQuery) return false;
+                if (filter === 'late') return u.has_late;
+                if (filter === 'ontime') return !u.has_late;
+                return true;
+            });
+
+            document.getElementById('activeBorrowFilterCount').innerText = `${userList.length} sinh viên`;
             const tbody = document.getElementById('activeBorrowsTableBody');
-            tbody.innerHTML = `<tr><td colspan="6" class="p-6 text-center text-slate-400 text-xs">Chưa có lượt mượn nào trên hệ thống mây.</td></tr>`;
+            tbody.innerHTML = '';
+
+            if (userList.length === 0) {
+                tbody.innerHTML = `<tr><td colspan="6" class="p-6 text-center text-slate-400 text-xs">Không tìm thấy sinh viên nào đang mượn sách phù hợp.</td></tr>`;
+                return;
+            }
+
+            userList.forEach(u => {
+                const isExpanded = expandedUserIds.includes(u.mssv);
+
+                tbody.innerHTML += `
+                    <tr onclick="toggleUserBorrows('${u.mssv}')" class="hover:bg-orange-50/50 transition border-b border-slate-100 cursor-pointer select-none">
+                        <td class="p-3.5 text-center text-slate-400">
+                            <i class="fa-solid ${isExpanded ? 'fa-chevron-down text-orange-600' : 'fa-chevron-right'} text-xs transition-transform"></i>
+                        </td>
+                        <td class="p-3.5">
+                            <div class="font-bold text-slate-900 text-sm">${u.ho_ten}</div>
+                            <div class="text-[11px] font-mono text-orange-600 font-bold">MSSV: ${u.mssv}</div>
+                        </td>
+                        <td class="p-3.5">
+                            <span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-xs font-bold bg-blue-50 text-blue-700 border border-blue-200">
+                                <i class="fa-solid fa-book text-[10px]"></i> ${u.books.length} cuốn
+                            </span>
+                        </td>
+                        <td class="p-3.5 text-xs font-semibold text-slate-600">
+                            ${u.nearest_due || '--'}
+                        </td>
+                        <td class="p-3.5">
+                            ${u.has_late ? `
+                                <span class="px-2.5 py-1 rounded-full text-[11px] font-black bg-rose-100 text-rose-700 animate-pulse">
+                                    Có sách trễ hạn (${u.total_fine.toLocaleString()} đ)
+                                </span>
+                            ` : `
+                                <span class="px-2.5 py-1 rounded-full text-[11px] font-bold bg-emerald-100 text-emerald-700">
+                                    Trong hạn
+                                </span>
+                            `}
+                        </td>
+                        <td class="p-3.5 text-right text-xs font-bold text-orange-600">
+                            ${isExpanded ? 'Thu gọn ▲' : 'Xem sách ▼'}
+                        </td>
+                    </tr>
+                `;
+
+                if (isExpanded) {
+                    let subRowsHtml = '';
+                    u.books.forEach((b, index) => {
+                        subRowsHtml += `
+                            <div class="flex flex-col sm:flex-row sm:items-center justify-between p-3 bg-white rounded-xl border border-slate-200 text-xs gap-2">
+                                <div class="flex items-center gap-3">
+                                    <span class="w-5 h-5 rounded-full bg-slate-100 text-slate-600 font-bold flex items-center justify-center text-[10px]">${index + 1}</span>
+                                    <div>
+                                        <div class="font-bold text-slate-800 text-xs sm:text-sm">${b.ten_sach}</div>
+                                        <div class="text-[10px] text-slate-400 mt-0.5">Kệ: <b class="text-slate-600">${b.vi_tri_ke}</b></div>
+                                    </div>
+                                </div>
+                                <div class="flex items-center gap-3 self-end sm:self-auto">
+                                    <span class="bg-slate-50 text-slate-700 px-2.5 py-1 rounded font-mono font-bold text-[11px] border border-slate-200">${b.ma_vach}</span>
+                                    <span class="text-slate-500">Mượn: ${b.ngay_muon || 'Hôm nay'}</span>
+                                    <span class="font-bold text-slate-700">Hạn: ${b.han_tra}</span>
+                                    ${b.is_late ? `
+                                        <span class="bg-rose-100 text-rose-700 font-bold px-2 py-0.5 rounded text-[10px]">Trễ ${b.days_late} ngày</span>
+                                    ` : `
+                                        <span class="bg-emerald-100 text-emerald-700 font-bold px-2 py-0.5 rounded text-[10px]">Đúng hạn</span>
+                                    `}
+                                </div>
+                            </div>
+                        `;
+                    });
+
+                    tbody.innerHTML += `
+                        <tr class="bg-slate-50/70">
+                            <td colspan="6" class="p-3.5 pl-12">
+                                <div class="space-y-2">
+                                    <div class="text-[11px] font-bold text-slate-500 flex items-center gap-1.5">
+                                        <i class="fa-solid fa-layer-group text-orange-600"></i> Danh sách ${u.books.length} cuốn sách sinh viên đang mượn:
+                                    </div>
+                                    ${subRowsHtml}
+                                </div>
+                            </td>
+                        </tr>
+                    `;
+                }
+            });
         }
 
-        function toggleUserBorrows(mssv) {}
+        function toggleUserBorrows(mssv) {
+            if (expandedUserIds.includes(mssv)) {
+                expandedUserIds = expandedUserIds.filter(id => id !== mssv);
+            } else {
+                expandedUserIds.push(mssv);
+            }
+            renderActiveBorrowsTable();
+        }
 
+        // ================= CỤM NGHIỆM THU SÁCH TRẢ =================
         function renderInspectBooks(books) {
-            document.getElementById('inspectCount').innerText = `0 cuốn`;
+            document.getElementById('inspectCount').innerText = `${books.length} cuốn`;
+            const tbody = document.getElementById('inspectTableBody');
+            tbody.innerHTML = '';
+
+            if (books.length === 0) {
+                tbody.innerHTML = `<tr><td colspan="7" class="p-4 text-center text-slate-400 text-xs">Hiện không có cuốn sách nào trong tủ chờ kiểm tra.</td></tr>`;
+                return;
+            }
+
+            books.forEach(b => {
+                tbody.innerHTML += `
+                    <tr class="hover:bg-slate-50 transition">
+                        <td class="p-3 font-bold text-blue-600">${b.so_hoc}</td>
+                        <td class="p-3 font-semibold text-slate-800">${b.ten_sach}</td>
+                        <td class="p-3"><span class="bg-slate-100 text-slate-700 px-2.5 py-1 rounded-md text-xs font-mono">${b.ma_vach}</span></td>
+                        <td class="p-3 text-xs">${b.ho_ten} (${b.mssv})</td>
+                        <td class="p-3 text-xs text-slate-500">${b.ngay_tra || 'Hôm nay'}</td>
+                        <td class="p-3 text-xs font-bold ${b.tien_phat > 0 ? 'text-rose-600' : 'text-slate-500'}">
+                            ${b.tien_phat > 0 ? b.tien_phat.toLocaleString() + ' đ' : 'Không có'}
+                        </td>
+                        <td class="p-3 text-right space-x-1.5 whitespace-nowrap">
+                            <button onclick="inspectBook(${b.id}, 'binh_thuong')" class="px-3 py-1.5 bg-emerald-600 hover:bg-emerald-700 text-white rounded-lg text-xs font-bold shadow-sm transition">
+                                <i class="fa-solid fa-check mr-1"></i> Tốt (Nhập kho)
+                            </button>
+                            <button onclick="inspectBook(${b.id}, 'hu_hong')" class="px-2.5 py-1.5 bg-rose-50 hover:bg-rose-100 text-rose-600 rounded-lg text-xs font-bold transition">
+                                <i class="fa-solid fa-triangle-exclamation mr-1"></i> Báo hỏng/Phạt
+                            </button>
+                        </td>
+                    </tr>
+                `;
+            });
         }
 
-        async function inspectBook(resId, status) {}
+        async function inspectBook(resId, status) {
+            let fineExtra = 0;
+            if (status === 'hu_hong') {
+                const fineInput = prompt("Nhập số tiền phạt hư hỏng / mất sách / rách trang (VNĐ):", "50000");
+                if (fineInput === null) return;
+                fineExtra = parseInt(fineInput) || 0;
+            } else {
+                if (!confirm("Xác nhận sách nguyên vẹn, nhập lại vào kho sách?")) return;
+            }
 
-        // ================= CỤM KHO SÁCH (HOẠT ĐỘNG TRỰC TIẾP VỚI FIRESTORE) =================
+            try {
+                const res = await fetch('/api/librarian/inspect-book', {
+                    method: 'POST',
+                    headers: {'Content-Type': 'application/json'},
+                    body: JSON.stringify({
+                        reservation_id: resId,
+                        tinh_trang: status,
+                        tien_phat_them: fineExtra
+                    })
+                });
+                const data = await res.json();
+                if (res.ok) {
+                    alert(data.message);
+                    loadLibrarianData();
+                } else {
+                    alert(data.detail || "Thao tác thất bại!");
+                }
+            } catch(e) {
+                alert("Lỗi kết nối máy chủ!");
+            }
+        }
+
+        // ================= CỤM KHO SÁCH =================
         function selectLibCategory(cat) {
             currentLibCategory = cat;
             const buttons = document.querySelectorAll('#libCategoryChips button');
@@ -689,59 +975,61 @@
         }
 
         async function submitEditBook(event) {
-            if (event) event.preventDefault();
-            try {
-                const oldTitle = document.getElementById('editOldTitle').value.trim();
-                const newTitle = document.getElementById('editNewTitle').value.trim();
-                const author = document.getElementById('editAuthor').value.trim();
-                const shelf = document.getElementById('editShelf').value.trim();
+    if (event) event.preventDefault();
+    try {
+        const oldTitle = document.getElementById('editOldTitle').value.trim();
+        const newTitle = document.getElementById('editNewTitle').value.trim();
+        const author = document.getElementById('editAuthor').value.trim();
+        const shelf = document.getElementById('editShelf').value.trim();
 
-                const snapshot = await db.collection('books').where('ten_sach', '==', oldTitle).get();
-                if (snapshot.empty) {
-                    alert("Không tìm thấy đầu sách này trên hệ thống mây!");
-                    return;
-                }
-
-                const batch = db.batch();
-                snapshot.forEach(doc => {
-                    const docRef = db.collection('books').doc(doc.id);
-                    batch.update(docRef, {
-                        ten_sach: newTitle,
-                        tac_gia: author,
-                        vi_tri_ke: shelf
-                    });
-                });
-
-                await batch.commit();
-                alert("Cập nhật thông tin sách thành công!");
-                closeEditBookModal();
-                loadLibrarianData();
-            } catch (err) {
-                console.error("Lỗi cập nhật sách:", err);
-                alert("Lỗi kết nối máy chủ! Không thể cập nhật sách.");
-            }
+        const snapshot = await db.collection('books').where('ten_sach', '==', oldTitle).get();
+        if (snapshot.empty) {
+            alert("Không tìm thấy đầu sách này trên hệ thống mây!");
+            return;
         }
+
+        const batch = db.batch();
+        snapshot.forEach(doc => {
+            const docRef = db.collection('books').doc(doc.id);
+            batch.update(docRef, {
+                ten_sach: newTitle,
+                tac_gia: author,
+                vi_tri_ke: shelf
+            });
+        });
+
+        await batch.commit();
+        alert("Cập nhật thông tin sách thành công!");
+        document.getElementById('editBookModal').classList.add('hidden');
+        loadLibrarianData();
+    } catch (err) {
+        console.error("Lỗi cập nhật sách:", err);
+        alert("Lỗi kết nối máy chủ! Không thể cập nhật sách.");
+    }
+}
 
         async function deleteBookGroup(title, borrowedCount) {
             if (borrowedCount > 0) {
-                return alert(`Không thể xóa! Sách "${title}" hiện đang được mượn.`);
+                return alert(`Không thể xóa! Sách "${title}" hiện có ${borrowedCount} cuốn đang được sinh viên mượn hoặc giữ chỗ tại tủ Locker.`);
             }
 
             if (!confirm(`Bạn có chắc chắn muốn XÓA HOÀN TOÀN đầu sách "${title}" khỏi hệ thống thư viện?`)) return;
 
             try {
-                const snapshot = await db.collection('books').where('ten_sach', '==', title).get();
-                const batch = db.batch();
-                snapshot.forEach(doc => {
-                    batch.delete(db.collection('books').doc(doc.id));
+                const res = await fetch('/api/librarian/book/delete-group', {
+                    method: 'POST',
+                    headers: {'Content-Type': 'application/json'},
+                    body: JSON.stringify({ ten_sach: title })
                 });
-                await batch.commit();
-
-                alert(`Đã xóa thành công đầu sách "${title}" khỏi mây!`);
-                loadLibrarianData();
+                const data = await res.json();
+                if (res.ok) {
+                    alert(data.message);
+                    loadLibrarianData();
+                } else {
+                    alert(data.detail || "Không thể xóa sách!");
+                }
             } catch(e) {
-                console.error("Lỗi xóa sách:", e);
-                alert("Không thể xóa sách!");
+                alert("Lỗi kết nối máy chủ!");
             }
         }
 
@@ -751,78 +1039,52 @@
             if (isNaN(qty) || qty < 0) return alert("Vui lòng nhập số lượng nguyên hợp lệ (>= 0)!");
 
             try {
-                const snapshot = await db.collection('books').where('ten_sach', '==', title).get();
-                if (snapshot.empty) {
-                    alert("Không tìm thấy đầu sách này trên hệ thống mây!");
-                    return;
-                }
-
-                const batch = db.batch();
-                snapshot.forEach(doc => {
-                    const docRef = db.collection('books').doc(doc.id);
-                    batch.update(docRef, {
-                        so_luong: qty,
-                        so_luong_con: qty
-                    });
+                const res = await fetch('/api/librarian/book/set-stock', {
+                    method: 'POST',
+                    headers: {'Content-Type': 'application/json'},
+                    body: JSON.stringify({ ten_sach: title, so_luong: qty })
                 });
-
-                await batch.commit();
-                alert("Đã cập nhật số lượng sách thành công!");
-                loadLibrarianData();
+                const data = await res.json();
+                if (res.ok) {
+                    alert(data.message);
+                    loadLibrarianData();
+                } else {
+                    alert(data.detail || "Không thể lưu số lượng!");
+                    loadLibrarianData();
+                }
             } catch(e) {
-                console.error("Lỗi cập nhật số lượng:", e);
-                alert("Lỗi kết nối máy chủ! Không thể cập nhật số lượng.");
+                alert("Lỗi kết nối máy chủ!");
             }
         }
 
         async function increaseStock(title) {
             try {
-                const snapshot = await db.collection('books').where('ten_sach', '==', title).get();
-                if (snapshot.empty) return;
-
-                const doc = snapshot.docs[0];
-                const currentData = doc.data();
-                const newQty = (currentData.so_luong || 0) + 1;
-                const newCon = (currentData.so_luong_con !== undefined ? currentData.so_luong_con : currentData.so_luong) + 1;
-
-                await db.collection('books').doc(doc.id).update({
-                    so_luong: newQty,
-                    so_luong_con: newCon
+                const res = await fetch('/api/librarian/book/increase', {
+                    method: 'POST',
+                    headers: {'Content-Type': 'application/json'},
+                    body: JSON.stringify({ ten_sach: title })
                 });
-
-                loadLibrarianData();
+                if (res.ok) loadLibrarianData();
             } catch(e) {
-                console.error("Lỗi tăng số lượng:", e);
-                alert("Không thể tăng số lượng sách!");
+                alert("Lỗi kết nối máy chủ!");
             }
         }
 
         async function decreaseStock(title) {
             try {
-                const snapshot = await db.collection('books').where('ten_sach', '==', title).get();
-                if (snapshot.empty) return;
-
-                const doc = snapshot.docs[0];
-                const currentData = doc.data();
-                const currentCon = currentData.so_luong_con !== undefined ? currentData.so_luong_con : currentData.so_luong;
-
-                if (currentCon <= 0) {
-                    alert("Số lượng có sẵn trong kho đã bằng 0, không thể giảm thêm!");
-                    return;
-                }
-
-                const newQty = Math.max(0, (currentData.so_luong || 0) - 1);
-                const newCon = Math.max(0, currentCon - 1);
-
-                await db.collection('books').doc(doc.id).update({
-                    so_luong: newQty,
-                    so_luong_con: newCon
+                const res = await fetch('/api/librarian/book/decrease', {
+                    method: 'POST',
+                    headers: {'Content-Type': 'application/json'},
+                    body: JSON.stringify({ ten_sach: title })
                 });
-
-                loadLibrarianData();
+                const data = await res.json();
+                if (res.ok) {
+                    loadLibrarianData();
+                } else {
+                    alert(data.detail || "Không thể giảm!");
+                }
             } catch(e) {
-                console.error("Lỗi giảm số lượng:", e);
-                alert("Không thể giảm số lượng sách!");
+                alert("Lỗi kết nối máy chủ!");
             }
         }
 
@@ -868,10 +1130,18 @@
         }
 
         async function collectAllReturned() {
-            alert("Hệ thống mây Firestore đã tự động đồng bộ tồn kho!");
+            if (!confirm("Xác nhận đã gom toàn bộ sách từ các hộc trả sách về kệ?")) return;
+            try {
+                const res = await fetch('/api/librarian/collect-all', { method: 'POST' });
+                const data = await res.json();
+                alert(data.message);
+                loadLibrarianData();
+            } catch (err) {
+                alert("Lỗi kết nối máy chủ!");
+            }
         }
 
-        setInterval(loadLibrarianData, 10000);
+        setInterval(loadLibrarianData, 5000);
         loadLibrarianData();
     </script>
 </body>
