@@ -1041,7 +1041,7 @@
             const shelf = document.getElementById('newBookShelf').value.trim();
 
             try {
-                // Đẩy dữ liệu sách mới trực tiếp lên Cloud Firestore
+                // Lưu trực tiếp lên Cloud Firestore
                 await db.collection('books').add({
                     ma_vach: barcode.toUpperCase(),
                     ten_sach: title,
@@ -1053,16 +1053,16 @@
                     ngay_tao: firebase.firestore.FieldValue.serverTimestamp()
                 });
 
-                alert("🎉 Thêm đầu sách thành công lên hệ thống đám mây 24/7!");
+                alert("🎉 Thêm đầu sách thành công lên hệ thống mây 24/7!");
                 closeAddBookModal();
-                
+        
                 // Reset form
                 document.getElementById('newBookBarcode').value = '';
                 document.getElementById('newBookTitle').value = '';
                 document.getElementById('newBookAuthor').value = '';
                 document.getElementById('newBookShelf').value = '';
-                
-                // Reload lại dữ liệu kho sách
+        
+                // Tải lại dữ liệu kho sách từ Firestore
                 loadLibrarianData();
             } catch(err) {
                 console.error("Lỗi Firestore:", err);
