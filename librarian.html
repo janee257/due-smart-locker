@@ -1035,9 +1035,6 @@
         function openAddBookModal() { document.getElementById('addBookModal').classList.remove('hidden'); }
         function closeAddBookModal() { document.getElementById('addBookModal').classList.add('hidden'); }
 
-        // Khởi tạo Firestore database trực tiếp trên web
-        const db = firebase.firestore();
-
         async function submitAddBook(e) {
             e.preventDefault();
             const barcode = document.getElementById('newBookBarcode').value.trim();
