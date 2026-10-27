@@ -1,13 +1,14 @@
 <!DOCTYPE html>
 <html lang="vi">
+<!-- Thư viện Firebase -->
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
+<script src="/firebase-init.js"></script>
 <head>
+    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>DUE Smart Locker - Cổng Dịch Vụ Sinh Viên</title>
-    <!-- Thư viện Firebase SDK -->
-    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
@@ -36,6 +37,11 @@
                 <p class="text-[11px] text-slate-500">Hệ thống mượn - trả sách Smart Locker</p>
             </div>
 
+            <div class="bg-amber-50 border border-amber-200 p-2.5 rounded-xl text-[11px] text-amber-800 flex items-center gap-2">
+                <i class="fa-solid fa-shield-halved text-amber-600"></i>
+                <span>Chỉ áp dụng cho tài khoản sinh viên nội bộ trường DUE.</span>
+            </div>
+
             <form id="formLogin" onsubmit="handleLogin(event)" class="space-y-3.5 text-xs">
                 <div>
                     <label class="block font-bold text-slate-700 mb-1">Mã số sinh viên (MSSV):</label>
@@ -46,9 +52,10 @@
                     <label class="block font-bold text-slate-700 mb-1">Mật khẩu:</label>
                     <input type="password" id="loginPassword" value="123456" required placeholder="Nhập mật khẩu" 
                            class="w-full px-3.5 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm outline-none focus:ring-2 focus:ring-orange-500">
+                    <p class="text-[10px] text-slate-400 mt-1">* Mật khẩu mặc định: <b>123456</b></p>
                 </div>
                 <div id="loginError" class="hidden p-2.5 rounded-xl bg-rose-50 border border-rose-200 text-rose-600 font-semibold text-xs"></div>
-                <button type="submit" class="w-full py-3 bg-orange-600 hover:bg-orange-700 text-white font-bold rounded-xl text-xs shadow-lg transition">
+                <button type="submit" class="w-full py-3 bg-orange-600 hover:bg-orange-700 text-white font-bold rounded-xl text-xs shadow-lg shadow-orange-600/30 transition">
                     Đăng Nhập Tài Khoản
                 </button>
             </form>
@@ -57,6 +64,10 @@
 
     <!-- ================= GIAO DIỆN CHÍNH ================= -->
     <div id="mainApp" class="hidden">
+        <input style="display:none" type="text" name="fakeusernameremembered"/>
+        <input style="display:none" type="password" name="fakepasswordremembered"/>
+
+        <!-- Header -->
         <header class="bg-gradient-to-r from-orange-600 to-amber-600 text-white p-4 shadow-md sticky top-0 z-30">
             <div class="max-w-6xl mx-auto flex items-center justify-between">
                 <div class="flex items-center gap-3">
@@ -67,22 +78,27 @@
                     </div>
                 </div>
                 <div class="flex items-center gap-2">
+                    <button onclick="openChangePasswordModal()" class="text-xs bg-white/20 hover:bg-white/30 px-3 py-1.5 rounded-full font-medium transition flex items-center gap-1">
+                        <i class="fa-solid fa-key"></i> <span class="hidden sm:inline">Đổi MK</span>
+                    </button>
                     <button onclick="handleLogout()" class="text-xs bg-black/20 hover:bg-black/30 px-3 py-1.5 rounded-full font-medium transition flex items-center gap-1">
-                        <i class="fa-solid fa-right-from-bracket"></i> Đăng xuất
+                        <i class="fa-solid fa-right-from-bracket"></i> <span class="hidden sm:inline">Đăng xuất</span>
                     </button>
                 </div>
             </div>
         </header>
 
         <main class="max-w-6xl mx-auto p-4 sm:p-6 space-y-6">
+            <!-- Thẻ hồ sơ sinh viên -->
             <div class="bg-white p-4 sm:p-5 rounded-2xl border border-slate-200 shadow-sm flex items-center justify-between">
                 <div class="space-y-0.5">
                     <p class="text-[10px] uppercase font-bold text-slate-400 tracking-wider">Sinh viên DUE</p>
-                    <p class="font-bold text-slate-800 text-sm sm:text-base" id="userDisplayName">Phạm Nhật Hạ</p>
-                    <p class="text-xs text-slate-500 font-mono" id="userDisplayMssv">MSSV: 251121514110</p>
+                    <p class="font-bold text-slate-800 text-sm sm:text-base" id="userDisplayName">--</p>
+                    <p class="text-xs text-slate-500 font-mono" id="userDisplayMssv">--</p>
                 </div>
                 <div class="text-right">
                     <span class="bg-emerald-100 text-emerald-700 text-[11px] sm:text-xs px-3 py-1 rounded-full font-bold">Thẻ Hợp Lệ</span>
+                    <p class="text-[11px] text-slate-400 mt-1">Nợ phạt: <b class="text-slate-700" id="userDisplayDebt">0 đ</b></p>
                 </div>
             </div>
 
@@ -102,9 +118,40 @@
             <!-- TAB 1: MƯỢN SÁCH -->
             <div id="tabContentBorrow" class="space-y-4">
                 <div class="bg-white p-4 rounded-2xl border border-slate-200 shadow-sm space-y-3">
-                    <div class="relative flex-1">
-                        <i class="fa-solid fa-magnifying-glass absolute left-3.5 top-3.5 text-slate-400 text-sm"></i>
-                        <input type="search" id="searchInput" oninput="renderBooks()" placeholder="Tìm giáo trình, mã sách, tác giả..." class="w-full pl-10 pr-4 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs sm:text-sm outline-none focus:ring-2 focus:ring-orange-500">
+                    <div class="flex flex-col sm:flex-row gap-3 items-stretch sm:items-center justify-between">
+                        <div class="relative flex-1">
+                            <i class="fa-solid fa-magnifying-glass absolute left-3.5 top-3.5 text-slate-400 text-sm"></i>
+                            <input type="search" id="searchInput" autocomplete="off" readonly onfocus="this.removeAttribute('readonly');" oninput="renderBooks()" placeholder="Tìm giáo trình, mã sách, tác giả..." class="w-full pl-10 pr-4 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs sm:text-sm outline-none focus:ring-2 focus:ring-orange-500">
+                        </div>
+
+                        <div class="flex items-center gap-2">
+                            <div class="flex items-center gap-1.5 bg-slate-50 border border-slate-200 px-2.5 py-1.5 rounded-xl text-xs">
+                                <i class="fa-solid fa-arrow-down-a-z text-orange-600"></i>
+                                <select id="sortSelect" onchange="renderBooks()" class="bg-transparent font-semibold outline-none cursor-pointer">
+                                    <option value="az">Tên sách: A → Z</option>
+                                    <option value="za">Tên sách: Z → A</option>
+                                    <option value="stock_desc">Số lượng: Nhiều → Ít</option>
+                                </select>
+                            </div>
+
+                            <label class="flex items-center gap-1.5 bg-slate-50 border border-slate-200 px-2.5 py-2 rounded-xl text-xs font-semibold cursor-pointer select-none hover:bg-slate-100 transition">
+                                <input type="checkbox" id="onlyAvailableCheck" onchange="renderBooks()" class="accent-orange-600 rounded">
+                                <span class="hidden sm:inline">Chỉ sách</span> còn
+                            </label>
+                        </div>
+                    </div>
+
+                    <div class="pt-2 border-t flex items-center gap-2 overflow-x-auto no-scrollbar text-xs">
+                        <span class="text-slate-400 font-bold whitespace-nowrap text-[11px]"><i class="fa-solid fa-tags mr-1"></i>Chuyên ngành:</span>
+                        <div class="flex gap-1.5" id="categoryChips">
+                            <button onclick="selectCategory('all')" class="filter-chip active px-3 py-1.5 rounded-xl border border-slate-200 font-semibold whitespace-nowrap transition">Tất cả</button>
+                            <button onclick="selectCategory('httt')" class="filter-chip px-3 py-1.5 rounded-xl border border-slate-200 font-semibold whitespace-nowrap transition">Hệ thống thông tin</button>
+                            <button onclick="selectCategory('kinhte')" class="filter-chip px-3 py-1.5 rounded-xl border border-slate-200 font-semibold whitespace-nowrap transition">Kinh tế</button>
+                            <button onclick="selectCategory('ketoan')" class="filter-chip px-3 py-1.5 rounded-xl border border-slate-200 font-semibold whitespace-nowrap transition">Kế toán</button>
+                            <button onclick="selectCategory('marketing')" class="filter-chip px-3 py-1.5 rounded-xl border border-slate-200 font-semibold whitespace-nowrap transition">Marketing</button>
+                            <button onclick="selectCategory('taichinh')" class="filter-chip px-3 py-1.5 rounded-xl border border-slate-200 font-semibold whitespace-nowrap transition">Tài chính - Ngân hàng</button>
+                            <button onclick="selectCategory('khac')" class="filter-chip px-3 py-1.5 rounded-xl border border-slate-200 font-semibold whitespace-nowrap transition">Khác</button>
+                        </div>
                     </div>
                 </div>
 
@@ -112,52 +159,218 @@
                     <span>Kết quả tìm thấy: <b id="resultsCount" class="text-slate-800 font-bold">0</b> đầu sách</span>
                 </div>
 
+                <!-- Thẻ chứa mã QR đơn chờ lấy -->
+                <div id="activeQrCard" class="hidden max-w-md mx-auto bg-white p-5 rounded-3xl border-2 border-orange-500 shadow-lg text-center space-y-3">
+                    <div class="inline-block bg-orange-100 text-orange-700 px-3 py-1 rounded-full text-[11px] font-bold">
+                        <i class="fa-solid fa-bell mr-1"></i> ĐƠN HẸN ĐÃ CẤP HỘC
+                    </div>
+                    <h3 class="font-bold text-slate-800 text-sm sm:text-base" id="qrBookTitle">--</h3>
+                    <p class="text-xs text-slate-500">Khung giờ: <span id="qrSlot" class="font-bold text-slate-700"></span></p>
+                    
+                    <div class="p-3 bg-slate-50 rounded-2xl inline-block border border-slate-200 shadow-inner">
+                        <div id="qrcode" class="flex justify-center"></div>
+                    </div>
+
+                    <div class="bg-amber-50 border border-amber-200 rounded-xl p-3 text-xs text-amber-900 space-y-1">
+                        <p>Hộc tủ nhận: <strong id="qrLockerNum" class="text-orange-600 text-sm font-black"></strong></p>
+                        <p>Mã Token: <strong id="qrTokenVal" class="font-mono text-slate-800"></strong></p>
+                    </div>
+                    <p class="text-[10px] text-slate-400">Đưa mã QR này trước camera trạm Kiosk Smart Locker để mở cửa tủ.</p>
+                </div>
+
                 <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4" id="booksList"></div>
             </div>
 
-            <!-- TAB 2: ĐANG MƯỢN -->
+            <!-- TAB 2: ĐANG MƯỢN (TRẢ NHIỀU SÁCH CÙNG LÚC) -->
             <div id="tabContentReturn" class="hidden space-y-4">
-                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4" id="borrowedBooksList">
-                    <p class="col-span-full text-center text-xs text-slate-400 py-10">Bạn không có cuốn sách nào đang mượn.</p>
+                <div class="bg-blue-50 border border-blue-200 rounded-2xl p-4 text-xs sm:text-sm text-blue-900 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3">
+                    <div>
+                        <p class="font-bold flex items-center gap-1.5"><i class="fa-solid fa-list-check text-blue-600"></i> Quy trình trả nhiều sách cùng lúc:</p>
+                        <p class="text-slate-600 text-xs">Tick chọn những cuốn bạn muốn trả hôm nay, sau đó bấm Tạo mã QR để mở 1 ngăn tủ Smart Locker duy nhất.</p>
+                    </div>
+                    <button onclick="toggleSelectAllReturn()" class="px-3 py-1.5 bg-white border border-blue-300 text-blue-700 font-bold rounded-xl text-xs hover:bg-blue-100 transition whitespace-nowrap">
+                        <i class="fa-solid fa-check-double mr-1"></i> Chọn tất cả
+                    </button>
+                </div>
+
+                <div id="activeReturnQrCard" class="hidden bg-white p-5 rounded-3xl border-2 border-blue-500 shadow-xl text-center space-y-3">
+                    <div class="inline-block bg-blue-100 text-blue-700 px-3 py-1 rounded-full text-xs font-bold">
+                        <i class="fa-solid fa-qrcode mr-1"></i> MÃ QR TRẢ SÁCH (ĐÃ CẤP HỘC)
+                    </div>
+                    <h3 class="font-bold text-slate-800 text-sm sm:text-base">Số lượng trả: <span id="returnBookCount" class="text-blue-600 font-black">0</span> cuốn</h3>
+                    <div class="p-3 bg-slate-50 rounded-2xl inline-block border border-slate-200">
+                        <div id="returnQrcode" class="flex justify-center"></div>
+                    </div>
+                    <div class="bg-blue-50 border border-blue-200 rounded-xl p-3 text-xs text-blue-950 space-y-1">
+                        <p>Hộc tủ nhận trả: <strong id="returnLockerNum" class="text-blue-700 text-base font-black"></strong></p>
+                        <p>Mã PIN: <strong id="returnTokenVal" class="font-mono text-slate-800 text-sm"></strong></p>
+                    </div>
+                    <p class="text-xs text-slate-500">Đưa mã QR này trước camera Kiosk Smart Locker để mở cửa hộc tủ, bỏ toàn bộ số sách đã chọn vào và đóng cửa lại.</p>
+                </div>
+
+                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4" id="borrowedBooksList"></div>
+
+                <div id="confirmReturnBar" class="sticky bottom-4 bg-slate-900 text-white p-3.5 rounded-2xl shadow-xl flex items-center justify-between border border-slate-700">
+                    <div class="text-xs">
+                        <span>Đã chọn: <b id="selectedReturnCount" class="text-orange-400 text-sm font-bold">0</b> cuốn</span>
+                    </div>
+                    <button onclick="submitBatchReturn()" class="px-4 py-2 bg-blue-600 hover:bg-blue-500 font-bold rounded-xl text-xs sm:text-sm shadow-md transition flex items-center gap-1.5">
+                        <i class="fa-solid fa-qrcode"></i> Tạo Mã QR Trả Sách
+                    </button>
                 </div>
             </div>
 
             <!-- TAB 3: LỊCH SỬ -->
             <div id="tabContentHistory" class="hidden space-y-4">
-                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4" id="historyList">
-                    <p class="col-span-full text-center text-xs text-slate-400 py-10">Chưa có lịch sử mượn trả.</p>
+                <div class="bg-slate-50 border border-slate-200 rounded-2xl p-3 text-xs sm:text-sm text-slate-600 flex items-center gap-2">
+                    <i class="fa-solid fa-clock-rotate-left text-orange-600"></i>
+                    <span>Toàn bộ nhật ký mượn & trả sách tại Smart Locker của bạn:</span>
                 </div>
+                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4" id="historyList"></div>
             </div>
         </main>
     </div>
 
     <!-- THANH GIỎ HÀNG NỔI -->
-    <div id="cartBar" class="hidden fixed bottom-4 left-4 right-4 max-w-lg mx-auto bg-slate-900/95 text-white p-3.5 rounded-2xl shadow-2xl flex items-center justify-between z-40 border border-slate-700">
-        <div>
-            <p class="text-xs sm:text-sm font-bold">Giỏ mượn: <span id="cartCountBadge" class="text-orange-400">0</span> cuốn</p>
+    <div id="cartBar" class="hidden fixed bottom-4 left-4 right-4 max-w-lg mx-auto bg-slate-900/95 backdrop-blur-md text-white p-3.5 rounded-2xl shadow-2xl flex items-center justify-between z-40 border border-slate-700">
+        <div class="flex items-center gap-3">
+            <div class="w-10 h-10 rounded-xl bg-orange-600 flex items-center justify-center font-bold text-sm shadow-md">
+                <i class="fa-solid fa-cart-shopping"></i>
+            </div>
+            <div>
+                <p class="text-xs sm:text-sm font-bold">Giỏ mượn: <span id="cartCountBadge" class="text-orange-400">0</span> cuốn</p>
+                <p class="text-[10px] text-slate-400">Bấm để kiểm tra & chọn khung giờ</p>
+            </div>
         </div>
-        <button onclick="alert('Đã đồng bộ giỏ hàng lên hệ thống mượn 24/7!')" class="px-4 py-2 bg-orange-600 hover:bg-orange-500 text-white rounded-xl text-xs font-bold transition">
-            Xác Nhận Mượn
+        <button onclick="openBookingCartModal()" class="px-4 py-2 bg-orange-600 hover:bg-orange-500 text-white rounded-xl text-xs sm:text-sm font-bold shadow-md transition flex items-center gap-1.5">
+            Xem giỏ & Đặt <i class="fa-solid fa-arrow-right"></i>
         </button>
     </div>
 
-    <script>
-        const firebaseConfig = {
-            apiKey: "AIzaSyB1qtSFNNFmVWAo0r0lqIU5cEfCGOKX59M",
-            authDomain: "due-smart-locker.firebaseapp.com",
-            projectId: "due-smart-locker",
-            storageBucket: "due-smart-locker.firebasestorage.app",
-            messagingSenderId: "639064006349",
-            appId: "1:639064006349:web:ea10677c76872b13989384",
-            measurementId: "G-078Z3QDM27"
-        };
-        if (!firebase.apps.length) firebase.initializeApp(firebaseConfig);
-        const auth = firebase.auth();
-        const db = firebase.firestore();
+    <!-- MODAL GIỎ HÀNG & CHỌN LỊCH HẸN -->
+    <div id="cartModal" class="hidden fixed inset-0 bg-black/60 z-50 flex items-end sm:items-center justify-center p-0 sm:p-4 backdrop-blur-sm">
+        <div class="bg-white w-full max-w-lg rounded-t-3xl sm:rounded-3xl p-6 space-y-4 max-h-[90vh] flex flex-col">
+            <div class="flex justify-between items-center border-b pb-3">
+                <h3 class="font-bold text-slate-800 text-sm sm:text-base flex items-center gap-2">
+                    <i class="fa-solid fa-bag-shopping text-orange-600"></i> Giỏ Mượn Sách (<span id="cartModalCount">0</span>)
+                </h3>
+                <button onclick="closeBookingCartModal()" class="text-slate-400 hover:text-slate-600"><i class="fa-solid fa-xmark text-lg"></i></button>
+            </div>
 
+            <div class="overflow-y-auto space-y-2 flex-1 pr-1" id="cartItemsList"></div>
+
+            <div class="pt-2 border-t space-y-3">
+                <!-- KHỐI LỊCH THÁNG TRỰC QUAN CÓ NÚT CHUYỂN THÁNG -->
+                <div class="space-y-2">
+                    <div class="flex justify-between items-center">
+                        <label class="block text-xs font-bold text-slate-700">
+                            <i class="fa-regular fa-calendar-days text-orange-600 mr-1"></i> Chọn ngày nhận sách:
+                        </label>
+                        
+                        <div class="flex items-center gap-1.5 bg-orange-50 px-2 py-1 rounded-xl border border-orange-200">
+                            <button type="button" onclick="changeCalendarMonth(-1)" id="prevMonthBtn" title="Tháng trước" class="w-6 h-6 rounded-md hover:bg-orange-200/70 text-orange-700 flex items-center justify-center font-bold text-xs transition disabled:opacity-30 disabled:cursor-not-allowed">
+                                <i class="fa-solid fa-chevron-left text-[11px]"></i>
+                            </button>
+                            <span id="calendarMonthYear" class="text-xs font-bold text-orange-700 min-w-[95px] text-center select-none"></span>
+                            <button type="button" onclick="changeCalendarMonth(1)" id="nextMonthBtn" title="Tháng sau" class="w-6 h-6 rounded-md hover:bg-orange-200/70 text-orange-700 flex items-center justify-center font-bold text-xs transition disabled:opacity-30 disabled:cursor-not-allowed">
+                                <i class="fa-solid fa-chevron-right text-[11px]"></i>
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Bảng Calendar -->
+                    <div class="bg-slate-50 border border-slate-200 rounded-2xl p-2.5">
+                        <div class="grid grid-cols-7 text-center text-[10px] font-bold text-slate-400 mb-1.5 pb-1 border-b border-slate-200">
+                            <span>T2</span><span>T3</span><span>T4</span><span>T5</span><span>T6</span><span class="text-rose-400">T7</span><span class="text-rose-400">CN</span>
+                        </div>
+                        <div id="calendarDaysGrid" class="grid grid-cols-7 gap-1 text-center"></div>
+                    </div>
+
+                    <input type="hidden" id="bookDate" value="">
+                    
+                    <div class="flex items-center justify-between text-[10px] text-slate-400 px-1">
+                        <span>* Chỉ nhận Thứ 2 - Thứ 6 (8h - 17h)</span>
+                        <span class="text-slate-800 font-bold" id="selectedDateText">Chưa chọn ngày</span>
+                    </div>
+                </div>
+
+                <div>
+                    <label class="block text-xs font-bold text-slate-700 mb-1">Khung giờ nhận sách (8h - 17h):</label>
+                    <select id="bookSlot" class="w-full p-2.5 border border-slate-200 rounded-xl text-xs sm:text-sm bg-slate-50 outline-none">
+                        <option value="08:00 - 09:30">08:00 - 09:30</option>
+                        <option value="09:30 - 11:30">09:30 - 11:30</option>
+                        <option value="11:30 - 13:30">11:30 - 13:30</option>
+                        <option value="13:30 - 15:30">13:30 - 15:30</option>                            
+                        <option value="15:30 - 17:00">15:30 - 17:00</option>
+                    </select>
+                </div>
+
+                <button onclick="confirmCartBooking()" class="w-full py-3 bg-orange-600 hover:bg-orange-700 text-white font-bold rounded-xl text-xs sm:text-sm shadow-lg shadow-orange-600/30 transition">
+                    Xác Nhận Đặt Mượn Tất Cả
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal Đổi Mật Khẩu -->
+    <div id="changePasswordModal" class="hidden fixed inset-0 bg-black/60 z-50 flex items-center justify-center p-4 backdrop-blur-sm">
+        <div class="bg-white w-full max-w-sm rounded-3xl p-6 space-y-4 shadow-2xl">
+            <div class="flex justify-between items-center border-b pb-3">
+                <h3 class="font-bold text-slate-800 text-sm flex items-center gap-2">
+                    <i class="fa-solid fa-key text-orange-600"></i> Đổi Mật Khẩu
+                </h3>
+                <button onclick="closeChangePasswordModal()" class="text-slate-400 hover:text-slate-600"><i class="fa-solid fa-xmark text-lg"></i></button>
+            </div>
+            <div class="space-y-3 text-xs">
+                <div>
+                    <label class="block font-bold text-slate-700 mb-1">Mật khẩu hiện tại:</label>
+                    <input type="password" id="oldPassInput" placeholder="Nhập mật khẩu cũ" class="w-full p-3 bg-slate-50 border rounded-xl outline-none">
+                </div>
+                <div>
+                    <label class="block font-bold text-slate-700 mb-1">Mật khẩu mới:</label>
+                    <input type="password" id="newPassInput" placeholder="Nhập mật khẩu mới" class="w-full p-3 bg-slate-50 border rounded-xl outline-none">
+                </div>
+            </div>
+            <button onclick="submitChangePassword()" class="w-full py-3 bg-orange-600 hover:bg-orange-700 text-white font-bold rounded-xl text-xs shadow-md transition">
+                Cập Nhật Mật Khẩu
+            </button>
+        </div>
+    </div>
+
+    <!-- Modal Barcode sách trả -->
+    <div id="barcodeModal" class="hidden fixed inset-0 bg-black/60 z-50 flex items-center justify-center p-4 backdrop-blur-sm">
+        <div class="bg-white w-full max-w-sm rounded-3xl p-6 text-center space-y-4 shadow-2xl">
+            <h3 class="font-bold text-slate-800 text-sm">Mã Barcode Trả Sách</h3>
+            <p class="text-xs text-slate-500" id="barcodeBookTitle">--</p>
+            <div class="p-4 bg-slate-50 rounded-2xl border inline-block">
+                <div id="barcodeQrCode" class="flex justify-center"></div>
+            </div>
+            <p class="text-sm font-mono font-black text-slate-800 bg-slate-100 py-2 rounded-xl" id="barcodeValue">--</p>
+            <button onclick="closeBarcodeModal()" class="w-full py-2.5 bg-slate-800 text-white font-bold rounded-xl text-xs">Đóng</button>
+        </div>
+    </div>
+
+    <!-- ================= JAVASCRIPT ================= -->
+    <script>
         let currentUser = null;
         let allBooks = [];
+        let borrowedBooks = [];
         let cart = [];
+        let currentCategory = 'all';
+
+        // Khởi tạo tháng xem (ngày đầu tiên của tháng để tránh lỗi nhảy ngày)
+        let calendarViewDate = new Date(new Date().getFullYear(), new Date().getMonth(), 1);
+        let selectedBookingDate = '';
+
+        function checkSession() {
+            const saved = sessionStorage.getItem('due_student_user');
+            if (saved) {
+                currentUser = JSON.parse(saved);
+                showApp();
+            } else {
+                showLogin();
+            }
+        }
 
         async function handleLogin(e) {
             e.preventDefault();
@@ -167,124 +380,765 @@
             errBox.classList.add('hidden');
 
             try {
-                let email = mssv.includes('@') ? mssv : `${mssv}@due.udn.vn`;
-                await auth.signInWithEmailAndPassword(email, pass);
+                // Xác thực trực tiếp qua Firebase Authentication
+                const res = await loginWithFirebase(mssv, pass);
                 
-                currentUser = { mssv: mssv, ho_ten: "Phạm Nhật Hạ" };
+                // Lấy thông tin sinh viên từ token
+                currentUser = {
+                    id: 1, // mapping nội bộ
+                    mssv: mssv.replace('@due.udn.vn', ''),
+                    ho_ten: res.user.displayName || "Sinh viên DUE",
+                    email: res.user.email,
+                    tien_no_phat: 0
+                };
+                
                 sessionStorage.setItem('due_student_user', JSON.stringify(currentUser));
                 showApp();
             } catch (err) {
-                errBox.innerText = "Sai MSSV hoặc mật khẩu đăng nhập!";
+                console.error("Firebase Auth Error:", err);
+                errBox.innerText = "Đăng nhập thất bại: Sai tài khoản hoặc mật khẩu Firebase!";
                 errBox.classList.remove('hidden');
             }
         }
 
         function handleLogout() {
-            auth.signOut();
             sessionStorage.removeItem('due_student_user');
-            location.reload();
+            currentUser = null;
+            cart = [];
+            showLogin();
+        }
+
+        function showLogin() {
+            document.getElementById('loginSection').classList.remove('hidden');
+            document.getElementById('mainApp').classList.add('hidden');
+            document.getElementById('cartBar').classList.add('hidden');
         }
 
         function showApp() {
             document.getElementById('loginSection').classList.add('hidden');
             document.getElementById('mainApp').classList.remove('hidden');
-            loadBooksFromFirestore();
+            document.getElementById('userDisplayName').innerText = currentUser.ho_ten;
+            document.getElementById('userDisplayMssv').innerText = `MSSV: ${currentUser.mssv}`;
+            document.getElementById('userDisplayDebt').innerText = `${currentUser.tien_no_phat.toLocaleString()} đ`;
+            
+            const sInput = document.getElementById('searchInput');
+            if (sInput) sInput.value = '';
+
+            loadInitialData();
         }
 
         function switchTab(tab) {
-            ['borrow', 'return', 'history'].forEach(t => {
+            const tabs = ['borrow', 'return', 'history'];
+            tabs.forEach(t => {
                 const btn = document.getElementById('tabBtn' + t.charAt(0).toUpperCase() + t.slice(1));
                 const content = document.getElementById('tabContent' + t.charAt(0).toUpperCase() + t.slice(1));
                 if (t === tab) {
                     btn.classList.add('active');
+                    btn.classList.remove('text-slate-500', 'border-transparent');
                     content.classList.remove('hidden');
                 } else {
                     btn.classList.remove('active');
+                    btn.classList.add('text-slate-500', 'border-transparent');
                     content.classList.add('hidden');
                 }
             });
+
+            if (tab === 'return') fetchBorrowedBooks();
+            if (tab === 'history') fetchHistory();
         }
 
-        async function loadBooksFromFirestore() {
+        async function fetchBooks() {
             try {
-                const snapshot = await db.collection('books').get();
-                allBooks = [];
+                const res = await fetch('/api/books');
+                allBooks = await res.json();
                 
-                if (snapshot.empty) {
-                    const sampleBooks = [
-                        { ten_sach: "Phân tích và Thiết kế Hệ thống Thông tin", ma_sach: "MIS101", tac_gia: "PGS.TS Nguyễn Văn A", vi_tri_ke: "Tầng 2 - Kệ A1", so_luong_con: 5 },
-                        { ten_sach: "Cơ sở dữ liệu doanh nghiệp với Odoo", ma_sach: "MIS102", tac_gia: "ThS. Trần Thị B", vi_tri_ke: "Tầng 2 - Kệ A2", so_luong_con: 3 },
-                        { ten_sach: "Kinh tế vi mô nâng cao", ma_sach: "ECO201", tac_gia: "Dr. John Doe", vi_tri_ke: "Tầng 1 - Kệ B1", so_luong_con: 4 }
-                    ];
-                    for (let b of sampleBooks) {
-                        await db.collection('books').add(b);
-                        allBooks.push(b);
-                    }
-                } else {
-                    snapshot.forEach(doc => allBooks.push({ id: doc.id, ...doc.data() }));
+                const sInput = document.getElementById('searchInput');
+                if (sInput && sInput.value === currentUser?.mssv) {
+                    sInput.value = '';
                 }
+
                 renderBooks();
             } catch (err) {
-                console.error("Lỗi tải sách:", err);
+                console.error("Lỗi nạp sách:", err);
             }
         }
 
+        function selectCategory(cat) {
+            currentCategory = cat;
+            const buttons = document.querySelectorAll('#categoryChips button');
+            buttons.forEach(btn => btn.classList.remove('active'));
+            event.target.classList.add('active');
+            renderBooks();
+        }
+
         function renderBooks() {
-            const query = document.getElementById('searchInput').value.toLowerCase().trim();
+            const sInput = document.getElementById('searchInput');
+            let query = sInput ? sInput.value.toLowerCase().trim() : '';
+
+            if (currentUser && query === currentUser.mssv.toLowerCase()) {
+                query = '';
+                if (sInput) sInput.value = '';
+            }
+
+            const sortMode = document.getElementById('sortSelect')?.value || 'az';
+            const onlyAvailable = document.getElementById('onlyAvailableCheck')?.checked || false;
+
+            let filtered = allBooks.filter(b => 
+                b.ten_sach.toLowerCase().includes(query) || 
+                b.ma_vach.toLowerCase().includes(query) ||
+                (b.tac_gia && b.tac_gia.toLowerCase().includes(query))
+            );
+
+            if (currentCategory !== 'all') {
+                filtered = filtered.filter(b => {
+                    const text = (b.ten_sach + ' ' + b.tac_gia + ' ' + b.ma_vach).toLowerCase();
+                    if (currentCategory === 'httt') return text.includes('mis') || text.includes('httt') || text.includes('dữ liệu') || text.includes('python') || text.includes('tin học');
+                    if (currentCategory === 'kinhte') return text.includes('eco') || text.includes('kinh tế');
+                    if (currentCategory === 'ketoan') return text.includes('acc') || text.includes('kế toán');
+                    if (currentCategory === 'marketing') return text.includes('mar') || text.includes('marketing') || text.includes('tiêu dùng');
+                    if (currentCategory === 'taichinh') return text.includes('fin') || text.includes('tài chính') || text.includes('ngân hàng');
+                    if (currentCategory === 'khac') return text.includes('luật') || text.includes('law') || text.includes('thống kê') || text.includes('sta') || text.includes('ecom');
+                    return true;
+                });
+            }
+
+            if (onlyAvailable) {
+                filtered = filtered.filter(b => b.so_luong_con > 0);
+            }
+
+            filtered.sort((a, b) => {
+                if (sortMode === 'az') return a.ten_sach.localeCompare(b.ten_sach, 'vi');
+                if (sortMode === 'za') return b.ten_sach.localeCompare(a.ten_sach, 'vi');
+                if (sortMode === 'stock_desc') return b.so_luong_con - a.so_luong_con;
+                return 0;
+            });
+
+            document.getElementById('resultsCount').innerText = filtered.length;
             const list = document.getElementById('booksList');
             list.innerHTML = '';
 
-            let filtered = allBooks.filter(b => b.ten_sach.toLowerCase().includes(query) || b.ma_sach.toLowerCase().includes(query));
-            document.getElementById('resultsCount').innerText = filtered.length;
-
             if (filtered.length === 0) {
-                list.innerHTML = `<p class="col-span-full text-center text-xs text-slate-400 py-10">Không tìm thấy đầu sách nào.</p>`;
+                list.innerHTML = `
+                    <div class="col-span-full text-center py-12 space-y-2 bg-white rounded-3xl border border-dashed border-slate-300">
+                        <i class="fa-solid fa-book-open text-3xl text-slate-300"></i>
+                        <p class="text-xs sm:text-sm text-slate-500 font-medium">Không tìm thấy giáo trình nào phù hợp với bộ lọc hiện tại.</p>
+                        <button onclick="resetFilters()" class="text-xs text-orange-600 font-bold underline">Xóa bộ lọc & đặt lại</button>
+                    </div>
+                `;
                 return;
             }
 
             filtered.forEach(b => {
-                const isInCart = cart.some(item => item.ma_sach === b.ma_sach);
+                const isAvailable = b.so_luong_con > 0;
+                const isInCart = cart.some(item => item.id === b.id);
+
                 list.innerHTML += `
-                    <div class="bg-white p-4 rounded-2xl border border-slate-200 shadow-sm flex flex-col justify-between gap-3">
-                        <div class="space-y-1">
-                            <div class="flex justify-between items-center">
-                                <span class="text-[10px] font-mono bg-slate-100 text-slate-600 px-2 py-0.5 rounded font-bold">${b.ma_sach}</span>
-                                <span class="text-[10px] font-bold px-2 py-0.5 rounded-full bg-emerald-100 text-emerald-700">Còn: ${b.so_luong_con || 5} cuốn</span>
+                    <div class="bg-white p-4 sm:p-5 rounded-2xl border border-slate-200 shadow-sm flex flex-col justify-between gap-3 hover:border-orange-300 hover:shadow-md transition">
+                        <div class="space-y-1.5">
+                            <div class="flex items-center justify-between gap-2">
+                                <span class="text-[10px] font-mono bg-slate-100 text-slate-600 px-2 py-0.5 rounded font-bold">${b.ma_vach}</span>
+                                <span class="text-[10px] font-bold px-2 py-0.5 rounded-full ${isAvailable ? 'bg-emerald-100 text-emerald-700' : 'bg-rose-100 text-rose-700'}">
+                                    ${isAvailable ? `Còn: ${b.so_luong_con} cuốn` : 'Tạm hết'}
+                                </span>
                             </div>
-                            <h4 class="font-bold text-slate-800 text-xs sm:text-sm">${b.ten_sach}</h4>
-                            <p class="text-[11px] text-slate-400">${b.tac_gia} • <span class="text-orange-600 font-semibold">${b.vi_tri_ke || 'Kệ chính'}</span></p>
+                            <h4 class="font-bold text-slate-800 text-xs sm:text-sm leading-snug">${b.ten_sach}</h4>
+                            <p class="text-[11px] text-slate-400">${b.tac_gia} • <span class="text-orange-600 font-semibold">${b.vi_tri_ke}</span></p>
                         </div>
+
                         <div class="pt-2 border-t flex justify-end">
-                            <button onclick="toggleCart('${b.ma_sach}')" class="px-3.5 py-1.5 ${isInCart ? 'bg-rose-50 text-rose-600 border border-rose-200' : 'bg-orange-600 text-white shadow-md'} rounded-xl text-xs font-bold transition">
-                                ${isInCart ? 'Đã chọn' : 'Chọn mượn'}
-                            </button>
+                            ${isAvailable ? (
+                                isInCart ? 
+                                `<button onclick="removeFromCart(${b.id})" class="px-3.5 py-1.5 bg-rose-50 border border-rose-200 text-rose-600 rounded-xl text-xs font-bold transition flex items-center gap-1.5">
+                                    <i class="fa-solid fa-check"></i> Đã chọn
+                                </button>` :
+                                `<button onclick="addToCart(${b.id})" class="px-3.5 py-1.5 bg-orange-600 hover:bg-orange-700 text-white rounded-xl text-xs font-bold shadow-md shadow-orange-600/20 transition flex items-center gap-1.5">
+                                    <i class="fa-solid fa-plus"></i> Chọn mượn
+                                </button>`
+                            ) : `<span class="px-3 py-1.5 bg-slate-100 text-slate-400 rounded-xl text-xs font-semibold">Tạm hết</span>`}
                         </div>
                     </div>
                 `;
             });
         }
 
-        function toggleCart(maSachs) {
-            const book = allBooks.find(b => b.ma_sach === maSachs);
-            if (!book) return;
-            const idx = cart.findIndex(item => item.ma_sach === maSachs);
-            if (idx > -1) {
-                cart.splice(idx, 1);
-            } else {
-                cart.push(book);
-            }
-            document.getElementById('cartCountBadge').innerText = cart.length;
-            document.getElementById('cartBar').classList.toggle('hidden', cart.length === 0);
-            renderBooks();
+        function resetFilters() {
+            document.getElementById('searchInput').value = '';
+            document.getElementById('onlyAvailableCheck').checked = false;
+            document.getElementById('sortSelect').value = 'az';
+            selectCategory('all');
         }
 
-        window.onload = () => {
-            const saved = sessionStorage.getItem('due_student_user');
-            if (saved) {
-                currentUser = JSON.parse(saved);
-                showApp();
+        function addToCart(bookId) {
+            const book = allBooks.find(b => b.id === bookId);
+            if (!book) return;
+            if (!cart.some(item => item.id === bookId)) {
+                cart.push(book);
+                updateCartUI();
+                renderBooks();
             }
-        };
+        }
+
+        function removeFromCart(bookId) {
+            cart = cart.filter(item => item.id !== bookId);
+            updateCartUI();
+            renderBooks();
+            renderCartModalItems();
+        }
+
+        function updateCartUI() {
+            const bar = document.getElementById('cartBar');
+            const badge = document.getElementById('cartCountBadge');
+            badge.innerText = cart.length;
+            if (cart.length > 0) {
+                bar.classList.remove('hidden');
+            } else {
+                bar.classList.add('hidden');
+                closeBookingCartModal();
+            }
+        }
+
+        // ================= CỤM XỬ LÝ LỊCH THÁNG =================
+        function openBookingCartModal() {
+            if (cart.length === 0) return alert("Giỏ hàng đang trống!");
+            document.getElementById('cartModalCount').innerText = cart.length;
+            renderCartModalItems();
+
+            const now = new Date();
+            calendarViewDate = new Date(now.getFullYear(), now.getMonth(), 1);
+            
+            initDefaultBookingDate();
+            renderMonthlyCalendar();
+
+            document.getElementById('cartModal').classList.remove('hidden');
+        }
+
+        function initDefaultBookingDate() {
+            const today = new Date();
+            today.setHours(0, 0, 0, 0);
+
+            for (let i = 0; i <= 7; i++) {
+                const d = new Date(today);
+                d.setDate(today.getDate() + i);
+                const dayOfWeek = d.getDay(); // 0: CN, 6: T7
+                if (dayOfWeek !== 0 && dayOfWeek !== 6) {
+                    selectedBookingDate = formatDateString(d);
+                    break;
+                }
+            }
+        }
+
+        function formatDateString(dateObj) {
+            const y = dateObj.getFullYear();
+            const m = String(dateObj.getMonth() + 1).padStart(2, '0');
+            const d = String(dateObj.getDate()).padStart(2, '0');
+            return `${y}-${m}-${d}`;
+        }
+
+        function changeCalendarMonth(offset) {
+            calendarViewDate.setMonth(calendarViewDate.getMonth() + offset);
+            renderMonthlyCalendar();
+        }
+
+        function renderMonthlyCalendar() {
+            const today = new Date();
+            today.setHours(0, 0, 0, 0);
+
+            const viewYear = calendarViewDate.getFullYear();
+            const viewMonth = calendarViewDate.getMonth(); // 0 - 11
+
+            document.getElementById('calendarMonthYear').innerText = `Tháng ${viewMonth + 1}/${viewYear}`;
+
+            const isPastMonth = (viewYear < today.getFullYear()) || 
+                                (viewYear === today.getFullYear() && viewMonth < today.getMonth());
+            document.getElementById('prevMonthBtn').disabled = isPastMonth;
+
+            const grid = document.getElementById('calendarDaysGrid');
+            grid.innerHTML = '';
+
+            const firstDayOfMonth = new Date(viewYear, viewMonth, 1);
+            const totalDaysInMonth = new Date(viewYear, viewMonth + 1, 0).getDate();
+
+            let startDayIndex = firstDayOfMonth.getDay();
+            startDayIndex = (startDayIndex === 0) ? 6 : startDayIndex - 1;
+
+            for (let i = 0; i < startDayIndex; i++) {
+                grid.innerHTML += `<div class="h-9"></div>`;
+            }
+
+            // Giới hạn đúng 7 ngày tới
+            const maxAllowedDate = new Date(today);
+            maxAllowedDate.setDate(today.getDate() + 7);
+
+            for (let day = 1; day <= totalDaysInMonth; day++) {
+                const cellDate = new Date(viewYear, viewMonth, day);
+                cellDate.setHours(0, 0, 0, 0);
+
+                const dayOfWeek = cellDate.getDay(); // 0: CN, 6: T7
+                const isPast = cellDate < today;
+                const isWeekend = (dayOfWeek === 0 || dayOfWeek === 6);
+                const isOutOfRange = cellDate > maxAllowedDate;
+
+                const isDisabled = isPast || isWeekend || isOutOfRange;
+                const dateStr = formatDateString(cellDate);
+                const isSelected = (selectedBookingDate === dateStr);
+
+                if (isDisabled) {
+                    grid.innerHTML += `
+                        <div class="h-9 flex items-center justify-center text-xs text-slate-300 font-medium rounded-xl select-none cursor-not-allowed ${isWeekend ? 'bg-slate-100/50 text-rose-300' : ''}">
+                            ${day}
+                        </div>
+                    `;
+                } else {
+                    if (isSelected) {
+                        grid.innerHTML += `
+                            <button type="button" 
+                                    onclick="selectCalendarDate('${dateStr}')" 
+                                    id="cal_day_${dateStr}"
+                                    class="cal-day-btn h-9 flex items-center justify-center text-xs font-black rounded-xl transition-all duration-200 bg-orange-700 text-white shadow-lg ring-2 ring-orange-500 scale-105">
+                                ${day}
+                            </button>
+                        `;
+                    } else {
+                        grid.innerHTML += `
+                            <button type="button" 
+                                    onclick="selectCalendarDate('${dateStr}')" 
+                                    id="cal_day_${dateStr}"
+                                    class="cal-day-btn h-9 flex items-center justify-center text-xs font-bold rounded-xl transition-all duration-200 bg-white hover:bg-orange-100 hover:text-orange-700 text-slate-700 border border-slate-200 shadow-sm">
+                                ${day}
+                            </button>
+                        `;
+                    }
+                }
+            }
+
+            updateCalendarSelectionUI();
+        }
+
+        function selectCalendarDate(dateStr) {
+            selectedBookingDate = dateStr;
+            renderMonthlyCalendar();
+        }
+
+        function updateCalendarSelectionUI() {
+            document.getElementById('bookDate').value = selectedBookingDate;
+
+            if (selectedBookingDate) {
+                const parts = selectedBookingDate.split('-');
+                const d = new Date(parts[0], parts[1] - 1, parts[2]);
+                const dayName = d.toLocaleDateString('vi-VN', { weekday: 'long' });
+                document.getElementById('selectedDateText').innerText = `Đã chọn: ${dayName}, ${parts[2]}/${parts[1]}/${parts[0]}`;
+            } else {
+                document.getElementById('selectedDateText').innerText = `Chưa chọn ngày`;
+            }
+        }
+
+        function closeBookingCartModal() {
+            document.getElementById('cartModal').classList.add('hidden');
+        }
+
+        function renderCartModalItems() {
+            const container = document.getElementById('cartItemsList');
+            container.innerHTML = '';
+            cart.forEach((b, index) => {
+                container.innerHTML += `
+                    <div class="p-2.5 rounded-xl bg-slate-50 border border-slate-200 flex justify-between items-center text-xs sm:text-sm">
+                        <div class="space-y-0.5">
+                            <span class="font-bold text-slate-800">${index + 1}. ${b.ten_sach}</span>
+                            <p class="text-[10px] text-slate-400 font-mono">${b.vi_tri_ke} • ${b.tac_gia}</p>
+                        </div>
+                        <button onclick="removeFromCart(${b.id})" class="text-rose-500 hover:text-rose-700 p-1.5"><i class="fa-solid fa-trash-can"></i></button>
+                    </div>
+                `;
+            });
+        }
+
+        async function confirmCartBooking() {
+            if (cart.length === 0) return;
+            const date = document.getElementById('bookDate').value;
+            const slot = document.getElementById('bookSlot').value;
+            const bookIds = cart.map(b => b.id);
+
+            try {
+                const res = await fetch('/api/reserve', {
+                    method: 'POST',
+                    headers: {'Content-Type': 'application/json'},
+                    body: JSON.stringify({
+                        user_id: currentUser.id,
+                        book_ids: bookIds,
+                        ngay_hen: date,
+                        khung_gio: slot
+                    })
+                });
+                const data = await res.json();
+                if (res.ok) {
+                    alert(data.message);
+                    closeBookingCartModal();
+                    cart = [];
+                    updateCartUI();
+                    fetchBooks();
+                    showQr(`${data.count} cuốn sách`, `${date} (${slot})`, data.all_lockers, data.primary_qr);
+                } else {
+                    alert(data.detail || "Không thể đặt mượn!");
+                }
+            } catch (err) {
+                alert("Lỗi kết nối máy chủ backend!");
+            }
+        }
+
+        function showQr(title, slot, locker, token) {
+            const card = document.getElementById('activeQrCard');
+            card.classList.remove('hidden');
+            document.getElementById('qrBookTitle').innerText = title;
+            document.getElementById('qrSlot').innerText = slot;
+            document.getElementById('qrLockerNum').innerText = locker;
+            document.getElementById('qrTokenVal').innerText = token;
+
+            const qrContainer = document.getElementById('qrcode');
+            qrContainer.innerHTML = '';
+            new QRCode(qrContainer, { text: token, width: 140, height: 140 });
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+
+        async function fetchBorrowedBooks() {
+            if (!currentUser) return;
+            try {
+                const res = await fetch(`/api/student/borrowed/${currentUser.id}`);
+                borrowedBooks = await res.json();
+                document.getElementById('borrowedCount').innerText = borrowedBooks.length;
+                renderBorrowedBooks();
+            } catch (err) {
+                console.error("Lỗi nạp sách đang mượn:", err);
+            }
+        }
+
+        let selectedReturnIds = [];
+
+        function renderBorrowedBooks() {
+            const list = document.getElementById('borrowedBooksList');
+            list.innerHTML = '';
+            selectedReturnIds = [];
+            updateSelectedReturnCount();
+
+            if (borrowedBooks.length === 0) {
+                list.innerHTML = `<p class="col-span-full text-center text-xs sm:text-sm text-slate-400 py-10">Hiện bạn không mượn cuốn sách nào.</p>`;
+                document.getElementById('confirmReturnBar').classList.add('hidden');
+                return;
+            }
+
+            document.getElementById('confirmReturnBar').classList.remove('hidden');
+            const today = new Date();
+            today.setHours(0, 0, 0, 0);
+
+            borrowedBooks.forEach(b => {
+                let statusBadge = '';
+                let lateInfo = '';
+
+                if (b.han_tra) {
+                    const dueDate = new Date(b.han_tra);
+                    dueDate.setHours(0, 0, 0, 0);
+                    const diffTime = today - dueDate;
+                    const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+
+                    if (diffDays > 0) {
+                        statusBadge = `<span class="px-2.5 py-1 rounded-full text-[10px] font-bold bg-rose-100 text-rose-700">Trễ hạn</span>`;
+                        lateInfo = `<p class="text-[11px] text-rose-600 font-bold mt-1">Trễ: ${diffDays} ngày (Phí: ${(diffDays * 5000).toLocaleString()} đ)</p>`;
+                    } else {
+                        statusBadge = `<span class="px-2.5 py-1 rounded-full text-[10px] font-bold bg-emerald-100 text-emerald-700">Đang mượn</span>`;
+                        lateInfo = `<p class="text-[11px] text-slate-500 mt-1">Còn ${Math.abs(diffDays)} ngày</p>`;
+                    }
+                }
+
+                list.innerHTML += `
+                    <div id="card_book_${b.res_id}" 
+                         onclick="toggleBookCard(event, ${b.res_id})" 
+                         class="bg-white p-4 rounded-2xl border-2 border-slate-200 shadow-sm flex items-start gap-3 hover:border-blue-300 transition cursor-pointer select-none">
+                        <div class="pt-1">
+                            <input type="checkbox" 
+                                   id="chk_${b.res_id}" 
+                                   value="${b.res_id}" 
+                                   onclick="event.stopPropagation();"
+                                   onchange="onCheckboxClick(${b.res_id})" 
+                                   class="w-5 h-5 accent-blue-600 rounded cursor-pointer">
+                        </div>
+                        <div class="flex-1 space-y-1">
+                            <div class="flex justify-between items-start gap-1">
+                                <span class="text-[10px] font-mono bg-blue-50 text-blue-700 px-2 py-0.5 rounded font-bold">${b.ma_vach}</span>
+                                ${statusBadge}
+                            </div>
+                            <h4 class="font-bold text-slate-800 text-xs sm:text-sm leading-snug">${b.ten_sach}</h4>
+                            <p class="text-[11px] text-slate-400">Ngày mượn: <b>${b.ngay_muon || 'Hôm nay'}</b></p>
+                            <p class="text-[11px] text-slate-600">Hạn trả: <b class="text-orange-600">${b.han_tra}</b></p>
+                            ${lateInfo}
+                        </div>
+                    </div>
+                `;
+            });
+        }
+
+        function toggleBookCard(event, resId) {
+            const chk = document.getElementById(`chk_${resId}`);
+            if (chk) {
+                chk.checked = !chk.checked;
+                onCheckboxClick(resId);
+            }
+        }
+        
+        function onCheckboxClick(resId) {
+            const chk = document.getElementById(`chk_${resId}`);
+            const card = document.getElementById(`card_book_${resId}`);
+            
+            if (chk && chk.checked) {
+                if (!selectedReturnIds.includes(resId)) selectedReturnIds.push(resId);
+                if (card) {
+                    card.classList.remove('border-slate-200');
+                    card.classList.add('border-blue-500', 'bg-blue-50/40');
+                }
+            } else {
+                selectedReturnIds = selectedReturnIds.filter(id => id !== resId);
+                if (card) {
+                    card.classList.remove('border-blue-500', 'bg-blue-50/40');
+                    card.classList.add('border-slate-200');
+                }
+            }
+            updateSelectedReturnCount();
+        }
+
+        // Nút Chọn tất cả
+        function toggleSelectAllReturn() {
+            const allChecked = selectedReturnIds.length === borrowedBooks.length;
+            selectedReturnIds = [];
+
+            borrowedBooks.forEach(b => {
+                const chk = document.getElementById(`chk_${b.res_id}`);
+                const card = document.getElementById(`card_book_${b.res_id}`);
+                if (chk) {
+                    chk.checked = !allChecked;
+                    if (!allChecked) {
+                        selectedReturnIds.push(b.res_id);
+                        if (card) {
+                            card.classList.remove('border-slate-200');
+                            card.classList.add('border-blue-500', 'bg-blue-50/40');
+                        }
+                    } else {
+                        if (card) {
+                            card.classList.remove('border-blue-500', 'bg-blue-50/40');
+                            card.classList.add('border-slate-200');
+                        }
+                    }
+                }
+            });
+            updateSelectedReturnCount();
+        }
+
+        function updateSelectedReturnCount() {
+            const badge = document.getElementById('selectedReturnCount');
+            if (badge) badge.innerText = selectedReturnIds.length;
+        }
+
+        function handleCheckboxChange(resId) {
+            const chk = document.getElementById(`chk_${resId}`);
+            if (chk.checked) {
+                if (!selectedReturnIds.includes(resId)) selectedReturnIds.push(resId);
+            } else {
+                selectedReturnIds = selectedReturnIds.filter(id => id !== resId);
+            }
+            updateSelectedReturnCount();
+        }
+
+        function toggleSelectAllReturn() {
+            const allChecked = selectedReturnIds.length === borrowedBooks.length;
+            borrowedBooks.forEach(b => {
+                const chk = document.getElementById(`chk_${b.res_id}`);
+                if (chk) chk.checked = !allChecked;
+            });
+            selectedReturnIds = allChecked ? [] : borrowedBooks.map(b => b.res_id);
+            updateSelectedReturnCount();
+        }
+
+        function updateSelectedReturnCount() {
+            const badge = document.getElementById('selectedReturnCount');
+            if (badge) badge.innerText = selectedReturnIds.length;
+        }
+
+        async function submitBatchReturn() {
+            if (selectedReturnIds.length === 0) return alert("Vui lòng tick chọn ít nhất 1 cuốn sách để trả!");
+
+            try {
+                const res = await fetch('/api/student/create-return-qr', {
+                    method: 'POST',
+                    headers: {'Content-Type': 'application/json'},
+                    body: JSON.stringify({
+                        user_id: currentUser.id,
+                        reservation_ids: selectedReturnIds
+                    })
+                });
+                const data = await res.json();
+                if (res.ok) {
+                    showReturnQr(data.count, data.so_hoc, data.qr_token);
+                } else {
+                    alert(data.detail || "Không thể tạo mã trả sách!");
+                }
+            } catch(e) {
+                alert("Lỗi kết nối máy chủ!");
+            }
+        }
+
+        function showReturnQr(count, lockerName, token) {
+            const card = document.getElementById('activeReturnQrCard');
+            card.classList.remove('hidden');
+            document.getElementById('returnBookCount').innerText = count;
+            document.getElementById('returnLockerNum').innerText = lockerName;
+            document.getElementById('returnTokenVal').innerText = token;
+
+            const qrBox = document.getElementById('returnQrcode');
+            qrBox.innerHTML = '';
+            new QRCode(qrBox, { text: token, width: 140, height: 140 });
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+
+        async function fetchHistory() {
+            if (!currentUser) return;
+            try {
+                const res = await fetch(`/api/student/history/${currentUser.id}`);
+                const historyData = await res.json();
+                const list = document.getElementById('historyList');
+                list.innerHTML = '';
+
+                if (historyData.length === 0) {
+                    list.innerHTML = `<p class="col-span-full text-center text-xs sm:text-sm text-slate-400 py-10">Chưa có lịch sử mượn trả sách.</p>`;
+                    return;
+                }
+
+                historyData.forEach(h => {
+                    const isCompleted = h.trang_thai_don === 'hoan_tat';
+                    const isCancelled = h.trang_thai_don === 'da_huy_do_qua_han';
+                    
+                    let statusBadge = '';
+                    if (isCompleted) {
+                        statusBadge = `<span class="px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-slate-100 text-slate-600">Đã hoàn tất trả</span>`;
+                    } else if (isCancelled) {
+                        statusBadge = `<span class="px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-rose-100 text-rose-700">Đã hủy (Không đến lấy)</span>`;
+                    } else {
+                        statusBadge = `<span class="px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-amber-100 text-amber-700">Đang xử lý</span>`;
+                    }
+
+                    list.innerHTML += `
+                        <div class="bg-white p-4 rounded-2xl border border-slate-200 shadow-sm text-xs space-y-1.5">
+                            <div class="flex justify-between items-center">
+                                <span class="font-mono text-[10px] text-slate-400 bg-slate-50 px-2 py-0.5 rounded">${h.ma_vach}</span>
+                                ${statusBadge}
+                            </div>
+                            <h4 class="font-bold text-slate-800 leading-snug">${h.ten_sach}</h4>
+                            <div class="text-[11px] text-slate-500 flex justify-between pt-1 border-t">
+                                <span>Lịch hẹn: <b>${h.ngay_hen || '--'}</b></span>
+                                <span>Trạng thái: <b>${isCancelled ? 'Hết hạn nhận' : (h.ngay_tra ? 'Đã trả' : 'Đang giữ')}</b></span>
+                            </div>
+                            <div class="flex justify-between text-[11px]">
+                                <span class="text-slate-400">Hạn quy định: ${h.han_tra || '--'}</span>
+                                ${h.tien_phat > 0 ? `<span class="text-rose-600 font-bold">Nộp phạt: ${h.tien_phat.toLocaleString()} đ</span>` : ''}
+                            </div>
+                        </div>
+                    `;
+                });
+            } catch (err) {
+                console.error("Lỗi nạp lịch sử:", err);
+            }
+        }
+
+        function showBarcodeModal(barcode, title) {
+            document.getElementById('barcodeBookTitle').innerText = title;
+            document.getElementById('barcodeValue').innerText = barcode;
+            const container = document.getElementById('barcodeQrCode');
+            container.innerHTML = '';
+            new QRCode(container, { text: barcode, width: 150, height: 150 });
+            document.getElementById('barcodeModal').classList.remove('hidden');
+        }
+
+        function closeBarcodeModal() {
+            document.getElementById('barcodeModal').classList.add('hidden');
+        }
+
+        function openChangePasswordModal() {
+            document.getElementById('changePasswordModal').classList.remove('hidden');
+        }
+
+        function closeChangePasswordModal() {
+            document.getElementById('changePasswordModal').classList.add('hidden');
+            document.getElementById('oldPassInput').value = '';
+            document.getElementById('newPassInput').value = '';
+        }
+
+        async function submitChangePassword() {
+            const oldP = document.getElementById('oldPassInput').value.trim();
+            const newP = document.getElementById('newPassInput').value.trim();
+
+            if (!oldP || !newP) return alert("Vui lòng nhập đầy đủ 2 trường!");
+
+            try {
+                const res = await fetch('/api/student/change-password', {
+                    method: 'POST',
+                    headers: {'Content-Type': 'application/json'},
+                    body: JSON.stringify({ user_id: currentUser.id, old_password: oldP, new_password: newP })
+                });
+                const data = await res.json();
+                if (res.ok) {
+                    alert(data.message);
+                    closeChangePasswordModal();
+                } else {
+                    alert(data.detail || "Đổi mật khẩu thất bại!");
+                }
+            } catch (err) {
+                alert("Lỗi kết nối máy chủ!");
+            }
+        }
+
+        function loadInitialData() {
+            fetchBooks();
+            fetchBorrowedBooks();
+        }
+
+        checkSession();
+        // Khởi tạo Firestore database
+        const db = firebase.firestore();
+
+        // Hàm tải danh sách sách từ Firebase Firestore
+        async function loadBooksFromFirestore() {
+            try {
+                const querySnapshot = await db.collection('books').get();
+                let books = [];
+        
+                // Nếu kho trên Firebase chưa có sách nào, hệ thống tự động thêm sẵn dữ liệu mẫu cho DUE
+                if (querySnapshot.empty) {
+                    const sampleBooks = [
+                        { ten_sach: "Phân tích và Thiết kế Hệ thống Thông tin", ma_sach: "MIS101", tac_gia: "PGS.TS Nguyễn Văn A", chuyen_nganh: "Hệ thống thông tin", so_luong: 5 },
+                        { ten_sach: "Cơ sở dữ liệu doanh nghiệp với Odoo", ma_sach: "MIS102", tac_gia: "ThS. Trần Thị B", chuyen_nganh: "Hệ thống thông tin", so_luong: 3 },
+                        { ten_sach: "Kinh tế vi mô nâng cao", ma_sach: "ECO201", tac_gia: "Dr. John Doe", chuyen_nganh: "Kinh tế", so_luong: 4 },
+                        { ten_sach: "Quản trị Marketing số", ma_sach: "MKT301", tac_gia: "Prof. Michael", chuyen_nganh: "Marketing", so_luong: 6 },
+                        { ten_sach: "Tài chính doanh nghiệp hiện đại", ma_sach: "FIN202", tac_gia: "ThS. Lê Văn C", chuyen_nganh: "Tài chính - Ngân hàng", so_luong: 2 }
+                    ];
+            
+                    // Đẩy dữ liệu mẫu lên Firestore lần đầu tiên
+                    for (let book of sampleBooks) {
+                        await db.collection('books').add(book);
+                    }
+                    books = sampleBooks;
+                } else {
+                    querySnapshot.forEach((doc) => {
+                        books.push({ id: doc.id, ...doc.data() });
+                    });
+                }
+        
+                // Hiển thị danh sách lên giao diện (gọi hàm render có sẵn của bạn)
+                renderBookList(books);
+            } catch (err) {
+                console.error("Lỗi tải danh sách sách:", err);
+            }
+        }
+
+        // Gọi hàm tải sách khi trang được mở
+        document.addEventListener("DOMContentLoaded", () => {
+            loadBooksFromFirestore();
+        });
     </script>
 </body>
 </html>
