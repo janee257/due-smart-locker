@@ -974,36 +974,31 @@ window.addEventListener('DOMContentLoaded', async () => {
             document.getElementById('editBookModal').classList.add('hidden');
         }
 
-        async function submitEditBook(e) {
-            e.preventDefault();
-            const oldTitle = document.getElementById('editOldTitle').value.trim();
-            const newTitle = document.getElementById('editNewTitle').value.trim();
-            const author = document.getElementById('editAuthor').value.trim();
-            const shelf = document.getElementById('editShelf').value.trim();
+        async function submitEditBook(event) {
+    if (event) event.preventDefault();
+    try {
+        // Lấy ID cuốn sách đang chỉnh sửa từ form hoặc biến lưu trữ tạm
+        const bookId = document.getElementById('editBookId').value; // Hoặc biến lưu ID của bạn
+        
+        const updatedData = {
+            ten_sach: document.getElementById('editBookName').value,
+            tac_gia: document.getElementById('editBookAuthor').value,
+            vi_tri_ke: document.getElementById('editBookShelve').value,
+            // Cập nhật các trường khác nếu có trên form
+        };
 
-            try {
-                const res = await fetch('/api/librarian/book/edit', {
-                    method: 'POST',
-                    headers: {'Content-Type': 'application/json'},
-                    body: JSON.stringify({
-                        old_title: oldTitle,
-                        new_title: newTitle,
-                        tac_gia: author,
-                        vi_tri_ke: shelf
-                    })
-                });
-                const data = await res.json();
-                if (res.ok) {
-                    alert(data.message);
-                    closeEditBookModal();
-                    loadLibrarianData();
-                } else {
-                    alert(data.detail || "Không thể cập nhật thông tin!");
-                }
-            } catch(e) {
-                alert("Lỗi kết nối máy chủ!");
-            }
-        }
+        // Cập nhật trực tiếp lên Firestore
+        await db.collection('books').doc(bookId).update(updatedData);
+
+        alert("Cập nhật thông tin sách thành công!");
+        // Đóng modal và tải lại danh sách
+        closeEditModal();
+        loadLibrarianData();
+    } catch (err) {
+        console.error("Lỗi cập nhật sách:", err);
+        alert("Lỗi kết nối máy chủ! Không thể cập nhật sách.");
+    }
+}
 
         async function deleteBookGroup(title, borrowedCount) {
             if (borrowedCount > 0) {
