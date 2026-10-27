@@ -1029,6 +1029,9 @@
         function openAddBookModal() { document.getElementById('addBookModal').classList.remove('hidden'); }
         function closeAddBookModal() { document.getElementById('addBookModal').classList.add('hidden'); }
 
+        // Khởi tạo Firestore database trực tiếp trên web
+        const db = firebase.firestore();
+
         async function submitAddBook(e) {
             e.preventDefault();
             const barcode = document.getElementById('newBookBarcode').value.trim();
@@ -1038,25 +1041,32 @@
             const shelf = document.getElementById('newBookShelf').value.trim();
 
             try {
-                const res = await fetch('/api/books', {
-                    method: 'POST',
-                    headers: {'Content-Type': 'application/json'},
-                    body: JSON.stringify({ ma_vach: barcode, ten_sach: title, so_luong: qty, tac_gia: author, vi_tri_ke: shelf, gia_bia: 120000 })
+                // Đẩy dữ liệu sách mới trực tiếp lên Cloud Firestore
+                await db.collection('books').add({
+                    ma_vach: barcode.toUpperCase(),
+                    ten_sach: title,
+                    so_luong: qty,
+                    so_luong_con: qty,
+                    tac_gia: author,
+                    vi_tri_ke: shelf,
+                    gia_bia: 120000,
+                    ngay_tao: firebase.firestore.FieldValue.serverTimestamp()
                 });
-                const data = await res.json();
-                if (res.ok) {
-                    alert(data.message);
-                    closeAddBookModal();
-                    document.getElementById('newBookBarcode').value = '';
-                    document.getElementById('newBookTitle').value = '';
-                    document.getElementById('newBookAuthor').value = '';
-                    document.getElementById('newBookShelf').value = '';
-                    loadLibrarianData();
-                } else {
-                    alert(data.detail || "Thêm sách thất bại!");
-                }
+
+                alert("🎉 Thêm đầu sách thành công lên hệ thống đám mây 24/7!");
+                closeAddBookModal();
+                
+                // Reset form
+                document.getElementById('newBookBarcode').value = '';
+                document.getElementById('newBookTitle').value = '';
+                document.getElementById('newBookAuthor').value = '';
+                document.getElementById('newBookShelf').value = '';
+                
+                // Reload lại dữ liệu kho sách
+                loadLibrarianData();
             } catch(err) {
-                alert("Lỗi kết nối máy chủ!");
+                console.error("Lỗi Firestore:", err);
+                alert("Lỗi khi thêm sách lên mây! Vui lòng kiểm tra lại kết nối.");
             }
         }
 
