@@ -41,46 +41,41 @@
         const auth = firebase.auth();
         const db = window.firebase ? firebase.firestore() : null;
 
-        // Tự động nạp 20 đầu sách mẫu ngay khi trang Thủ thư vừa tải xong lần đầu
+        // Tự động nạp 20 đầu sách ngay khi mở trang Thủ thư
 window.addEventListener('DOMContentLoaded', async () => {
     try {
-        const snapshot = await db.collection('books').limit(1).get();
-        if (snapshot.empty) {
-            console.log("Kho sách trống, đang tự động nạp 20 đầu sách mẫu...");
-            const sampleBooks = [
-                { ma_vach: "DUE-MIS-01", ten_sach: "Phân tích và Thiết kế Hệ thống Thông tin", so_luong: 5, so_luong_con: 5, tac_gia: "PGS.TS Nguyễn Văn A", vi_tri_ke: "Tầng 2 - Kệ A1", gia_bia: 120000 },
-                { ma_vach: "DUE-MIS-02", ten_sach: "Cơ sở dữ liệu doanh nghiệp với Odoo", so_luong: 4, so_luong_con: 4, tac_gia: "ThS. Trần Thị B", vi_tri_ke: "Tầng 2 - Kệ A2", gia_bia: 150000 },
-                { ma_vach: "DUE-MIS-03", ten_sach: "Lập trình Python cho Quản trị", so_luong: 6, so_luong_con: 6, tac_gia: "Dr. John Doe", vi_tri_ke: "Tầng 2 - Kệ A3", gia_bia: 135000 },
-                { ma_vach: "DUE-ECO-01", ten_sach: "Kinh tế vi mô nâng cao", so_luong: 5, so_luong_con: 5, tac_gia: "GS. Michael Porter", vi_tri_ke: "Tầng 1 - Kệ B1", gia_bia: 110000 },
-                { ma_vach: "DUE-ECO-02", ten_sach: "Kinh tế vĩ mô trong kỷ nguyên số", so_luong: 4, so_luong_con: 4, tac_gia: "TS. Lê Văn C", vi_tri_ke: "Tầng 1 - Kệ B2", gia_bia: 125000 },
-                { ma_vach: "DUE-ACC-01", ten_sach: "Nguyên lý Kế toán tài chính", so_luong: 8, so_luong_con: 8, tac_gia: "PGS.TS Phạm Thị D", vi_tri_ke: "Tầng 3 - Kệ C1", gia_bia: 140000 },
-                { ma_vach: "DUE-ACC-02", ten_sach: "Kế toán quản trị doanh nghiệp", so_luong: 5, so_luong_con: 5, tac_gia: "ThS. Hoàng Văn E", vi_tri_ke: "Tầng 3 - Kệ C2", gia_bia: 145000 },
-                { ma_vach: "DUE-MAR-01", ten_sach: "Quản trị Marketing hiện đại", so_luong: 7, so_luong_con: 7, tac_gia: "Philip Kotler", vi_tri_ke: "Tầng 1 - Kệ D1", gia_bia: 180000 },
-                { ma_vach: "DUE-MAR-02", ten_sach: "Hành vi người tiêu dùng số", so_luong: 5, so_luong_con: 5, tac_gia: "TS. Ngô Thanh F", vi_tri_ke: "Tầng 1 - Kệ D2", gia_bia: 130000 },
-                { ma_vach: "DUE-FIN-01", ten_sach: "Tài chính doanh nghiệp căn bản", so_luong: 6, so_luong_con: 6, tac_gia: "Eugene Fama", vi_tri_ke: "Tầng 3 - Kệ E1", gia_bia: 160000 },
-                { ma_vach: "DUE-FIN-02", ten_sach: "Thị trường Chứng khoán & Đầu tư", so_luong: 4, so_luong_con: 4, tac_gia: "ThS. Bùi Minh G", vi_tri_ke: "Tầng 3 - Kệ E2", gia_bia: 155000 },
-                { ma_vach: "DUE-LAW-01", ten_sach: "Luật Kinh tế Việt Nam", so_luong: 5, so_luong_con: 5, tac_gia: "PGS.TS Vũ Văn H", vi_tri_ke: "Tầng 4 - Kệ F1", gia_bia: 115000 },
-                { ma_vach: "DUE-STA-01", ten_sach: "Thống kê ứng dụng trong kinh doanh", so_luong: 6, so_luong_con: 6, tac_gia: "TS. Đỗ Thị I", vi_tri_ke: "Tầng 2 - Kệ G1", gia_bia: 125000 },
-                { ma_vach: "DUE-LOG-01", ten_sach: "Quản trị Chuỗi cung ứng Toàn cầu", so_luong: 5, so_luong_con: 5, tac_gia: "Donald Waters", vi_tri_ke: "Tầng 2 - Kệ H1", gia_bia: 170000 },
-                { ma_vach: "DUE-HRM-01", ten_sach: "Quản trị Nguồn nhân lực chiến lược", so_luong: 5, so_luong_con: 5, tac_gia: "Gary Dessler", vi_tri_ke: "Tầng 4 - Kệ K1", gia_bia: 145000 },
-                { ma_vach: "DUE-ECOM-01", ten_sach: "Thương mại điện tử và Chuyển đổi số", so_luong: 7, so_luong_con: 7, tac_gia: "Laudon & Traver", vi_tri_ke: "Tầng 2 - Kệ L1", gia_bia: 190000 },
-                { ma_vach: "DUE-BUS-01", ten_sach: "Quản trị học đại cương", so_luong: 10, so_luong_con: 10, tac_gia: "Stephen Robbins", vi_tri_ke: "Tầng 1 - Kệ M1", gia_bia: 135000 },
-                { ma_vach: "DUE-PR-01", ten_sach: "Quan hệ công chúng (PR) trong doanh nghiệp", so_luong: 4, so_luong_con: 4, tac_gia: "ThS. Phan Thị K", vi_tri_ke: "Tầng 1 - Kệ N1", gia_bia: 120000 },
-                { ma_vach: "DUE-ENT-01", ten_sach: "Khởi nghiệp đổi mới sáng tạo", so_luong: 6, so_luong_con: 6, tac_gia: "Bill Aulet", vi_tri_ke: "Tầng 4 - Kệ P1", gia_bia: 150000 },
-                { ma_vach: "DUE-MIS-04", ten_sach: "Hệ thống Hoạch định Nguồn lực Doanh nghiệp (ERP)", so_luong: 5, so_luong_con: 5, tac_gia: "TS. Nguyễn Văn L", vi_tri_ke: "Tầng 2 - Kệ A4", gia_bia: 165000 }
-            ];
+        const sampleBooks = [
+            { ma_vach: "DUE-MIS-01", ten_sach: "Phân tích và Thiết kế Hệ thống Thông tin", so_luong: 5, so_luong_con: 5, tac_gia: "PGS.TS Nguyễn Văn A", vi_tri_ke: "Tầng 2 - Kệ A1", gia_bia: 120000 },
+            { ma_vach: "DUE-MIS-02", ten_sach: "Cơ sở dữ liệu doanh nghiệp với Odoo", so_luong: 4, so_luong_con: 4, tac_gia: "ThS. Trần Thị B", vi_tri_ke: "Tầng 2 - Kệ A2", gia_bia: 150000 },
+            { ma_vach: "DUE-MIS-03", ten_sach: "Lập trình Python cho Quản trị", so_luong: 6, so_luong_con: 6, tac_gia: "Dr. John Doe", vi_tri_ke: "Tầng 2 - Kệ A3", gia_bia: 135000 },
+            { ma_vach: "DUE-ECO-01", ten_sach: "Kinh tế vi mô nâng cao", so_luong: 5, so_luong_con: 5, tac_gia: "GS. Michael Porter", vi_tri_ke: "Tầng 1 - Kệ B1", gia_bia: 110000 },
+            { ma_vach: "DUE-ECO-02", ten_sach: "Kinh tế vĩ mô trong kỷ nguyên số", so_luong: 4, so_luong_con: 4, tac_gia: "TS. Lê Văn C", vi_tri_ke: "Tầng 1 - Kệ B2", gia_bia: 125000 },
+            { ma_vach: "DUE-ACC-01", ten_sach: "Nguyên lý Kế toán tài chính", so_luong: 8, so_luong_con: 8, tac_gia: "PGS.TS Phạm Thị D", vi_tri_ke: "Tầng 3 - Kệ C1", gia_bia: 140000 },
+            { ma_vach: "DUE-ACC-02", ten_sach: "Kế toán quản trị doanh nghiệp", so_luong: 5, so_luong_con: 5, tac_gia: "ThS. Hoàng Văn E", vi_tri_ke: "Tầng 3 - Kệ C2", gia_bia: 145000 },
+            { ma_vach: "DUE-MAR-01", ten_sach: "Quản trị Marketing hiện đại", so_luong: 7, so_luong_con: 7, tac_gia: "Philip Kotler", vi_tri_ke: "Tầng 1 - Kệ D1", gia_bia: 180000 },
+            { ma_vach: "DUE-MAR-02", ten_sach: "Hành vi người tiêu dùng số", so_luong: 5, so_luong_con: 5, tac_gia: "TS. Ngô Thanh F", vi_tri_ke: "Tầng 1 - Kệ D2", gia_bia: 130000 },
+            { ma_vach: "DUE-FIN-01", ten_sach: "Tài chính doanh nghiệp căn bản", so_luong: 6, so_luong_con: 6, tac_gia: "Eugene Fama", vi_tri_ke: "Tầng 3 - Kệ E1", gia_bia: 160000 },
+            { ma_vach: "DUE-FIN-02", ten_sach: "Thị trường Chứng khoán & Đầu tư", so_luong: 4, so_luong_con: 4, tac_gia: "ThS. Bùi Minh G", vi_tri_ke: "Tầng 3 - Kệ E2", gia_bia: 155000 },
+            { ma_vach: "DUE-LAW-01", ten_sach: "Luật Kinh tế Việt Nam", so_luong: 5, so_luong_con: 5, tac_gia: "PGS.TS Vũ Văn H", vi_tri_ke: "Tầng 4 - Kệ F1", gia_bia: 115000 },
+            { ma_vach: "DUE-STA-01", ten_sach: "Thống kê ứng dụng trong kinh doanh", so_luong: 6, so_luong_con: 6, tac_gia: "TS. Đỗ Thị I", vi_tri_ke: "Tầng 2 - Kệ G1", gia_bia: 125000 },
+            { ma_vach: "DUE-LOG-01", ten_sach: "Quản trị Chuỗi cung ứng Toàn cầu", so_luong: 5, so_luong_con: 5, tac_gia: "Donald Waters", vi_tri_ke: "Tầng 2 - Kệ H1", gia_bia: 170000 },
+            { ma_vach: "DUE-HRM-01", ten_sach: "Quản trị Nguồn nhân lực chiến lược", so_luong: 5, so_luong_con: 5, tac_gia: "Gary Dessler", vi_tri_ke: "Tầng 4 - Kệ K1", gia_bia: 145000 },
+            { ma_vach: "DUE-ECOM-01", ten_sach: "Thương mại điện tử và Chuyển đổi số", so_luong: 7, so_luong_con: 7, tac_gia: "Laudon & Traver", vi_tri_ke: "Tầng 2 - Kệ L1", gia_bia: 190000 },
+            { ma_vach: "DUE-BUS-01", ten_sach: "Quản trị học đại cương", so_luong: 10, so_luong_con: 10, tac_gia: "Stephen Robbins", vi_tri_ke: "Tầng 1 - Kệ M1", gia_bia: 135000 },
+            { ma_vach: "DUE-PR-01", ten_sach: "Quan hệ công chúng (PR) trong doanh nghiệp", so_luong: 4, so_luong_con: 4, tac_gia: "ThS. Phan Thị K", vi_tri_ke: "Tầng 1 - Kệ N1", gia_bia: 120000 },
+            { ma_vach: "DUE-ENT-01", ten_sach: "Khởi nghiệp đổi mới sáng tạo", so_luong: 6, so_luong_con: 6, tac_gia: "Bill Aulet", vi_tri_ke: "Tầng 4 - Kệ P1", gia_bia: 150000 },
+            { ma_vach: "DUE-MIS-04", ten_sach: "Hệ thống Hoạch định Nguồn lực Doanh nghiệp (ERP)", so_luong: 5, so_luong_con: 5, tac_gia: "TS. Nguyễn Văn L", vi_tri_ke: "Tầng 2 - Kệ A4", gia_bia: 165000 }
+        ];
 
-            for (let book of sampleBooks) {
-                await db.collection('books').add({
-                    ...book,
-                    ngay_tao: firebase.firestore.FieldValue.serverTimestamp()
-                });
-            }
-            console.log("🎉 Đã nạp xong 20 đầu sách tự động!");
-            location.reload();
+        for (let book of sampleBooks) {
+            await db.collection('books').add({
+                ...book,
+                ngay_tao: firebase.firestore.FieldValue.serverTimestamp()
+            });
         }
+        console.log("🎉 Đã bơm thành công 20 đầu sách vào Firebase!");
     } catch (e) {
-        console.error("Lỗi tự động nạp sách:", e);
+        console.error("Lỗi:", e);
     }
 });
 
