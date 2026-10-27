@@ -427,30 +427,45 @@
         }
 
         async function loadLibrarianData() {
-            try {
-                // 1. Tải danh sách đơn soạn
-                const resOrders = await fetch('/api/librarian/orders');
-                const orders = await resOrders.json();
-                renderOrders(orders);
+    try {
+        // Tải danh sách sách trực tiếp từ Cloud Firestore thay vì gọi API Python
+        const snapshot = await db.collection('books').get();
+        const rawBooks = [];
+        snapshot.forEach(doc => {
+            rawBooks.push({ id: doc.id, ...doc.data() });
+        });
 
-                // 2. Tải danh sách sách sinh viên trả chờ kiểm tra
-                const resInspect = await fetch('/api/librarian/returns-inspect');
-                if (resInspect.ok) {
-                    const inspectBooks = await resInspect.json();
-                    renderInspectBooks(inspectBooks);
-                }
-
-                // 3. Tải danh mục kho sách
-                const resBooks = await fetch('/api/librarian/books-grouped');
-                allGroupedBooks = await resBooks.json();
-                renderFilteredLibrarianBooks();
-
-                // 4. Cập nhật số liệu badge sách mượn
-                loadActiveBorrowsData();
-            } catch (err) {
-                console.error("Lỗi nạp dữ liệu thủ thư:", err);
+        // Gom nhóm theo tên sách để hiển thị đúng giao diện kho hiện tại
+        const grouped = {};
+        rawBooks.forEach(b => {
+            const name = b.ten_sach || "Sách chưa đặt tên";
+            if (!grouped[name]) {
+                grouped[name] = {
+                    ten_sach: name,
+                    tac_gia: b.tac_gia || "Đang cập nhật",
+                    vi_tri_ke: b.vi_tri_ke || "Kệ chính",
+                    ma_vach_dai_dien: b.ma_vach || "DUE-BOOK",
+                    tong_so_luong: 0,
+                    so_luong_co_san: 0,
+                    so_luong_dang_muon: 0
+                };
             }
-        }
+            grouped[name].tong_so_luong += (b.so_luong || 1);
+            grouped[name].so_luong_co_san += (b.so_luong_con !== undefined ? b.so_luong_con : (b.so_luong || 1));
+        });
+
+        allGroupedBooks = Object.values(grouped);
+        renderFilteredLibrarianBooks();
+
+        // Cập nhật các bảng khác tạm thời nếu chưa có API
+        document.getElementById('totalActiveBorrowBadge').innerText = "0";
+        document.getElementById('orderCount').innerText = "0 đơn";
+        document.getElementById('inspectCount').innerText = "0 cuốn";
+
+    } catch (err) {
+        console.error("Lỗi nạp dữ liệu thủ thư từ Firestore:", err);
+    }
+}
 
         // Render đơn soạn: Gom nhóm sinh viên - sách
         function renderOrders(orders) {
