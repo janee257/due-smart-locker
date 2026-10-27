@@ -1,0 +1,310 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <!-- Thư viện Firebase SDK -->
+    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
+    <script>
+        const firebaseConfig = {
+            apiKey: "AIzaSyB1qtSFNNFmVWAo0r0lqIU5cEfCGOKX59M",
+            authDomain: "due-smart-locker.firebaseapp.com",
+            projectId: "due-smart-locker",
+            storageBucket: "due-smart-locker.firebasestorage.app",
+            messagingSenderId: "639064006349",
+            appId: "1:639064006349:web:ea10677c76872b13989384",
+            measurementId: "G-078Z3QDM27"
+        };
+
+        if (!firebase.apps || !firebase.apps.length) {
+            firebase.initializeApp(firebaseConfig);
+        }
+        const auth = firebase.auth();
+
+        async function loginWithFirebase(email, password) {
+            let fullEmail = email.trim();
+            if (!fullEmail.includes("@")) fullEmail += "@due.udn.vn";
+            return await auth.signInWithEmailAndPassword(fullEmail, password.trim());
+        }
+
+        async function logoutFirebase() {
+            await auth.signOut();
+            sessionStorage.clear();
+        }
+    </script>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>DUE Smart Locker - Trạm Kiosk Tủ Thông Minh</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script src="https://unpkg.com/html5-qrcode"></script>
+</head>
+<body class="bg-slate-900 text-white min-h-screen flex flex-col font-sans">
+
+    <!-- ================= MÀN HÌNH ĐĂNG NHẬP KIOSK QUA FIREBASE ================= -->
+    <div id="kioskLoginSection" class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950">
+        <div class="bg-slate-900 border border-slate-700 w-full max-w-sm rounded-3xl p-6 shadow-2xl space-y-4 text-white">
+            <div class="text-center space-y-1">
+                <img src="/logo_due.png" alt="DUE Logo" class="h-14 w-auto mx-auto object-contain bg-white p-1 rounded-2xl shadow-md" onerror="this.onerror=null; this.src='https://due.udn.vn/Portals/0/logo-due.png';">
+                <h2 class="font-bold text-base pt-2 text-orange-400">Khởi Động Trạm Kiosk</h2>
+                <p class="text-[11px] text-slate-400">Đăng nhập tài khoản thiết bị để kích hoạt tủ Smart Locker</p>
+            </div>
+
+            <form onsubmit="handleKioskLogin(event)" class="space-y-3.5 text-xs">
+                <div>
+                    <label class="block font-bold text-slate-300 mb-1">Email Thiết bị:</label>
+                    <input type="text" id="kioskEmail" value="kiosk@due.udn.vn" required placeholder="kiosk@due.udn.vn" 
+                           class="w-full px-3.5 py-2.5 bg-slate-800 border border-slate-700 rounded-xl text-sm outline-none focus:border-orange-500 text-white">
+                </div>
+                <div>
+                    <label class="block font-bold text-slate-300 mb-1">Mật khẩu trạm:</label>
+                    <input type="password" id="kioskPassword" required placeholder="Nhập mật khẩu" 
+                           class="w-full px-3.5 py-2.5 bg-slate-800 border border-slate-700 rounded-xl text-sm outline-none focus:border-orange-500 text-white">
+                </div>
+                <div id="kioskLoginError" class="hidden p-2.5 rounded-xl bg-rose-900/50 border border-rose-500 text-rose-200 font-semibold text-xs"></div>
+                <button type="submit" class="w-full py-3 bg-orange-600 hover:bg-orange-500 text-white font-bold rounded-xl text-xs shadow-lg transition">
+                    Kích Hoạt Trạm Tủ
+                </button>
+            </form>
+        </div>
+    </div>
+
+    <!-- NÚT ĐĂNG XUẤT KIOSK Ở GÓC DƯỚI BÊN TRÁI -->
+    <div id="kioskLogoutBtnContainer" class="hidden fixed bottom-4 left-4 z-40">
+        <button onclick="handleKioskLogout()" class="px-3.5 py-2 bg-slate-800 hover:bg-rose-600 text-white text-xs font-bold rounded-xl shadow-lg transition flex items-center gap-1.5 border border-slate-700">
+            <i class="fa-solid fa-power-off"></i> Khóa Kiosk
+        </button>
+    </div>
+
+    <!-- Thanh trạng thái tủ kèm Logo chiếc khiên DUE -->
+    <header class="bg-slate-800 border-b border-slate-700 p-3.5 flex justify-between items-center shadow-md">
+        <div class="flex items-center gap-3">
+            <img src="/logo_due.png" alt="DUE Logo" class="h-11 w-auto bg-white p-1 rounded-xl shadow-sm object-contain" onerror="this.onerror=null; this.src='https://due.udn.vn/Portals/0/logo-due.png';">
+            <div>
+                <h1 class="text-base sm:text-lg font-bold leading-tight flex items-center gap-2">
+                    TRẠM TỦ THÔNG MINH <span class="bg-orange-600 text-white text-[10px] px-2 py-0.5 rounded-full uppercase tracking-wider font-bold">Kiosk</span>
+                </h1>
+                <p class="text-xs text-slate-400">Thư viện DUE • Tủ 20 ngăn • Khóa điện tử tự động</p>
+            </div>
+        </div>
+        <div class="flex items-center gap-3 sm:gap-4 text-xs font-semibold">
+            <span class="flex items-center gap-1.5"><span class="w-2.5 h-2.5 rounded-full bg-emerald-500"></span> Trống</span>
+            <span class="flex items-center gap-1.5"><span class="w-2.5 h-2.5 rounded-full bg-amber-500"></span> Chờ lấy</span>
+            <span class="flex items-center gap-1.5"><span class="w-2.5 h-2.5 rounded-full bg-blue-500"></span> Sách trả</span>
+            <span class="flex items-center gap-1.5"><span class="w-2.5 h-2.5 rounded-full bg-emerald-400 animate-ping"></span> 🔓 Đang mở</span>
+        </div>
+    </header>
+
+    <div class="flex-1 grid grid-cols-1 lg:grid-cols-12 gap-6 p-4 sm:p-6 max-w-7xl mx-auto w-full">
+        <!-- Khung quét mã & Thao tác (Cột trái) -->
+        <div class="lg:col-span-5 space-y-5">
+            <div class="bg-slate-800 p-5 rounded-2xl border border-slate-700 shadow-xl space-y-4">
+                <h2 class="text-base font-bold flex items-center gap-2 text-orange-400">
+                    <i class="fa-solid fa-qrcode"></i> QUÉT MÃ NHẬN / TRẢ SÁCH
+                </h2>
+                
+                <!-- Khung camera -->
+                <div class="relative bg-black rounded-xl overflow-hidden aspect-video border border-slate-600 flex items-center justify-center">
+                    <div id="reader" class="w-full h-full"></div>
+                </div>
+
+                <div class="space-y-3">
+                    <label class="text-xs font-semibold text-slate-300">Hoặc nhập mã Token / Barcode thủ công:</label>
+                    <div class="flex gap-2">
+                        <input type="text" id="manualInput" placeholder="Ví dụ: QR-A1B2C3 hoặc TRA-X9Y8Z7" 
+                               class="flex-1 bg-slate-900 border border-slate-600 rounded-xl px-4 py-3 text-sm font-mono text-white outline-none focus:border-orange-500 uppercase">
+                    </div>
+                    <div class="grid grid-cols-2 gap-3 pt-2">
+                        <button onclick="handlePickup()" class="py-3 bg-orange-600 hover:bg-orange-500 font-bold text-sm rounded-xl transition flex items-center justify-center gap-2 shadow-lg">
+                            <i class="fa-solid fa-box-open"></i> Nhận Sách (Mở Hộc)
+                        </button>
+                        <button onclick="handleReturn()" class="py-3 bg-blue-600 hover:bg-blue-500 font-bold text-sm rounded-xl transition flex items-center justify-center gap-2 shadow-lg">
+                            <i class="fa-solid fa-rotate-left"></i> Trả Sách (Ca Chiều)
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Bảng hiển thị thông báo kết quả -->
+            <div id="statusBox" class="hidden p-4 rounded-xl border text-sm font-medium"></div>
+        </div>
+
+        <!-- Lưới 20 Hộc Tủ (Cột phải) -->
+        <div class="lg:col-span-7 bg-slate-800/60 p-5 rounded-2xl border border-slate-700">
+            <h2 class="text-base font-bold mb-4 flex items-center justify-between text-slate-300">
+                <span><i class="fa-solid fa-table-cells mr-2"></i>TRẠNG THÁI 20 HỘC TỦ</span>
+                <span class="text-xs font-normal text-slate-400">Tự động đồng bộ</span>
+            </h2>
+            <div id="lockersGrid" class="grid grid-cols-4 sm:grid-cols-5 gap-3">
+                <!-- Render 20 hộc qua JS -->
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let openedLockerName = null;
+        let isScanningLocked = false; // Chống quét lặp liên tục từ camera
+
+        // Kiểm tra phiên đăng nhập Firebase của Kiosk
+        auth.onAuthStateChanged((user) => {
+            if (user && user.email.includes("kiosk")) {
+                document.getElementById('kioskLoginSection').classList.add('hidden');
+                document.getElementById('kioskLogoutBtnContainer').classList.remove('hidden');
+                fetchLockers();
+            } else {
+                document.getElementById('kioskLoginSection').classList.remove('hidden');
+                document.getElementById('kioskLogoutBtnContainer').classList.add('hidden');
+            }
+        });
+
+        async function handleKioskLogin(e) {
+            e.preventDefault();
+            const email = document.getElementById('kioskEmail').value.trim();
+            const pass = document.getElementById('kioskPassword').value.trim();
+            const errBox = document.getElementById('kioskLoginError');
+            errBox.classList.add('hidden');
+
+            try {
+                await loginWithFirebase(email, pass);
+                document.getElementById('kioskLoginSection').classList.add('hidden');
+                document.getElementById('kioskLogoutBtnContainer').classList.remove('hidden');
+                fetchLockers();
+            } catch(err) {
+                errBox.innerText = "Sai tài khoản hoặc mật khẩu trạm Kiosk!";
+                errBox.classList.remove('hidden');
+            }
+        }
+
+        async function handleKioskLogout() {
+            await logoutFirebase();
+            location.reload();
+        }
+
+        async function fetchLockers() {
+            try {
+                const res = await fetch('/api/lockers');
+                const lockers = await res.json();
+                renderLockers(lockers);
+            } catch (err) {
+                console.error("Lỗi kết nối hộc tủ:", err);
+            }
+        }
+
+        function renderLockers(lockers) {
+            const grid = document.getElementById('lockersGrid');
+            grid.innerHTML = '';
+            lockers.forEach(l => {
+                let colorClass = "bg-slate-700 border-slate-600 text-slate-400";
+                let icon = "fa-lock";
+                let statusText = "Trống";
+
+                if (l.so_hoc === openedLockerName) {
+                    colorClass = "bg-emerald-500/20 border-emerald-400 text-emerald-300 animate-pulse ring-2 ring-emerald-400";
+                    icon = "fa-lock-open text-emerald-400";
+                    statusText = "ĐANG MỞ";
+                } else if (l.trang_thai === 'cho_nhan') {
+                    colorClass = "bg-amber-500/20 border-amber-500/60 text-amber-300";
+                    icon = "fa-box";
+                    statusText = "Chờ lấy";
+                } else if (l.trang_thai === 'chua_sach_tra') {
+                    colorClass = "bg-blue-500/20 border-blue-500/60 text-blue-300";
+                    icon = "fa-inbox";
+                    statusText = "Sách trả";
+                }
+
+                grid.innerHTML += `
+                    <div class="border rounded-xl p-3 flex flex-col items-center justify-center space-y-1 transition duration-300 ${colorClass}">
+                        <i class="fa-solid ${icon} text-lg"></i>
+                        <span class="font-bold text-xs tracking-wider">${l.so_hoc}</span>
+                        <span class="text-[10px] uppercase font-semibold">${statusText}</span>
+                    </div>
+                `;
+            });
+        }
+
+        async function handlePickup() {
+            const token = document.getElementById('manualInput').value.trim().toUpperCase();
+            if (!token) return showNotice("Vui lòng nhập hoặc quét mã QR Token!", "error");
+
+            try {
+                const res = await fetch('/api/locker/pickup', {
+                    method: 'POST',
+                    headers: {'Content-Type': 'application/json'},
+                    body: JSON.stringify({ qr_token: token })
+                });
+                const data = await res.json();
+                if (res.ok) {
+                    openedLockerName = data.opened_locker;
+                    showNotice(`🔓 ${data.message}`, "success");
+                    fetchLockers();
+                    setTimeout(() => { openedLockerName = null; fetchLockers(); }, 10000);
+                } else {
+                    showNotice(data.detail || "Không hợp lệ!", "error");
+                }
+            } catch (err) {
+                showNotice("Lỗi kết nối máy chủ!", "error");
+            }
+        }
+
+        async function handleReturn() {
+            const code = document.getElementById('manualInput').value.trim().toUpperCase();
+            if (!code) return showNotice("Vui lòng nhập hoặc quét mã QR Trả sách / Barcode!", "error");
+
+            try {
+                const res = await fetch('/api/locker/return', {
+                    method: 'POST',
+                    headers: {'Content-Type': 'application/json'},
+                    body: JSON.stringify({ ma_vach: code })
+                });
+                const data = await res.json();
+                if (res.ok) {
+                    openedLockerName = data.opened_locker;
+                    showNotice(`🔓 ${data.message}`, "success");
+                    fetchLockers();
+                    setTimeout(() => { openedLockerName = null; fetchLockers(); }, 10000);
+                } else {
+                    showNotice(data.detail || "Không tìm thấy dữ liệu mượn!", "error");
+                }
+            } catch (err) {
+                showNotice("Lỗi kết nối máy chủ!", "error");
+            }
+        }
+
+        function showNotice(msg, type) {
+            const box = document.getElementById('statusBox');
+            box.classList.remove('hidden', 'bg-emerald-900/50', 'border-emerald-500', 'text-emerald-200', 'bg-rose-900/50', 'border-rose-500', 'text-rose-200');
+            if (type === 'success') {
+                box.classList.add('bg-emerald-900/50', 'border-emerald-500', 'text-emerald-200');
+            } else {
+                box.classList.add('bg-rose-900/50', 'border-rose-500', 'text-rose-200');
+            }
+            box.innerText = msg;
+        }
+
+        // Camera quét mã QR tự động nhận diện mã Nhận sách (QR-...) hoặc Trả sách (TRA-...)
+        const html5QrCode = new Html5Qrcode("reader");
+        html5QrCode.start(
+            { facingMode: "environment" },
+            { fps: 10, qrbox: { width: 250, height: 250 } },
+            (decodedText) => {
+                if (isScanningLocked) return;
+                isScanningLocked = true;
+
+                const cleanCode = decodedText.trim().toUpperCase();
+                document.getElementById('manualInput').value = cleanCode;
+
+                if (cleanCode.startsWith("TRA-") || cleanCode.startsWith("DUE-")) {
+                    handleReturn();
+                } else {
+                    handlePickup();
+                }
+
+                // Khóa quét lặp trong 4 giây sau mỗi lần quét thành công
+                setTimeout(() => { isScanningLocked = false; }, 4000);
+            },
+            (err) => {}
+        ).catch(err => console.log("Không tìm thấy camera"));
+
+        setInterval(fetchLockers, 3000);
+    </script>
+</body>
+</html>
