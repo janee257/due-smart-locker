@@ -605,21 +605,21 @@
         }
 
         function addToCart(bookId) {
-            const book = allBooks.find(b => b.id === bookId);
-            if (!book) return;
-            if (!cart.some(item => item.id === bookId)) {
-                cart.push(book);
-                updateCartUI();
-                renderBooks();
-            }
-        }
+    const book = allBooks.find(b => String(b.id) === String(bookId));
+    if (!book) return;
+    if (!cart.some(item => String(item.id) === String(bookId))) {
+        cart.push(book);
+        updateCartUI();
+        renderBooks();
+    }
+}
 
-        function removeFromCart(bookId) {
-            cart = cart.filter(item => item.id !== bookId);
-            updateCartUI();
-            renderBooks();
-            renderCartModalItems();
-        }
+function removeFromCart(bookId) {
+    cart = cart.filter(item => String(item.id) !== String(bookId));
+    updateCartUI();
+    renderBooks();
+    renderCartModalItems();
+}
 
         function updateCartUI() {
             const bar = document.getElementById('cartBar');
@@ -789,37 +789,93 @@
         }
 
         async function confirmCartBooking() {
-            if (cart.length === 0) return;
-            const date = document.getElementById('bookDate').value;
-            const slot = document.getElementById('bookSlot').value;
-            const bookIds = cart.map(b => b.id);
+    if (cart.length === 0) return alert("Giỏ mượn đang trống!");
+    const date = document.getElementById('bookDate').value;
+    const slot = document.getElementById('bookSlot').value;
+    if (!date) return alert("Vui lòng chọn ngày nhận sách trên lịch!");
 
+    try {
+        const firestoreDb = window.db || firebase.firestore();
+        
+        // 1. Tìm 1 hộc tủ trống trong collection 'lockers'
+        const lockerSnap = await firestoreDb.collection('lockers')
+            .where('trang_thai', '==', 'trong')
+            .limit(1)
+            .get();
+
+        let assignedLocker = "Hộc 01";
+        let lockerDocId = null;
+
+        if (!lockerSnap.empty) {
+            const lDoc = lockerSnap.docs[0];
+            lockerDocId = lDoc.id;
+            assignedLocker = lDoc.data().so_hoc || "Hộc 01";
+        }
+
+        // Tạo mã QR Token duy nhất cho đơn
+        const qrToken = "QR-" + Math.random().toString(36).substring(2, 8).toUpperCase();
+        const mssv = currentUser.mssv || "251121514110";
+        const hoTen = currentUser.ho_ten || "Sinh viên DUE";
+
+        // Danh sách sách trong đơn
+        const booksList = cart.map(b => ({
+            book_id: b.id,
+            ten_sach: b.ten_sach,
+            vi_tri_ke: b.vi_tri_ke,
+            ma_vach: b.ma_vach
+        }));
+
+        // 2. Lưu đơn đặt mượn vào collection 'orders'
+        await firestoreDb.collection('orders').add({
+            mssv: mssv,
+            ho_ten: hoTen,
+            so_hoc: assignedLocker,
+            ngay_hen: date,
+            khung_gio: slot,
+            qr_token: qrToken,
+            trang_thai_don: 'cho_soan',
+            books: booksList,
+            ngay_tao: firebase.firestore.FieldValue.serverTimestamp()
+        });
+
+        // 3. Cập nhật trạng thái hộc tủ (nếu có hộc trong database)
+        if (lockerDocId) {
+            await firestoreDb.collection('lockers').doc(lockerDocId).update({
+                trang_thai: 'cho_nhan',
+                qr_token: qrToken,
+                cap_nhat_luc: firebase.firestore.FieldValue.serverTimestamp()
+            });
+        }
+
+        // 4. Trừ số lượng có sẵn trong kho Firestore
+        for (let b of cart) {
             try {
-                const res = await fetch('/api/reserve', {
-                    method: 'POST',
-                    headers: {'Content-Type': 'application/json'},
-                    body: JSON.stringify({
-                        user_id: currentUser.id,
-                        book_ids: bookIds,
-                        ngay_hen: date,
-                        khung_gio: slot
-                    })
+                await firestoreDb.collection('books').doc(b.id).update({
+                    so_luong_con: firebase.firestore.FieldValue.increment(-1)
                 });
-                const data = await res.json();
-                if (res.ok) {
-                    alert(data.message);
-                    closeBookingCartModal();
-                    cart = [];
-                    updateCartUI();
-                    fetchBooks();
-                    showQr(`${data.count} cuốn sách`, `${date} (${slot})`, data.all_lockers, data.primary_qr);
-                } else {
-                    alert(data.detail || "Không thể đặt mượn!");
-                }
             } catch (err) {
-                alert("Lỗi kết nối máy chủ backend!");
+                console.warn("Lỗi cập nhật số lượng từng cuốn:", err);
             }
         }
+
+        const bookTitles = cart.map(b => b.ten_sach).join(", ");
+        const count = cart.length;
+
+        alert(`Đặt hẹn thành công ${count} cuốn sách! Hộc nhận dự kiến: ${assignedLocker}`);
+        
+        closeBookingCartModal();
+        cart = [];
+        updateCartUI();
+        fetchBooks(); // Tải lại kho sách hiển thị số lượng mới
+        
+        // Hiển thị mã QR lên màn hình
+        showQr(`${count} cuốn: ${bookTitles}`, `${date} (${slot})`, assignedLocker, qrToken);
+
+    } catch (err) {
+        console.error("Lỗi đặt mượn sách:", err);
+        alert("Lỗi khi xác nhận đặt mượn! Vui lòng kiểm tra lại kết nối.");
+    }
+}
 
         function showQr(title, slot, locker, token) {
             const card = document.getElementById('activeQrCard');
