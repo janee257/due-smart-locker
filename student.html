@@ -447,21 +447,42 @@
             if (tab === 'history') fetchHistory();
         }
 
-        async function fetchBooks() {
-            try {
-                const res = await fetch('/api/books');
-                allBooks = await res.json();
-                
-                const sInput = document.getElementById('searchInput');
-                if (sInput && sInput.value === currentUser?.mssv) {
-                    sInput.value = '';
-                }
+        // Tải danh sách sách từ Firestore và gom nhóm theo Tên sách (đồng bộ 100% với Thủ thư)
+async function fetchBooks() {
+    try {
+        const snapshot = await db.collection('books').get();
+        const grouped = {};
 
-                renderBooks();
-            } catch (err) {
-                console.error("Lỗi nạp sách:", err);
+        snapshot.forEach(doc => {
+            const b = doc.data();
+            const name = b.ten_sach || "Sách chưa đặt tên";
+            if (!grouped[name]) {
+                grouped[name] = {
+                    id: doc.id,
+                    ten_sach: name,
+                    tac_gia: b.tac_gia || "Đang cập nhật",
+                    vi_tri_ke: b.vi_tri_ke || "Kệ chính",
+                    ma_vach: b.ma_vach || "DUE-BOOK",
+                    tong_so_luong: 0,
+                    so_luong_con: 0
+                };
             }
+            grouped[name].tong_so_luong += Number(b.so_luong || 1);
+            grouped[name].so_luong_con += Number(b.so_luong_con !== undefined ? b.so_luong_con : (b.so_luong || 1));
+        });
+
+        allBooks = Object.values(grouped);
+
+        const sInput = document.getElementById('searchInput');
+        if (sInput && currentUser && sInput.value === currentUser.mssv) {
+            sInput.value = '';
         }
+
+        renderBooks();
+    } catch (err) {
+        console.error("Lỗi nạp sách từ Firestore:", err);
+    }
+}
 
         function selectCategory(cat) {
             currentCategory = cat;
@@ -1101,26 +1122,6 @@
         // Khởi tạo Firestore database
         const db = firebase.firestore();
 
-        // Hàm tải danh sách sách trực tiếp từ Firebase Firestore cho Sinh viên
-async function loadBooksFromFirestore() {
-    try {
-        const snapshot = await db.collection('books').get();
-        allBooks = [];
-        snapshot.forEach(doc => {
-            allBooks.push({ id: doc.id, ...doc.data() });
-        });
-        
-        // Gọi hàm render hiển thị danh sách sách ra giao diện sinh viên của bạn
-        renderBooks(); 
-    } catch (err) {
-        console.error("Lỗi tải sách cho sinh viên:", err);
-    }
-}
-
-        // Gọi hàm tải sách khi trang được mở
-        document.addEventListener("DOMContentLoaded", () => {
-            loadBooksFromFirestore();
-        });
     </script>
 </body>
 </html>
