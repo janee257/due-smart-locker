@@ -216,25 +216,33 @@
     }
   }
 
-  // LẮNG NGHE REALTIME 20 HỘC TỦ TRÊN FIRESTORE
+  // LẮNG NGHE REALTIME 20 HỘC TỦ VÀ ĐƠN HÀNG TRÊN FIRESTORE
   function subscribeLockers() {
     stopLockerSubscription();
-    unsubscribeLockers = lockerRef.onSnapshot(snapshot => {
-      lockersMap.clear();
-      snapshot.forEach(doc => {
+    
+    // Lắng nghe đồng thời cả bảng 'lockers' và bảng 'orders' để đồng bộ trạng thái hộc
+    unsubscribeLockers = db.collection('orders').where('trang_thai_don', 'in', ['cho_soan', 'da_soan_xong']).onSnapshot(orderSnap => {
+      const activeLockersMap = new Map();
+      
+      orderSnap.forEach(doc => {
         const d = doc.data();
-        const soHoc = d.so_hoc || doc.id;
-        lockersMap.set(soHoc, { id: doc.id, ...d, so_hoc: soHoc });
+        if (d.so_hoc) {
+          // Nếu đơn chờ soạn -> hiện màu vàng (Chờ lấy / Đang nạp)
+          activeLockersMap.set(d.so_hoc, {
+            so_hoc: d.so_hoc,
+            trang_thai: d.trang_thai_don === 'da_soan_xong' ? 'cho_nhan' : 'cho_soan'
+          });
+        }
       });
 
-      // Tạo danh sách chuẩn 20 hộc theo thứ tự 01 -> 20
+      // Tạo danh sách chuẩn 20 hộc từ Hộc 01 đến Hộc 20
       const list = [];
       for (let i = 1; i <= 20; i++) {
         const key = `Hộc ${i < 10 ? '0' + i : i}`;
-        if (lockersMap.has(key)) {
-          list.push(lockersMap.get(key));
+        if (activeLockersMap.has(key)) {
+          list.push(activeLockersMap.get(key));
         } else {
-          list.push({ id: `hoc_${i}`, so_hoc: key, trang_thai: 'trong' });
+          list.push({ so_hoc: key, trang_thai: 'trong' });
         }
       }
 
@@ -243,10 +251,9 @@
     }, err => {
       console.error('Lỗi Firestore lockers:', err);
       $('connectionState').textContent = 'Mất kết nối Firestore';
-      showNotice('Không thể tải trạng thái tủ. Kiểm tra quyền Firestore.', 'error');
     });
   }
-
+  
   function stopLockerSubscription() { 
     if (unsubscribeLockers) unsubscribeLockers(); 
     unsubscribeLockers = null; 
