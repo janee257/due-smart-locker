@@ -1,8 +1,13 @@
 <!DOCTYPE html>
 <html lang="vi">
 <!-- Thư viện Firebase -->
+<!-- 1. Firebase App -->
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+<!-- 2. Firebase Auth -->
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
+<!-- 3. Firebase Firestore (PHẢI NẰM TRƯỚC firebase-init.js) -->
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
+<!-- 4. File Init -->
 <script src="/firebase-init.js"></script>
 <head>
     <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
@@ -417,15 +422,23 @@
         function showApp() {
             document.getElementById('loginSection').classList.add('hidden');
             document.getElementById('mainApp').classList.remove('hidden');
-            document.getElementById('userDisplayName').innerText = currentUser.ho_ten;
-            document.getElementById('userDisplayMssv').innerText = `MSSV: ${currentUser.mssv}`;
-            document.getElementById('userDisplayDebt').innerText = `${currentUser.tien_no_phat.toLocaleString()} đ`;
+            document.getElementById('userDisplayName').innerText = currentUser.ho_ten || "Sinh viên DUE";
+            document.getElementById('userDisplayMssv').innerText = `MSSV: ${currentUser.mssv || ''}`;
+            
+            // Xử lý an toàn: nếu tien_no_phat không có thì mặc định là 0
+            const debt = currentUser.tien_no_phat || 0;
+            document.getElementById('userDisplayDebt').innerText = `${debt.toLocaleString()} đ`;
             
             const sInput = document.getElementById('searchInput');
             if (sInput) sInput.value = '';
 
             loadInitialData();
         }
+
+            const sInput = document.getElementById('searchInput');
+            if (sInput) sInput.value = '';
+
+            loadInitialData();
 
         function switchTab(tab) {
             const tabs = ['borrow', 'return', 'history'];
@@ -448,41 +461,43 @@
         }
 
         // Tải danh sách sách từ Firestore và gom nhóm theo Tên sách (đồng bộ 100% với Thủ thư)
-async function fetchBooks() {
-    try {
-        const snapshot = await db.collection('books').get();
-        const grouped = {};
+        async function fetchBooks() {
+            try {
+                // Đảm bảo db đã sẵn sàng
+                const firestoreDb = window.db || firebase.firestore();
+                const snapshot = await firestoreDb.collection('books').get();
+                const grouped = {};
 
-        snapshot.forEach(doc => {
-            const b = doc.data();
-            const name = b.ten_sach || "Sách chưa đặt tên";
-            if (!grouped[name]) {
-                grouped[name] = {
-                    id: doc.id,
-                    ten_sach: name,
-                    tac_gia: b.tac_gia || "Đang cập nhật",
-                    vi_tri_ke: b.vi_tri_ke || "Kệ chính",
-                    ma_vach: b.ma_vach || "DUE-BOOK",
-                    tong_so_luong: 0,
-                    so_luong_con: 0
-                };
+                snapshot.forEach(doc => {
+                    const b = doc.data();
+                    const name = b.ten_sach || "Sách chưa đặt tên";
+                    if (!grouped[name]) {
+                        grouped[name] = {
+                            id: doc.id,
+                            ten_sach: name,
+                            tac_gia: b.tac_gia || "Đang cập nhật",
+                            vi_tri_ke: b.vi_tri_ke || "Kệ chính",
+                            ma_vach: b.ma_vach || "DUE-BOOK",
+                            tong_so_luong: 0,
+                            so_luong_con: 0
+                        };
+                    }
+                    grouped[name].tong_so_luong += Number(b.so_luong || 1);
+                    grouped[name].so_luong_con += Number(b.so_luong_con !== undefined ? b.so_luong_con : (b.so_luong || 1));
+                });
+
+                allBooks = Object.values(grouped);
+
+                const sInput = document.getElementById('searchInput');
+                if (sInput && currentUser && sInput.value === currentUser.mssv) {
+                    sInput.value = '';
+                }
+
+                renderBooks();
+            } catch (err) {
+                console.error("Lỗi nạp sách từ Firestore:", err);
             }
-            grouped[name].tong_so_luong += Number(b.so_luong || 1);
-            grouped[name].so_luong_con += Number(b.so_luong_con !== undefined ? b.so_luong_con : (b.so_luong || 1));
-        });
-
-        allBooks = Object.values(grouped);
-
-        const sInput = document.getElementById('searchInput');
-        if (sInput && currentUser && sInput.value === currentUser.mssv) {
-            sInput.value = '';
         }
-
-        renderBooks();
-    } catch (err) {
-        console.error("Lỗi nạp sách từ Firestore:", err);
-    }
-}
 
         function selectCategory(cat) {
             currentCategory = cat;
