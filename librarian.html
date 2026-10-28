@@ -41,50 +41,12 @@
         const auth = firebase.auth();
         const db = window.firebase ? firebase.firestore() : null;
 
-        // Tự động nạp 20 đầu sách ngay khi mở trang Thủ thư
-window.addEventListener('DOMContentLoaded', async () => {
-    try {
-        const sampleBooks = [
-            { ma_vach: "DUE-MIS-01", ten_sach: "Phân tích và Thiết kế Hệ thống Thông tin", so_luong: 5, so_luong_con: 5, tac_gia: "PGS.TS Nguyễn Văn A", vi_tri_ke: "Tầng 2 - Kệ A1", gia_bia: 120000 },
-            { ma_vach: "DUE-MIS-02", ten_sach: "Cơ sở dữ liệu doanh nghiệp với Odoo", so_luong: 4, so_luong_con: 4, tac_gia: "ThS. Trần Thị B", vi_tri_ke: "Tầng 2 - Kệ A2", gia_bia: 150000 },
-            { ma_vach: "DUE-MIS-03", ten_sach: "Lập trình Python cho Quản trị", so_luong: 6, so_luong_con: 6, tac_gia: "Dr. John Doe", vi_tri_ke: "Tầng 2 - Kệ A3", gia_bia: 135000 },
-            { ma_vach: "DUE-ECO-01", ten_sach: "Kinh tế vi mô nâng cao", so_luong: 5, so_luong_con: 5, tac_gia: "GS. Michael Porter", vi_tri_ke: "Tầng 1 - Kệ B1", gia_bia: 110000 },
-            { ma_vach: "DUE-ECO-02", ten_sach: "Kinh tế vĩ mô trong kỷ nguyên số", so_luong: 4, so_luong_con: 4, tac_gia: "TS. Lê Văn C", vi_tri_ke: "Tầng 1 - Kệ B2", gia_bia: 125000 },
-            { ma_vach: "DUE-ACC-01", ten_sach: "Nguyên lý Kế toán tài chính", so_luong: 8, so_luong_con: 8, tac_gia: "PGS.TS Phạm Thị D", vi_tri_ke: "Tầng 3 - Kệ C1", gia_bia: 140000 },
-            { ma_vach: "DUE-ACC-02", ten_sach: "Kế toán quản trị doanh nghiệp", so_luong: 5, so_luong_con: 5, tac_gia: "ThS. Hoàng Văn E", vi_tri_ke: "Tầng 3 - Kệ C2", gia_bia: 145000 },
-            { ma_vach: "DUE-MAR-01", ten_sach: "Quản trị Marketing hiện đại", so_luong: 7, so_luong_con: 7, tac_gia: "Philip Kotler", vi_tri_ke: "Tầng 1 - Kệ D1", gia_bia: 180000 },
-            { ma_vach: "DUE-MAR-02", ten_sach: "Hành vi người tiêu dùng số", so_luong: 5, so_luong_con: 5, tac_gia: "TS. Ngô Thanh F", vi_tri_ke: "Tầng 1 - Kệ D2", gia_bia: 130000 },
-            { ma_vach: "DUE-FIN-01", ten_sach: "Tài chính doanh nghiệp căn bản", so_luong: 6, so_luong_con: 6, tac_gia: "Eugene Fama", vi_tri_ke: "Tầng 3 - Kệ E1", gia_bia: 160000 },
-            { ma_vach: "DUE-FIN-02", ten_sach: "Thị trường Chứng khoán & Đầu tư", so_luong: 4, so_luong_con: 4, tac_gia: "ThS. Bùi Minh G", vi_tri_ke: "Tầng 3 - Kệ E2", gia_bia: 155000 },
-            { ma_vach: "DUE-LAW-01", ten_sach: "Luật Kinh tế Việt Nam", so_luong: 5, so_luong_con: 5, tac_gia: "PGS.TS Vũ Văn H", vi_tri_ke: "Tầng 4 - Kệ F1", gia_bia: 115000 },
-            { ma_vach: "DUE-STA-01", ten_sach: "Thống kê ứng dụng trong kinh doanh", so_luong: 6, so_luong_con: 6, tac_gia: "TS. Đỗ Thị I", vi_tri_ke: "Tầng 2 - Kệ G1", gia_bia: 125000 },
-            { ma_vach: "DUE-LOG-01", ten_sach: "Quản trị Chuỗi cung ứng Toàn cầu", so_luong: 5, so_luong_con: 5, tac_gia: "Donald Waters", vi_tri_ke: "Tầng 2 - Kệ H1", gia_bia: 170000 },
-            { ma_vach: "DUE-HRM-01", ten_sach: "Quản trị Nguồn nhân lực chiến lược", so_luong: 5, so_luong_con: 5, tac_gia: "Gary Dessler", vi_tri_ke: "Tầng 4 - Kệ K1", gia_bia: 145000 },
-            { ma_vach: "DUE-ECOM-01", ten_sach: "Thương mại điện tử và Chuyển đổi số", so_luong: 7, so_luong_con: 7, tac_gia: "Laudon & Traver", vi_tri_ke: "Tầng 2 - Kệ L1", gia_bia: 190000 },
-            { ma_vach: "DUE-BUS-01", ten_sach: "Quản trị học đại cương", so_luong: 10, so_luong_con: 10, tac_gia: "Stephen Robbins", vi_tri_ke: "Tầng 1 - Kệ M1", gia_bia: 135000 },
-            { ma_vach: "DUE-PR-01", ten_sach: "Quan hệ công chúng (PR) trong doanh nghiệp", so_luong: 4, so_luong_con: 4, tac_gia: "ThS. Phan Thị K", vi_tri_ke: "Tầng 1 - Kệ N1", gia_bia: 120000 },
-            { ma_vach: "DUE-ENT-01", ten_sach: "Khởi nghiệp đổi mới sáng tạo", so_luong: 6, so_luong_con: 6, tac_gia: "Bill Aulet", vi_tri_ke: "Tầng 4 - Kệ P1", gia_bia: 150000 },
-            { ma_vach: "DUE-MIS-04", ten_sach: "Hệ thống Hoạch định Nguồn lực Doanh nghiệp (ERP)", so_luong: 5, so_luong_con: 5, tac_gia: "TS. Nguyễn Văn L", vi_tri_ke: "Tầng 2 - Kệ A4", gia_bia: 165000 }
-        ];
+        // Không tự động seed dữ liệu mỗi lần mở trang để tránh tạo sách trùng.
 
-        for (let book of sampleBooks) {
-            await db.collection('books').add({
-                ...book,
-                ngay_tao: firebase.firestore.FieldValue.serverTimestamp()
-            });
-        }
-        console.log("🎉 Đã bơm thành công 20 đầu sách vào Firebase!");
-    } catch (e) {
-        console.error("Lỗi:", e);
-    }
-});
-
-        async function loginWithFirebase(email, password) {
-            let fullEmail = email.trim();
-            if (!fullEmail.includes("@")) {
-                fullEmail = fullEmail + "@due.udn.vn";
-            }
-            return await auth.signInWithEmailAndPassword(fullEmail, password.trim());
+        async function loginWithFirebase(identifier, password) {
+            let email = identifier.trim();
+            if (!email.includes("@")) email += "@due.udn.vn";
+            return auth.signInWithEmailAndPassword(email, password);
         }
     </script>
 </head>
@@ -318,13 +280,13 @@ window.addEventListener('DOMContentLoaded', async () => {
                     <div class="pt-2 border-t border-slate-200 flex items-center gap-2 overflow-x-auto text-xs">
                         <span class="text-slate-400 font-bold whitespace-nowrap text-[11px]"><i class="fa-solid fa-tags mr-1"></i>Khoa/Ngành:</span>
                         <div class="flex gap-1.5" id="libCategoryChips">
-                            <button onclick="selectLibCategory('all')" class="filter-chip active px-3 py-1.5 rounded-xl border border-slate-200 font-semibold whitespace-nowrap transition bg-white">Tất cả</button>
-                            <button onclick="selectLibCategory('httt')" class="filter-chip px-3 py-1.5 rounded-xl border border-slate-200 font-semibold whitespace-nowrap transition bg-white">Hệ thống thông tin</button>
-                            <button onclick="selectLibCategory('kinhte')" class="filter-chip px-3 py-1.5 rounded-xl border border-slate-200 font-semibold whitespace-nowrap transition bg-white">Kinh tế</button>
-                            <button onclick="selectLibCategory('ketoan')" class="filter-chip px-3 py-1.5 rounded-xl border border-slate-200 font-semibold whitespace-nowrap transition bg-white">Kế toán</button>
-                            <button onclick="selectLibCategory('marketing')" class="filter-chip px-3 py-1.5 rounded-xl border border-slate-200 font-semibold whitespace-nowrap transition bg-white">Marketing</button>
-                            <button onclick="selectLibCategory('taichinh')" class="filter-chip px-3 py-1.5 rounded-xl border border-slate-200 font-semibold whitespace-nowrap transition bg-white">Tài chính - Ngân hàng</button>
-                            <button onclick="selectLibCategory('khac')" class="filter-chip px-3 py-1.5 rounded-xl border border-slate-200 font-semibold whitespace-nowrap transition bg-white">Khác (Luật/Thống kê)</button>
+                            <button onclick="selectLibCategory('all', this)" class="filter-chip active px-3 py-1.5 rounded-xl border border-slate-200 font-semibold whitespace-nowrap transition bg-white">Tất cả</button>
+                            <button onclick="selectLibCategory('httt', this)" class="filter-chip px-3 py-1.5 rounded-xl border border-slate-200 font-semibold whitespace-nowrap transition bg-white">Hệ thống thông tin</button>
+                            <button onclick="selectLibCategory('kinhte', this)" class="filter-chip px-3 py-1.5 rounded-xl border border-slate-200 font-semibold whitespace-nowrap transition bg-white">Kinh tế</button>
+                            <button onclick="selectLibCategory('ketoan', this)" class="filter-chip px-3 py-1.5 rounded-xl border border-slate-200 font-semibold whitespace-nowrap transition bg-white">Kế toán</button>
+                            <button onclick="selectLibCategory('marketing', this)" class="filter-chip px-3 py-1.5 rounded-xl border border-slate-200 font-semibold whitespace-nowrap transition bg-white">Marketing</button>
+                            <button onclick="selectLibCategory('taichinh', this)" class="filter-chip px-3 py-1.5 rounded-xl border border-slate-200 font-semibold whitespace-nowrap transition bg-white">Tài chính - Ngân hàng</button>
+                            <button onclick="selectLibCategory('khac', this)" class="filter-chip px-3 py-1.5 rounded-xl border border-slate-200 font-semibold whitespace-nowrap transition bg-white">Khác (Luật/Thống kê)</button>
                         </div>
                     </div>
                 </div>
@@ -438,8 +400,7 @@ window.addEventListener('DOMContentLoaded', async () => {
         }
 
         async function handleLibrarianLogout() {
-            await logoutFirebase();
-            location.reload();
+            try { await auth.signOut(); } finally { sessionStorage.clear(); location.reload(); }
         }
 
         let allGroupedBooks = [];
@@ -465,45 +426,40 @@ window.addEventListener('DOMContentLoaded', async () => {
         }
 
         async function loadLibrarianData() {
-    try {
-        // Tải danh sách sách trực tiếp từ Cloud Firestore thay vì gọi API Python
-        const snapshot = await db.collection('books').get();
-        const rawBooks = [];
-        snapshot.forEach(doc => {
-            rawBooks.push({ id: doc.id, ...doc.data() });
-        });
-
-        // Gom nhóm theo tên sách để hiển thị đúng giao diện kho hiện tại
-        const grouped = {};
-        rawBooks.forEach(b => {
-            const name = b.ten_sach || "Sách chưa đặt tên";
-            if (!grouped[name]) {
-                grouped[name] = {
-                    ten_sach: name,
-                    tac_gia: b.tac_gia || "Đang cập nhật",
-                    vi_tri_ke: b.vi_tri_ke || "Kệ chính",
-                    ma_vach_dai_dien: b.ma_vach || "DUE-BOOK",
-                    tong_so_luong: 0,
-                    so_luong_co_san: 0,
-                    so_luong_dang_muon: 0
-                };
+            if (!auth.currentUser) return;
+            try {
+                const snapshot = await db.collection('books').get();
+                const grouped = {};
+                snapshot.forEach(doc => {
+                    const b = { id: doc.id, ...doc.data() };
+                    const name = String(b.ten_sach || 'Sách chưa đặt tên');
+                    if (!grouped[name]) {
+                        grouped[name] = {
+                            ten_sach: name,
+                            tac_gia: b.tac_gia || 'Đang cập nhật',
+                            vi_tri_ke: b.vi_tri_ke || 'Kệ chính',
+                            ma_vach_dai_dien: b.ma_vach || 'DUE-BOOK',
+                            tong_so_luong: 0,
+                            so_luong_co_san: 0,
+                            so_luong_dang_muon: 0,
+                            docIds: [],
+                            barcodes: []
+                        };
+                    }
+                    const total = Number(b.so_luong ?? 1) || 0;
+                    const available = Number(b.so_luong_con ?? total) || 0;
+                    grouped[name].tong_so_luong += total;
+                    grouped[name].so_luong_co_san += available;
+                    grouped[name].docIds.push(doc.id);
+                    if (b.ma_vach) grouped[name].barcodes.push(String(b.ma_vach));
+                });
+                allGroupedBooks = Object.values(grouped);
+                renderFilteredLibrarianBooks();
+            } catch (err) {
+                console.error('Lỗi tải kho sách Firestore:', err);
+                alert('Không tải được kho sách. Hãy kiểm tra kết nối và Firestore Security Rules.');
             }
-            grouped[name].tong_so_luong += (b.so_luong || 1);
-            grouped[name].so_luong_co_san += (b.so_luong_con !== undefined ? b.so_luong_con : (b.so_luong || 1));
-        });
-
-        allGroupedBooks = Object.values(grouped);
-        renderFilteredLibrarianBooks();
-
-        // Cập nhật các bảng khác tạm thời nếu chưa có API
-        document.getElementById('totalActiveBorrowBadge').innerText = "0";
-        document.getElementById('orderCount').innerText = "0 đơn";
-        document.getElementById('inspectCount').innerText = "0 cuốn";
-
-    } catch (err) {
-        console.error("Lỗi nạp dữ liệu thủ thư từ Firestore:", err);
-    }
-}
+        }
 
         // Render đơn soạn: Gom nhóm sinh viên - sách
         function renderOrders(orders) {
@@ -832,11 +788,11 @@ window.addEventListener('DOMContentLoaded', async () => {
         }
 
         // ================= CỤM KHO SÁCH =================
-        function selectLibCategory(cat) {
+        function selectLibCategory(cat, button) {
             currentLibCategory = cat;
             const buttons = document.querySelectorAll('#libCategoryChips button');
             buttons.forEach(btn => btn.classList.remove('active'));
-            event.target.classList.add('active');
+            if (button) button.classList.add('active');
             renderFilteredLibrarianBooks();
         }
 
@@ -1008,83 +964,83 @@ window.addEventListener('DOMContentLoaded', async () => {
     }
 }
 
+        function getBookGroup(title) {
+            return allGroupedBooks.find(b => b.ten_sach === title);
+        }
+
         async function deleteBookGroup(title, borrowedCount) {
-            if (borrowedCount > 0) {
-                return alert(`Không thể xóa! Sách "${title}" hiện có ${borrowedCount} cuốn đang được sinh viên mượn hoặc giữ chỗ tại tủ Locker.`);
-            }
-
-            if (!confirm(`Bạn có chắc chắn muốn XÓA HOÀN TOÀN đầu sách "${title}" khỏi hệ thống thư viện?`)) return;
-
+            const group = getBookGroup(title);
+            if (!group) return alert('Không tìm thấy đầu sách.');
+            if (borrowedCount > 0) return alert(`Không thể xóa: "${title}" đang có sách mượn/giữ chỗ.`);
+            if (!confirm(`Xóa đầu sách "${title}" khỏi Firestore?`)) return;
             try {
-                const res = await fetch('/api/librarian/book/delete-group', {
-                    method: 'POST',
-                    headers: {'Content-Type': 'application/json'},
-                    body: JSON.stringify({ ten_sach: title })
-                });
-                const data = await res.json();
-                if (res.ok) {
-                    alert(data.message);
-                    loadLibrarianData();
-                } else {
-                    alert(data.detail || "Không thể xóa sách!");
-                }
-            } catch(e) {
-                alert("Lỗi kết nối máy chủ!");
+                const batch = db.batch();
+                (group.docIds || []).forEach(id => batch.delete(db.collection('books').doc(id)));
+                await batch.commit();
+                await loadLibrarianData();
+                alert('Đã xóa đầu sách.');
+            } catch (err) {
+                console.error(err);
+                alert('Không thể xóa sách. Kiểm tra quyền Firestore.');
             }
         }
 
         async function saveStock(title, inputId) {
-            const inputVal = document.getElementById(inputId).value;
-            const qty = parseInt(inputVal);
-            if (isNaN(qty) || qty < 0) return alert("Vui lòng nhập số lượng nguyên hợp lệ (>= 0)!");
-
+            const group = getBookGroup(title);
+            const input = document.getElementById(inputId);
+            const qty = Number(input?.value);
+            if (!group || !Number.isInteger(qty) || qty < 0) return alert('Vui lòng nhập số lượng nguyên không âm.');
+            if (qty < group.so_luong_dang_muon) return alert('Số lượng có sẵn không thể thấp hơn số sách đang mượn.');
             try {
-                const res = await fetch('/api/librarian/book/set-stock', {
-                    method: 'POST',
-                    headers: {'Content-Type': 'application/json'},
-                    body: JSON.stringify({ ten_sach: title, so_luong: qty })
+                const firstId = group.docIds?.[0];
+                if (!firstId) return alert('Không tìm thấy bản ghi sách.');
+                // Điều chỉnh theo phần chênh lệch để tổng số lượng của nhóm vẫn nhất quán.
+                const delta = qty - group.so_luong_co_san;
+                if (group.tong_so_luong + delta < 0) return alert('Tổng số lượng không hợp lệ.');
+                await db.collection('books').doc(firstId).update({
+                    so_luong: firebase.firestore.FieldValue.increment(delta),
+                    so_luong_con: firebase.firestore.FieldValue.increment(delta)
                 });
-                const data = await res.json();
-                if (res.ok) {
-                    alert(data.message);
-                    loadLibrarianData();
-                } else {
-                    alert(data.detail || "Không thể lưu số lượng!");
-                    loadLibrarianData();
-                }
-            } catch(e) {
-                alert("Lỗi kết nối máy chủ!");
+                await loadLibrarianData();
+                alert('Đã cập nhật số lượng có sẵn.');
+            } catch (err) {
+                console.error(err);
+                alert('Không thể lưu số lượng. Kiểm tra Firestore Security Rules.');
             }
         }
 
         async function increaseStock(title) {
+            const group = getBookGroup(title);
+            if (!group) return alert('Không tìm thấy đầu sách.');
+            const firstId = group.docIds?.[0];
+            if (!firstId) return;
             try {
-                const res = await fetch('/api/librarian/book/increase', {
-                    method: 'POST',
-                    headers: {'Content-Type': 'application/json'},
-                    body: JSON.stringify({ ten_sach: title })
+                await db.collection('books').doc(firstId).update({
+                    so_luong: firebase.firestore.FieldValue.increment(1),
+                    so_luong_con: firebase.firestore.FieldValue.increment(1)
                 });
-                if (res.ok) loadLibrarianData();
-            } catch(e) {
-                alert("Lỗi kết nối máy chủ!");
+                await loadLibrarianData();
+            } catch (err) {
+                console.error(err);
+                alert('Không thể tăng số lượng sách.');
             }
         }
 
         async function decreaseStock(title) {
+            const group = getBookGroup(title);
+            if (!group) return alert('Không tìm thấy đầu sách.');
+            if (group.so_luong_co_san <= 0) return alert('Không còn sách có sẵn để giảm.');
+            const firstId = group.docIds?.[0];
+            if (!firstId) return;
             try {
-                const res = await fetch('/api/librarian/book/decrease', {
-                    method: 'POST',
-                    headers: {'Content-Type': 'application/json'},
-                    body: JSON.stringify({ ten_sach: title })
+                await db.collection('books').doc(firstId).update({
+                    so_luong: firebase.firestore.FieldValue.increment(-1),
+                    so_luong_con: firebase.firestore.FieldValue.increment(-1)
                 });
-                const data = await res.json();
-                if (res.ok) {
-                    loadLibrarianData();
-                } else {
-                    alert(data.detail || "Không thể giảm!");
-                }
-            } catch(e) {
-                alert("Lỗi kết nối máy chủ!");
+                await loadLibrarianData();
+            } catch (err) {
+                console.error(err);
+                alert('Không thể giảm số lượng sách.');
             }
         }
 
@@ -1100,9 +1056,14 @@ window.addEventListener('DOMContentLoaded', async () => {
             const shelf = document.getElementById('newBookShelf').value.trim();
 
             try {
-                // Lưu trực tiếp lên Cloud Firestore
-                await db.collection('books').add({
-                    ma_vach: barcode.toUpperCase(),
+                const normalizedBarcode = barcode.toUpperCase().replace(/\//g, '-');
+                const existing = await db.collection('books').where('ma_vach', '==', normalizedBarcode).limit(1).get();
+                if (!existing.empty) {
+                    alert('Mã vạch này đã tồn tại. Vui lòng dùng mã khác.');
+                    return;
+                }
+                await db.collection('books').doc(normalizedBarcode).set({
+                    ma_vach: normalizedBarcode,
                     ten_sach: title,
                     so_luong: qty,
                     so_luong_con: qty,
@@ -1141,8 +1102,7 @@ window.addEventListener('DOMContentLoaded', async () => {
             }
         }
 
-        setInterval(loadLibrarianData, 5000);
-        loadLibrarianData();
+        // Dữ liệu chỉ tải sau khi Firebase xác nhận phiên đăng nhập.
     </script>
 </body>
 </html>

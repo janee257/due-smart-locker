@@ -1,4 +1,5 @@
-// Cấu hình Firebase chính xác của dự án DUE Smart Locker
+
+/* Cấu hình Firebase dùng chung cho DUE Smart Locker */
 const firebaseConfig = {
   apiKey: "AIzaSyB1qtSFNNFmVWAo0r0lqIU5cEfCGOKX59M",
   authDomain: "due-smart-locker.firebaseapp.com",
@@ -9,41 +10,48 @@ const firebaseConfig = {
   measurementId: "G-078Z3QDM27"
 };
 
-// 1. Khởi tạo Firebase App nếu chưa có
-if (!firebase.apps || !firebase.apps.length) {
+// Khởi tạo Firebase một lần
+if (!firebase.apps.length) {
   firebase.initializeApp(firebaseConfig);
 }
 
-// 2. Khởi tạo dịch vụ Authentication
-const auth = firebase.auth();
+// Dùng chung Authentication và Firestore
+window.auth = firebase.auth();
+window.db = firebase.firestore();
 
-// 3. Hàm đăng nhập đa năng (Nhập MSSV hoặc Email đều được)
-async function loginWithFirebase(identifier, password) {
-  let email = identifier.trim();
-  // Nếu sinh viên chỉ nhập MSSV số, tự động gắn thêm đuôi trường
-  if (!email.includes("@")) {
-    email = `${email}@due.udn.vn`;
+// Đăng nhập bằng MSSV hoặc email
+window.loginWithFirebase = async function (identifier, password) {
+  const value = String(identifier || "").trim();
+
+  if (!value || !password) {
+    throw new Error("Vui lòng nhập tài khoản và mật khẩu.");
   }
-  
-  const userCredential = await auth.signInWithEmailAndPassword(email, password);
-  const token = await userCredential.user.getIdToken();
+
+  const email = value.includes("@")
+    ? value
+    : `${value}@due.udn.vn`;
+
+  const credential = await window.auth.signInWithEmailAndPassword(
+    email,
+    password
+  );
+
+  const token = await credential.user.getIdToken();
+
   return {
-    user: userCredential.user,
-    token: token
+    user: credential.user,
+    token
   };
-}
+};
 
-// 4. Hàm lấy Token ID hiện tại để gửi kèm request lên backend FastAPI
-async function getAuthToken() {
-  const user = auth.currentUser;
-  if (user) {
-    return await user.getIdToken();
-  }
-  return null;
-}
+// Lấy Firebase ID Token
+window.getAuthToken = async function () {
+  const user = window.auth.currentUser;
+  return user ? await user.getIdToken() : null;
+};
 
-// 5. Hàm đăng xuất an toàn
-async function logoutFirebase() {
-  await auth.signOut();
-  sessionStorage.clear();
-}
+// Đăng xuất Firebase
+window.logoutFirebase = async function () {
+  await window.auth.signOut();
+  sessionStorage.removeItem("due_student_user");
+};
