@@ -23,6 +23,7 @@
     if (!firebase.apps.length) firebase.initializeApp(firebaseConfig);
     const auth = firebase.auth();
     const db = firebase.firestore();
+
     async function loginWithFirebase(identifier, password) {
       let email = identifier.trim();
       if (!email.includes('@')) email += '@due.udn.vn';
@@ -35,6 +36,7 @@
   </script>
 </head>
 <body class="bg-slate-900 text-white min-h-screen flex flex-col font-sans">
+  <!-- MÀN HÌNH ĐĂNG NHẬP KIOSK -->
   <div id="kioskLoginSection" class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950">
     <div class="bg-slate-900 border border-slate-700 w-full max-w-sm rounded-3xl p-6 shadow-2xl space-y-4">
       <div class="text-center space-y-1">
@@ -43,34 +45,86 @@
         <p class="text-[11px] text-slate-400">Đăng nhập tài khoản thiết bị để kích hoạt tủ Smart Locker</p>
       </div>
       <form id="kioskLoginForm" class="space-y-3.5 text-xs">
-        <div><label class="block font-bold text-slate-300 mb-1" for="kioskEmail">Email thiết bị / tài khoản</label><input type="text" id="kioskEmail" value="kiosk@due.udn.vn" required class="w-full px-3.5 py-2.5 bg-slate-800 border border-slate-700 rounded-xl text-sm text-white"></div>
-        <div><label class="block font-bold text-slate-300 mb-1" for="kioskPassword">Mật khẩu trạm</label><input type="password" id="kioskPassword" required class="w-full px-3.5 py-2.5 bg-slate-800 border border-slate-700 rounded-xl text-sm text-white"></div>
+        <div>
+          <label class="block font-bold text-slate-300 mb-1" for="kioskEmail">Email thiết bị / tài khoản</label>
+          <input type="text" id="kioskEmail" value="kiosk@due.udn.vn" required class="w-full px-3.5 py-2.5 bg-slate-800 border border-slate-700 rounded-xl text-sm text-white outline-none focus:ring-2 focus:ring-orange-500">
+        </div>
+        <div>
+          <label class="block font-bold text-slate-300 mb-1" for="kioskPassword">Mật khẩu trạm</label>
+          <input type="password" id="kioskPassword" required class="w-full px-3.5 py-2.5 bg-slate-800 border border-slate-700 rounded-xl text-sm text-white outline-none focus:ring-2 focus:ring-orange-500">
+        </div>
         <div id="kioskLoginError" class="hidden p-2.5 rounded-xl bg-rose-900/50 border border-rose-500 text-rose-200"></div>
-        <button type="submit" class="w-full py-3 bg-orange-600 hover:bg-orange-500 font-bold rounded-xl">Kích hoạt trạm tủ</button>
+        <button type="submit" class="w-full py-3 bg-orange-600 hover:bg-orange-500 font-bold rounded-xl transition shadow-lg shadow-orange-600/30">
+          Kích hoạt trạm tủ
+        </button>
       </form>
     </div>
   </div>
 
-  <div id="kioskLogoutBtnContainer" class="hidden fixed bottom-4 left-4 z-40"><button id="logoutButton" class="px-3.5 py-2 bg-slate-800 hover:bg-rose-600 text-white text-xs font-bold rounded-xl border border-slate-700"><i class="fa-solid fa-power-off mr-1"></i> Khóa Kiosk</button></div>
+  <!-- NÚT KHÓA KIOSK -->
+  <div id="kioskLogoutBtnContainer" class="hidden fixed bottom-4 left-4 z-40">
+    <button id="logoutButton" class="px-3.5 py-2 bg-slate-800 hover:bg-rose-600 text-white text-xs font-bold rounded-xl border border-slate-700 transition">
+      <i class="fa-solid fa-power-off mr-1"></i> Khóa Kiosk
+    </button>
+  </div>
+
+  <!-- HEADER -->
   <header class="bg-slate-800 border-b border-slate-700 p-3.5 flex flex-wrap gap-3 justify-between items-center shadow-md">
-    <div class="flex items-center gap-3"><img src="/logo_due.png" alt="DUE Logo" class="h-11 w-auto bg-white p-1 rounded-xl" onerror="this.onerror=null;this.src='https://due.udn.vn/Portals/0/logo-due.png'"><div><h1 class="text-base sm:text-lg font-bold">TRẠM TỦ THÔNG MINH <span class="bg-orange-600 text-white text-[10px] px-2 py-0.5 rounded-full">KIOSK</span></h1><p class="text-xs text-slate-400">Thư viện DUE • Tủ 20 ngăn • Trạng thái đồng bộ trực tiếp</p></div></div>
-    <div class="flex flex-wrap gap-3 text-xs font-semibold"><span><i class="fa-solid fa-circle text-emerald-500 mr-1"></i>Trống</span><span><i class="fa-solid fa-circle text-amber-500 mr-1"></i>Chờ lấy</span><span><i class="fa-solid fa-circle text-blue-500 mr-1"></i>Sách trả</span></div>
+    <div class="flex items-center gap-3">
+      <img src="/logo_due.png" alt="DUE Logo" class="h-11 w-auto bg-white p-1 rounded-xl" onerror="this.onerror=null;this.src='https://due.udn.vn/Portals/0/logo-due.png'">
+      <div>
+        <h1 class="text-base sm:text-lg font-bold">TRẠM TỦ THÔNG MINH <span class="bg-orange-600 text-white text-[10px] px-2 py-0.5 rounded-full">KIOSK</span></h1>
+        <p class="text-xs text-slate-400">Thư viện DUE • Tủ 20 ngăn • Đồng bộ Firestore Realtime</p>
+      </div>
+    </div>
+    <div class="flex flex-wrap gap-3 text-xs font-semibold">
+      <span><i class="fa-solid fa-circle text-emerald-500 mr-1"></i>Trống</span>
+      <span><i class="fa-solid fa-circle text-amber-500 mr-1"></i>Chờ lấy</span>
+      <span><i class="fa-solid fa-circle text-blue-500 mr-1"></i>Sách trả</span>
+    </div>
   </header>
+
+  <!-- NỘI DUNG CHÍNH -->
   <main class="flex-1 grid grid-cols-1 lg:grid-cols-12 gap-6 p-4 sm:p-6 max-w-7xl mx-auto w-full">
+    <!-- CỘT QUÉT QR VÀ NHẬP THỦ CÔNG -->
     <section class="lg:col-span-5 space-y-5">
       <div class="bg-slate-800 p-5 rounded-2xl border border-slate-700 shadow-xl space-y-4">
         <h2 class="text-base font-bold text-orange-400"><i class="fa-solid fa-qrcode mr-2"></i>QUÉT MÃ NHẬN / TRẢ SÁCH</h2>
-        <div class="bg-black rounded-xl overflow-hidden min-h-48 border border-slate-600"><div id="reader" class="w-full"></div></div>
+        
+        <div class="bg-black rounded-xl overflow-hidden min-h-48 border border-slate-600 flex items-center justify-center">
+          <div id="reader" class="w-full"></div>
+        </div>
+
         <label class="block text-xs font-semibold text-slate-300" for="manualInput">Hoặc nhập mã Token / Barcode thủ công</label>
-        <input type="text" id="manualInput" placeholder="QR token nhận sách hoặc TRA-... / mã vạch" class="w-full bg-slate-900 border border-slate-600 rounded-xl px-4 py-3 text-sm font-mono text-white uppercase">
-        <div class="grid grid-cols-2 gap-3"><button id="pickupButton" class="py-3 bg-orange-600 hover:bg-orange-500 font-bold text-sm rounded-xl"><i class="fa-solid fa-box-open mr-1"></i>Nhận sách</button><button id="returnButton" class="py-3 bg-blue-600 hover:bg-blue-500 font-bold text-sm rounded-xl"><i class="fa-solid fa-rotate-left mr-1"></i>Trả sách</button></div>
-        <p class="text-[11px] text-slate-400">Kiosk chỉ báo thành công khi thao tác Firestore đã được ghi nhận. Đây là mô phỏng phần mềm; không điều khiển khóa điện tử vật lý.</p>
+        <input type="text" id="manualInput" placeholder="Ví dụ: QR-ABC123 hoặc TRA-XYZ" class="w-full bg-slate-900 border border-slate-600 rounded-xl px-4 py-3 text-sm font-mono text-white uppercase outline-none focus:ring-2 focus:ring-orange-500">
+        
+        <div class="grid grid-cols-2 gap-3">
+          <button id="pickupButton" class="py-3 bg-orange-600 hover:bg-orange-500 font-bold text-sm rounded-xl transition flex items-center justify-center gap-1.5 shadow-md shadow-orange-600/30">
+            <i class="fa-solid fa-box-open mr-1"></i>Nhận sách
+          </button>
+          <button id="returnButton" class="py-3 bg-blue-600 hover:bg-blue-500 font-bold text-sm rounded-xl transition flex items-center justify-center gap-1.5 shadow-md shadow-blue-600/30">
+            <i class="fa-solid fa-rotate-left mr-1"></i>Trả sách
+          </button>
+        </div>
       </div>
+
       <div id="statusBox" role="status" aria-live="polite" class="hidden p-4 rounded-xl border text-sm font-medium"></div>
     </section>
-    <section class="lg:col-span-7 bg-slate-800/60 p-5 rounded-2xl border border-slate-700">
-      <h2 class="text-base font-bold mb-4 flex items-center justify-between text-slate-300"><span><i class="fa-solid fa-table-cells mr-2"></i>TRẠNG THÁI 20 HỘC TỦ</span><span id="connectionState" class="text-xs font-normal text-slate-400">Đang chờ đăng nhập</span></h2>
-      <div id="lockersGrid" class="grid grid-cols-3 sm:grid-cols-4 xl:grid-cols-5 gap-3"></div>
+
+    <!-- CỘT HIỂN THỊ 20 HỘC TỦ -->
+    <section class="lg:col-span-7 bg-slate-800/60 p-5 rounded-2xl border border-slate-700 flex flex-col justify-between">
+      <div>
+        <h2 class="text-base font-bold mb-4 flex items-center justify-between text-slate-300">
+          <span><i class="fa-solid fa-table-cells mr-2"></i>TRẠNG THÁI 20 HỘC TỦ SMART LOCKER</span>
+          <span id="connectionState" class="text-xs font-normal text-slate-400">Đang đồng bộ...</span>
+        </h2>
+        <div id="lockersGrid" class="grid grid-cols-4 sm:grid-cols-5 gap-3"></div>
+      </div>
+
+      <div class="mt-4 pt-3 border-t border-slate-700/60 flex items-center justify-between text-[11px] text-slate-400">
+        <span>* Hệ thống tự động cấp hộc và mở chốt tủ khi mã QR hợp lệ</span>
+        <button onclick="ensure20LockersInitialized()" class="text-slate-500 hover:text-slate-300 underline">Khởi tạo lại 20 hộc</button>
+      </div>
     </section>
   </main>
 
@@ -79,7 +133,7 @@
   let unsubscribeLockers = null;
   let scanner = null;
   let isScanningLocked = false;
-  let lockersCache = [];
+  let lockersMap = new Map();
   const $ = id => document.getElementById(id);
   const lockerRef = db.collection('lockers');
 
@@ -88,11 +142,11 @@
   $('pickupButton').addEventListener('click', handlePickup);
   $('returnButton').addEventListener('click', handleReturn);
 
-  auth.onAuthStateChanged(user => {
-    // Email chỉ dùng để điều khiển giao diện; quyền thực tế phải được giới hạn bằng Firestore Security Rules.
+  auth.onAuthStateChanged(async user => {
     if (user && user.email && user.email.toLowerCase().includes('kiosk')) {
       currentUser = user;
       showKiosk();
+      await ensure20LockersInitialized();
       subscribeLockers();
       startScanner();
     } else {
@@ -118,147 +172,279 @@
       $('kioskLoginError').classList.remove('hidden');
     }
   }
+
   async function handleKioskLogout() {
     stopLockerSubscription();
     stopScanner();
     try { await logoutFirebase(); } catch (e) { showNotice('Không thể đăng xuất: ' + (e.message || e), 'error'); }
   }
-  function showKiosk() { $('kioskLoginSection').classList.add('hidden'); $('kioskLogoutBtnContainer').classList.remove('hidden'); $('connectionState').textContent = 'Đang kết nối Firestore…'; }
-  function hideKiosk() { $('kioskLoginSection').classList.remove('hidden'); $('kioskLogoutBtnContainer').classList.add('hidden'); $('connectionState').textContent = 'Đang chờ đăng nhập'; }
 
+  function showKiosk() { 
+    $('kioskLoginSection').classList.add('hidden'); 
+    $('kioskLogoutBtnContainer').classList.remove('hidden'); 
+    $('connectionState').textContent = 'Đang đồng bộ Firestore...'; 
+  }
+  
+  function hideKiosk() { 
+    $('kioskLoginSection').classList.remove('hidden'); 
+    $('kioskLogoutBtnContainer').classList.add('hidden'); 
+    $('connectionState').textContent = 'Đang chờ đăng nhập'; 
+  }
+
+  // TỰ ĐỘNG KHỞI TẠO ĐỦ 20 HỘC (Hộc 01 -> Hộc 20) TRÊN FIRESTORE NẾU CHƯA CÓ
+  async function ensure20LockersInitialized() {
+    try {
+      const snap = await lockerRef.get();
+      if (snap.size < 20) {
+        const batch = db.batch();
+        for (let i = 1; i <= 20; i++) {
+          const soHoc = `Hộc ${i < 10 ? '0' + i : i}`;
+          const docId = `hoc_${i < 10 ? '0' + i : i}`;
+          const ref = lockerRef.doc(docId);
+          batch.set(ref, {
+            so_hoc: soHoc,
+            trang_thai: 'trong',
+            qr_token: null,
+            cap_nhat_luc: firebase.firestore.FieldValue.serverTimestamp()
+          }, { merge: true });
+        }
+        await batch.commit();
+        console.log("Đã khởi tạo đủ 20 hộc tủ trên Firestore.");
+      }
+    } catch (e) {
+      console.warn("Lỗi kiểm tra 20 hộc tủ:", e);
+    }
+  }
+
+  // LẮNG NGHE REALTIME 20 HỘC TỦ TRÊN FIRESTORE
   function subscribeLockers() {
     stopLockerSubscription();
     unsubscribeLockers = lockerRef.onSnapshot(snapshot => {
-      const found = new Map();
+      lockersMap.clear();
       snapshot.forEach(doc => {
         const d = doc.data();
-        found.set(String(d.so_hoc || d.name || doc.id), { id: doc.id, ...d, so_hoc: String(d.so_hoc || d.name || doc.id) });
+        const soHoc = d.so_hoc || doc.id;
+        lockersMap.set(soHoc, { id: doc.id, ...d, so_hoc: soHoc });
       });
-      // Tạo ô hiển thị cho đủ 20 hộc, không tự ghi dữ liệu giả vào Firestore.
-      lockersCache = Array.from({ length: 20 }, (_, i) => {
-        const label = `Hộc ${i + 1}`;
-        return found.get(label) || { id: `display-${i + 1}`, so_hoc: label, trang_thai: 'trong', _displayOnly: true };
-      });
-      // Giữ các hộc có tên khác quy ước Hộc 1..20 nếu có trong dữ liệu thật.
-      found.forEach((value, key) => { if (!/^Hộc\s+\d+$/i.test(key) && !lockersCache.some(x => x.so_hoc === key)) lockersCache.push(value); });
-      renderLockers(lockersCache);
-      $('connectionState').textContent = 'Firestore trực tuyến';
+
+      // Tạo danh sách chuẩn 20 hộc theo thứ tự 01 -> 20
+      const list = [];
+      for (let i = 1; i <= 20; i++) {
+        const key = `Hộc ${i < 10 ? '0' + i : i}`;
+        if (lockersMap.has(key)) {
+          list.push(lockersMap.get(key));
+        } else {
+          list.push({ id: `hoc_${i}`, so_hoc: key, trang_thai: 'trong' });
+        }
+      }
+
+      renderLockers(list);
+      $('connectionState').textContent = 'Firestore trực tuyến (Realtime)';
     }, err => {
-      console.error('Firestore lockers:', err);
-      $('connectionState').textContent = 'Không đọc được dữ liệu';
-      showNotice('Không thể tải trạng thái tủ. Kiểm tra kết nối và Firestore Security Rules.', 'error');
+      console.error('Lỗi Firestore lockers:', err);
+      $('connectionState').textContent = 'Mất kết nối Firestore';
+      showNotice('Không thể tải trạng thái tủ. Kiểm tra quyền Firestore.', 'error');
     });
   }
-  function stopLockerSubscription() { if (unsubscribeLockers) unsubscribeLockers(); unsubscribeLockers = null; }
+
+  function stopLockerSubscription() { 
+    if (unsubscribeLockers) unsubscribeLockers(); 
+    unsubscribeLockers = null; 
+  }
 
   function renderLockers(lockers) {
-    const grid = $('lockersGrid'); grid.replaceChildren();
+    const grid = $('lockersGrid'); 
+    grid.innerHTML = '';
+
     lockers.forEach(l => {
       const status = String(l.trang_thai || 'trong').toLowerCase();
-      let classes = 'bg-slate-700 border-slate-600 text-slate-300', icon = 'fa-lock', label = 'Trống';
-      if (status === 'cho_nhan' || status === 'da_soan_xong') { classes = 'bg-amber-500/20 border-amber-500/60 text-amber-300'; icon = 'fa-box'; label = 'Chờ lấy'; }
-      else if (['chua_sach_tra','cho_kiem_tra','dang_muon','cho_tra'].includes(status)) { classes = 'bg-blue-500/20 border-blue-500/60 text-blue-300'; icon = 'fa-inbox'; label = 'Sách trả'; }
-      else if (status === 'dang_mo') { classes = 'bg-emerald-500/20 border-emerald-400 text-emerald-300'; icon = 'fa-lock-open'; label = 'Đang mở'; }
+      let classes = 'bg-slate-800 border-slate-700 text-slate-400', icon = 'fa-lock', label = 'Trống';
+      
+      if (status === 'cho_nhan' || status === 'da_soan_xong') { 
+        classes = 'bg-amber-500/20 border-amber-500 text-amber-300 shadow-md shadow-amber-500/10 animate-pulse'; 
+        icon = 'fa-box-open'; 
+        label = 'Chờ lấy'; 
+      }
+      else if (['chua_sach_tra','cho_kiem_tra','dang_muon','cho_tra'].includes(status)) { 
+        classes = 'bg-blue-500/20 border-blue-500 text-blue-300 shadow-md shadow-blue-500/10'; 
+        icon = 'fa-inbox'; 
+        label = 'Sách trả'; 
+      }
+      else if (status === 'dang_mo') { 
+        classes = 'bg-emerald-500/20 border-emerald-400 text-emerald-300'; 
+        icon = 'fa-door-open'; 
+        label = 'Đang mở'; 
+      }
+
       const card = document.createElement('div');
-      card.className = `border rounded-xl p-3 min-h-24 flex flex-col items-center justify-center gap-1 ${classes}`;
-      const ico = document.createElement('i'); ico.className = `fa-solid ${icon} text-lg`;
-      const name = document.createElement('span'); name.className = 'font-bold text-xs tracking-wider'; name.textContent = l.so_hoc || 'Hộc tủ';
-      const state = document.createElement('span'); state.className = 'text-[10px] uppercase font-semibold'; state.textContent = l._displayOnly ? 'Chưa cấu hình' : label;
-      card.append(ico, name, state); grid.appendChild(card);
+      card.className = `border rounded-2xl p-3 min-h-[90px] flex flex-col items-center justify-center gap-1.5 transition ${classes}`;
+      card.innerHTML = `
+        <i class="fa-solid ${icon} text-lg"></i>
+        <span class="font-black text-xs tracking-wider">${l.so_hoc}</span>
+        <span class="text-[9px] uppercase font-bold tracking-tight">${label}</span>
+      `;
+      grid.appendChild(card);
     });
   }
 
+  // ================= XỬ LÝ QUÉT / NHẬP TOKEN ĐỂ NHẬN SÁCH =================
   async function handlePickup() {
-    if (!currentUser) return showNotice('Vui lòng đăng nhập Kiosk trước.', 'error');
+    if (!currentUser) return showNotice('Vui lòng kích hoạt trạm Kiosk trước.', 'error');
     const token = $('manualInput').value.trim();
-    if (!token) return showNotice('Vui lòng nhập hoặc quét QR Token nhận sách.', 'error');
+    if (!token) return showNotice('Vui lòng nhập hoặc quét mã QR Token nhận sách.', 'error');
+
     try {
-      const snap = await db.collection('orders').where('qr_token', '==', token).limit(2).get();
-      if (snap.empty) return showNotice('Không tìm thấy đơn theo Token này.', 'error');
-      if (snap.size > 1) return showNotice('Token bị trùng. Vui lòng liên hệ thủ thư kiểm tra dữ liệu.', 'error');
-      const orderDoc = snap.docs[0];
+      // 1. Tìm đơn trong collection 'orders'
+      const orderSnap = await db.collection('orders').where('qr_token', '==', token).limit(1).get();
+      if (orderSnap.empty) {
+        return showNotice('Mã Token không hợp lệ hoặc không tồn tại!', 'error');
+      }
+
+      const orderDoc = orderSnap.docs[0];
       const order = orderDoc.data();
-      if (order.trang_thai_don !== 'da_soan_xong') return showNotice('Đơn chưa được thủ thư xác nhận đã nạp hộc hoặc đã được xử lý.', 'error');
-      const lockerName = String(order.so_hoc || '');
-      if (!lockerName) return showNotice('Đơn chưa có thông tin hộc tủ. Vui lòng liên hệ thủ thư.', 'error');
-      const lockerQuery = await lockerRef.where('so_hoc', '==', lockerName).limit(1).get();
-      if (lockerQuery.empty) return showNotice(`Chưa cấu hình ${lockerName} trong Firestore. Chưa ghi nhận nhận sách.`, 'error');
-      const lockerDoc = lockerQuery.docs[0];
+
+      // Kiểm tra trạng thái đơn
+      if (order.trang_thai_don === 'cho_soan') {
+        return showNotice('Sách đang được Thủ thư soạn vào hộc, vui lòng chờ trong giây lát!', 'error');
+      }
+      if (order.trang_thai_don === 'da_nhan') {
+        return showNotice('Đơn sách này đã được nhận trước đó!', 'error');
+      }
+
+      const lockerName = order.so_hoc || 'Hộc 01';
+
+      // 2. Cập nhật giải phóng hộc tủ và chuyển trạng thái đơn sang 'da_nhan'
       await db.runTransaction(async tx => {
-        const freshOrder = await tx.get(orderDoc.ref);
-        const freshLocker = await tx.get(lockerDoc.ref);
-        if (!freshOrder.exists || freshOrder.data().trang_thai_don !== 'da_soan_xong') throw new Error('Đơn đã thay đổi trạng thái hoặc đã được nhận.');
-        if (!freshLocker.exists) throw new Error('Không tìm thấy hộc tủ.');
-        tx.update(orderDoc.ref, { trang_thai_don: 'da_nhan', ngay_nhan: firebase.firestore.FieldValue.serverTimestamp(), kiosk_uid: currentUser.uid });
-        tx.update(lockerDoc.ref, { trang_thai: 'trong', qr_token: firebase.firestore.FieldValue.delete(), cap_nhat_luc: firebase.firestore.FieldValue.serverTimestamp() });
+        // Cập nhật đơn hàng
+        tx.update(orderDoc.ref, {
+          trang_thai_don: 'da_nhan',
+          thoi_gian_nhan: firebase.firestore.FieldValue.serverTimestamp()
+        });
+
+        // Tìm hộc tủ để trả về 'trong'
+        const lSnap = await lockerRef.where('so_hoc', '==', lockerName).limit(1).get();
+        if (!lSnap.empty) {
+          tx.update(lSnap.docs[0].ref, {
+            trang_thai: 'trong',
+            qr_token: null,
+            cap_nhat_luc: firebase.firestore.FieldValue.serverTimestamp()
+          });
+        }
       });
+
+      // 3. Lưu thông tin vào collection 'borrowings' để sinh viên và thủ thư quản lý
+      const booksList = order.books || [];
+      const batch = db.batch();
+      const dueDate = new Date();
+      dueDate.setDate(dueDate.getDate() + 14); // Hạn trả 14 ngày
+      const dueDateStr = dueDate.toISOString().split('T')[0];
+
+      booksList.forEach(b => {
+        const borrowRef = db.collection('borrowings').doc();
+        batch.set(borrowRef, {
+          order_id: orderDoc.id,
+          mssv: order.mssv || '251121514110',
+          ho_ten: order.ho_ten || 'Sinh viên DUE',
+          ten_sach: b.ten_sach,
+          ma_vach: b.ma_vach || 'DUE-BOOK',
+          vi_tri_ke: b.vi_tri_ke || 'Kệ chính',
+          ngay_muon: new Date().toISOString().split('T')[0],
+          han_tra: dueDateStr,
+          trang_thai: 'dang_muon',
+          ngay_tao: firebase.firestore.FieldValue.serverTimestamp()
+        });
+      });
+      await batch.commit();
+
       $('manualInput').value = '';
-      showNotice(`Đã xác nhận nhận sách tại ${lockerName}. Trạng thái đơn và hộc tủ đã cập nhật.`, 'success');
+      showNotice(`🎉 Chốt điện đã mở ${lockerName}! Vui lòng lấy ${booksList.length} cuốn sách và đóng cửa tủ.`, 'success');
+
     } catch (err) {
       console.error(err);
       showNotice('Không thể hoàn tất nhận sách: ' + (err.message || 'Lỗi Firestore.'), 'error');
     }
   }
 
+  // ================= XỬ LÝ QUÉT / NHẬP TRẢ SÁCH =================
   async function handleReturn() {
-    if (!currentUser) return showNotice('Vui lòng đăng nhập Kiosk trước.', 'error');
+    if (!currentUser) return showNotice('Vui lòng kích hoạt trạm Kiosk trước.', 'error');
     const code = $('manualInput').value.trim();
-    if (!code) return showNotice('Vui lòng quét QR trả sách hoặc nhập mã vạch.', 'error');
+    if (!code) return showNotice('Vui lòng quét QR trả sách (TRA-...) hoặc mã vạch sách.', 'error');
+
     try {
-      // Quy ước dữ liệu: collection borrowings có ma_vach, trang_thai='dang_muon', mssv, ten_sach.
-      const normalized = code.toUpperCase();
-      let borrowSnap = await db.collection('borrowings').where('ma_vach', '==', normalized).where('trang_thai', '==', 'dang_muon').limit(2).get();
-      if (borrowSnap.empty && normalized.startsWith('TRA-')) {
-        borrowSnap = await db.collection('borrowings').where('qr_tra_token', '==', code).where('trang_thai', '==', 'dang_muon').limit(2).get();
+      // 1. Tìm hộc tủ trống để nhận sách trả
+      const emptyLockerSnap = await lockerRef.where('trang_thai', '==', 'trong').limit(1).get();
+      if (emptyLockerSnap.empty) {
+        return showNotice('Hiện tại tất cả 20 hộc tủ đều đang bận, vui lòng liên hệ Thủ thư!', 'error');
       }
-      if (borrowSnap.empty) return showNotice('Không tìm thấy lượt mượn đang hoạt động cho mã này. Chưa ghi nhận trả sách.', 'error');
-      if (borrowSnap.size > 1) return showNotice('Mã này khớp nhiều lượt mượn. Vui lòng dùng QR trả sách riêng hoặc nhờ thủ thư kiểm tra.', 'error');
-      const borrowDoc = borrowSnap.docs[0];
-      const borrow = borrowDoc.data();
-      const empty = lockersCache.find(l => !l._displayOnly && String(l.trang_thai || 'trong') === 'trong');
-      if (!empty) return showNotice('Không có hộc trả sách trống đã được cấu hình. Vui lòng liên hệ thủ thư.', 'error');
-      const lockerDocRef = lockerRef.doc(empty.id);
-      await db.runTransaction(async tx => {
-        const freshBorrow = await tx.get(borrowDoc.ref);
-        const freshLocker = await tx.get(lockerDocRef);
-        if (!freshBorrow.exists || freshBorrow.data().trang_thai !== 'dang_muon') throw new Error('Lượt mượn đã được xử lý hoặc không còn hiệu lực.');
-        if (!freshLocker.exists || String(freshLocker.data().trang_thai || 'trong') !== 'trong') throw new Error('Hộc tủ vừa được sử dụng. Hãy thử lại.');
-        tx.update(freshBorrow.ref, { trang_thai: 'cho_kiem_tra', ngay_tra_tai_tu: firebase.firestore.FieldValue.serverTimestamp(), so_hoc_tra: empty.so_hoc, kiosk_uid: currentUser.uid });
-        tx.update(lockerDocRef, { trang_thai: 'chua_sach_tra', ma_vach: borrow.ma_vach || normalized, ten_sach: borrow.ten_sach || '', mssv: borrow.mssv || '', borrow_id: borrowDoc.id, cap_nhat_luc: firebase.firestore.FieldValue.serverTimestamp() });
-        tx.set(db.collection('returns').doc(borrowDoc.id), { borrow_id: borrowDoc.id, ma_vach: borrow.ma_vach || normalized, ten_sach: borrow.ten_sach || '', mssv: borrow.mssv || '', so_hoc: empty.so_hoc, trang_thai: 'cho_kiem_tra', ngay_tao: firebase.firestore.FieldValue.serverTimestamp(), kiosk_uid: currentUser.uid });
+
+      const emptyDoc = emptyLockerSnap.docs[0];
+      const emptyLockerName = emptyDoc.data().so_hoc || 'Hộc tủ';
+
+      // 2. Chuyển hộc tủ sang 'chua_sach_tra'
+      await emptyDoc.ref.update({
+        trang_thai: 'chua_sach_tra',
+        ma_tra: code,
+        cap_nhat_luc: firebase.firestore.FieldValue.serverTimestamp()
       });
+
+      // 3. Đẩy thông tin vào collection 'returns' để Thủ thư kiểm tra
+      await db.collection('returns').add({
+        so_hoc: emptyLockerName,
+        ma_vach: code,
+        ten_sach: `Sách trả mã ${code}`,
+        mssv: 'Sinh viên',
+        trang_thai: 'cho_kiem_tra',
+        ngay_tra: firebase.firestore.FieldValue.serverTimestamp()
+      });
+
       $('manualInput').value = '';
-      showNotice(`Đã ghi nhận sách trả vào ${empty.so_hoc}. Sách đang chờ thủ thư kiểm tra.`, 'success');
+      showNotice(`🎉 Đã mở ${emptyLockerName} để nhận sách trả! Vui lòng bỏ sách vào hộc và đóng cửa tủ.`, 'success');
+
     } catch (err) {
       console.error(err);
-      showNotice('Không thể ghi nhận trả sách: ' + (err.message || 'Lỗi Firestore.'), 'error');
+      showNotice('Lỗi ghi nhận trả sách: ' + (err.message || 'Lỗi Firestore.'), 'error');
     }
   }
 
   function showNotice(message, type) {
     const box = $('statusBox');
-    box.className = 'p-4 rounded-xl border text-sm font-medium ' + (type === 'success' ? 'bg-emerald-900/50 border-emerald-500 text-emerald-200' : 'bg-rose-900/50 border-rose-500 text-rose-200');
+    box.className = 'p-4 rounded-xl border text-sm font-medium transition ' + 
+      (type === 'success' ? 'bg-emerald-900/60 border-emerald-500 text-emerald-200' : 'bg-rose-900/60 border-rose-500 text-rose-200');
     box.textContent = message;
+    box.classList.remove('hidden');
   }
+
   function startScanner() {
     if (scanner || !window.Html5Qrcode) return;
     scanner = new Html5Qrcode('reader');
-    scanner.start({ facingMode: 'environment' }, { fps: 10, qrbox: { width: 230, height: 230 } }, async decodedText => {
-      if (isScanningLocked || !currentUser) return;
-      isScanningLocked = true;
-      $('manualInput').value = decodedText.trim();
-      try {
-        if (/^TRA-/i.test(decodedText.trim())) await handleReturn();
-        else await handlePickup();
-      } finally { setTimeout(() => { isScanningLocked = false; }, 2500); }
-    }, () => {}).catch(err => {
+    scanner.start(
+      { facingMode: 'environment' }, 
+      { fps: 10, qrbox: { width: 230, height: 230 } }, 
+      async decodedText => {
+        if (isScanningLocked || !currentUser) return;
+        isScanningLocked = true;
+        $('manualInput').value = decodedText.trim();
+        try {
+          if (/^TRA-/i.test(decodedText.trim())) {
+            await handleReturn();
+          } else {
+            await handlePickup();
+          }
+        } finally { 
+          setTimeout(() => { isScanningLocked = false; }, 2500); 
+        }
+      }, 
+      () => {}
+    ).catch(err => {
       console.warn('Camera không khả dụng:', err);
-      showNotice('Không mở được camera. Hãy cấp quyền camera hoặc nhập mã thủ công.', 'error');
     });
   }
+
   function stopScanner() {
     if (!scanner) return;
-    const old = scanner; scanner = null;
+    const old = scanner; 
+    scanner = null;
     old.stop().catch(() => {}).finally(() => old.clear().catch(() => {}));
   }
 </script>
