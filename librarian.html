@@ -822,6 +822,17 @@
         }
 
         // ================= TAB 2: QUẢN LÝ SÁCH MƯỢN =================
+        let expandedUserMssvs = [];
+
+        function toggleUserExpand(mssv) {
+            if (expandedUserMssvs.includes(mssv)) {
+                expandedUserMssvs = expandedUserMssvs.filter(m => m !== mssv);
+            } else {
+                expandedUserMssvs.push(mssv);
+            }
+            renderActiveBorrowsTable();
+        }
+
         function renderActiveBorrowsTable() {
             const query = (document.getElementById('borrowSearchInput')?.value || '').toLowerCase().trim();
             const filter = document.getElementById('borrowStatusFilter')?.value || 'all';
@@ -829,55 +840,115 @@
             if (!tbody) return;
             tbody.innerHTML = '';
 
-            let list = allBorrowingsList.filter(b => {
-                const matchQuery = (b.ho_ten || '').toLowerCase().includes(query) ||
-                                   (b.mssv || '').toLowerCase().includes(query) ||
-                                   (b.ten_sach || '').toLowerCase().includes(query) ||
-                                   (b.ma_vach || '').toLowerCase().includes(query);
+            // 1. Gom nhóm danh sách sách theo sinh viên (khóa chính là MSSV)
+            const groupedUsers = {};
+            allBorrowingsList.forEach(b => {
+                const mssv = b.mssv || 'Chưa rõ';
+                if (!groupedUsers[mssv]) {
+                    groupedUsers[mssv] = {
+                        mssv: mssv,
+                        ho_ten: b.ho_ten || 'Sinh viên',
+                        nearest_due: b.han_tra || '--',
+                        books: []
+                    };
+                }
+                groupedUsers[mssv].books.push(b);
+            });
+
+            // 2. Lọc theo thanh tìm kiếm và bộ lọc trạng thái
+            let userList = Object.values(groupedUsers).filter(u => {
+                const matchQuery = u.ho_ten.toLowerCase().includes(query) || 
+                                   u.mssv.toLowerCase().includes(query) ||
+                                   u.books.some(b => b.ten_sach?.toLowerCase().includes(query) || b.ma_vach?.toLowerCase().includes(query));
                 if (!matchQuery) return false;
 
                 if (filter === 'all') return true;
-                return b.trang_thai === filter;
+                return u.books.some(b => b.trang_thai === filter);
             });
 
             const badgeCount = document.getElementById('activeBorrowFilterCount');
-            if (badgeCount) badgeCount.innerText = `${list.length} bản ghi`;
+            if (badgeCount) badgeCount.innerText = `${userList.length} sinh viên`;
             const tabBadge = document.getElementById('totalActiveBorrowBadge');
             if (tabBadge) tabBadge.innerText = allBorrowingsList.filter(b => b.trang_thai === 'dang_muon').length;
 
-            if (list.length === 0) {
-                tbody.innerHTML = `<tr><td colspan="5" class="p-6 text-center text-slate-400 text-xs">Không tìm thấy bản ghi nào phù hợp.</td></tr>`;
+            if (userList.length === 0) {
+                tbody.innerHTML = `<tr><td colspan="5" class="p-6 text-center text-slate-400 text-xs">Không tìm thấy sinh viên nào phù hợp.</td></tr>`;
                 return;
             }
 
-            list.forEach(b => {
-                let statusBadge = '';
-                if (b.trang_thai === 'dang_muon') {
-                    statusBadge = '<span class="px-2.5 py-1 rounded-full text-[10px] font-bold bg-amber-100 text-amber-700">Đang mượn</span>';
-                } else if (b.trang_thai === 'cho_kiem_tra') {
-                    statusBadge = '<span class="px-2.5 py-1 rounded-full text-[10px] font-bold bg-blue-100 text-blue-700">Chờ kiểm tra</span>';
-                } else {
-                    statusBadge = '<span class="px-2.5 py-1 rounded-full text-[10px] font-bold bg-emerald-100 text-emerald-700">Đã hoàn tất</span>';
-                }
+            // 3. Render danh sách cha - con dạng Accordion
+            userList.forEach(u => {
+                const isExpanded = expandedUserMssvs.includes(u.mssv);
+                const activeCount = u.books.filter(b => b.trang_thai === 'dang_muon').length;
+                const inspectCount = u.books.filter(b => b.trang_thai === 'cho_kiem_tra').length;
 
+                // Tạo danh sách các cuốn sách con
+                let subItemsHtml = '';
+                u.books.forEach((b, idx) => {
+                    let badge = '';
+                    if (b.trang_thai === 'dang_muon') badge = '<span class="px-2 py-0.5 rounded text-[10px] font-bold bg-amber-100 text-amber-700">Đang giữ sách</span>';
+                    else if (b.trang_thai === 'cho_kiem_tra') badge = '<span class="px-2 py-0.5 rounded text-[10px] font-bold bg-blue-100 text-blue-700">Đã gửi tủ (Chờ kiểm tra)</span>';
+                    else badge = '<span class="px-2 py-0.5 rounded text-[10px] font-bold bg-emerald-100 text-emerald-700">Đã hoàn tất</span>';
+
+                    subItemsHtml += `
+                        <div class="flex flex-col sm:flex-row sm:items-center justify-between p-3 bg-white rounded-xl border border-slate-200 text-xs gap-2 shadow-xs">
+                            <div class="flex items-center gap-2.5">
+                                <span class="w-5 h-5 rounded-full bg-slate-100 text-slate-600 font-bold flex items-center justify-center text-[10px]">${idx + 1}</span>
+                                <div>
+                                    <div class="font-bold text-slate-800">${b.ten_sach}</div>
+                                    <div class="text-[10px] font-mono text-slate-400">Mã vạch: <b class="text-slate-600">${b.ma_vach || 'DUE'}</b> • Vị trí: ${b.vi_tri_ke || 'Kệ chính'}</div>
+                                </div>
+                            </div>
+                            <div class="flex items-center gap-3 self-end sm:self-auto text-[11px]">
+                                <span class="text-slate-500">Mượn: ${b.ngay_muon || '--'}</span>
+                                <span class="font-bold text-slate-700">Hạn: <b class="text-orange-600">${b.han_tra || '--'}</b></span>
+                                ${badge}
+                            </div>
+                        </div>
+                    `;
+                });
+
+                // Hàng cha
                 tbody.innerHTML += `
-                    <tr class="hover:bg-slate-50 transition border-b border-slate-100">
-                        <td class="p-3.5">
-                            <div class="font-bold text-slate-900 text-xs sm:text-sm">${b.ho_ten || 'Sinh viên'}</div>
-                            <div class="text-[11px] font-mono text-orange-600 font-bold">MSSV: ${b.mssv}</div>
+                    <tr onclick="toggleUserExpand('${u.mssv}')" class="hover:bg-orange-50/60 transition border-b border-slate-100 cursor-pointer select-none">
+                        <td class="p-3.5 align-middle">
+                            <div class="font-bold text-slate-900 text-sm flex items-center gap-2">
+                                <i class="fa-solid ${isExpanded ? 'fa-chevron-down text-orange-600' : 'fa-chevron-right text-slate-400'} text-xs transition-transform"></i>
+                                ${u.ho_ten}
+                            </div>
+                            <div class="text-[11px] font-mono text-orange-600 font-bold ml-4">MSSV: ${u.mssv}</div>
                         </td>
-                        <td class="p-3.5">
-                            <div class="font-bold text-slate-800 text-xs sm:text-sm">${b.ten_sach}</div>
-                            <span class="text-[10px] font-mono bg-slate-100 text-slate-600 px-2 py-0.5 rounded font-bold">${b.ma_vach || 'DUE'}</span>
+                        <td class="p-3.5 align-middle">
+                            <span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-xl text-xs font-bold bg-blue-50 text-blue-700 border border-blue-200">
+                                <i class="fa-solid fa-book text-[10px]"></i> Tổng: ${u.books.length} cuốn
+                            </span>
+                            ${activeCount > 0 ? `<span class="ml-1 text-[10px] font-semibold text-amber-700">(${activeCount} đang giữ)</span>` : ''}
                         </td>
-                        <td class="p-3.5 text-xs text-slate-500">${b.ngay_muon || '--'}</td>
-                        <td class="p-3.5 text-xs font-bold text-slate-700">${b.han_tra || '--'}</td>
-                        <td class="p-3.5 text-right whitespace-nowrap">${statusBadge}</td>
+                        <td class="p-3.5 align-middle text-xs text-slate-500">${u.books[0]?.ngay_muon || '--'}</td>
+                        <td class="p-3.5 align-middle text-xs font-bold text-slate-700">${u.nearest_due}</td>
+                        <td class="p-3.5 align-middle text-right text-xs font-bold text-orange-600">
+                            ${isExpanded ? 'Thu gọn ▲' : 'Xem chi tiết ▼'}
+                        </td>
                     </tr>
                 `;
+
+                // Hàng con (hiển thị khi bấm mở)
+                if (isExpanded) {
+                    tbody.innerHTML += `
+                        <tr class="bg-slate-50/80">
+                            <td colspan="5" class="p-4 pl-8 sm:pl-12">
+                                <div class="space-y-2">
+                                    <div class="text-[11px] font-bold text-slate-500 flex items-center gap-1.5">
+                                        <i class="fa-solid fa-layer-group text-orange-600"></i> Danh sách chi tiết các cuốn sách sinh viên đang mượn/trả:
+                                    </div>
+                                    ${subItemsHtml}
+                                </div>
+                            </td>
+                        </tr>
+                    `;
+                }
             });
         }
-
         // ================= TAB 3: KHO SÁCH =================
         async function loadLibrarianBooks() {
             try {

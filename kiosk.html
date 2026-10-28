@@ -244,7 +244,7 @@
             });
         }
 
-        // ================= XỬ LÝ NHẬN SÁCH TẠI KIOSK =================
+        // ================= XỬ LÝ NHẬN SÁCH TẠI KIOSK (CÓ CHECK THỦ THƯ NẠP SÁCH) =================
         async function handlePickup() {
             const token = $('manualInput').value.trim().toUpperCase();
             if (!token) return showNotice("Vui lòng nhập hoặc quét mã QR Token nhận sách!", "error");
@@ -258,8 +258,17 @@
                 const order = orderDoc.data();
                 const lockerName = order.so_hoc || "Hộc 01";
 
+                // --- KIỂM TRA TRẠNG THÁI SOẠN SÁCH CỦA THỦ THƯ ---
+                if (order.trang_thai_don === 'cho_soan') {
+                    return showNotice(`⚠️ Thủ thư chưa nạp sách vào ${lockerName}. Vui lòng quay lại sau khi nhận được thông báo!`, "error");
+                }
+
                 if (order.trang_thai_don === 'da_nhan') {
                     return showNotice(`Đơn sách tại ${lockerName} đã được nhận trước đó!`, "error");
+                }
+
+                if (order.trang_thai_don === 'da_huy_do_qua_han') {
+                    return showNotice(`Đơn sách tại ${lockerName} đã bị thu hồi do quá hạn lấy!`, "error");
                 }
 
                 // 2. Chuyển hộc tủ sang "ĐANG MỞ"
@@ -305,7 +314,7 @@
 
                 // Kích hoạt hiệu ứng mở tủ trên giao diện Kiosk
                 openedLockerName = lockerName;
-                showNotice(`🔓 ĐANG MỞ ${lockerName}! Sinh viên hãy lấy ${booksList.length} cuốn sách.`, "success");
+                showNotice(`🔓 ĐANG MỞ ${lockerName}! Sinh viên hãy lấy ${booksList.length} cuốn sách. Cửa sẽ tự đóng sau 5 giây.`, "success");
                 $('manualInput').value = '';
 
                 // Sau 5 giây tự động giải phóng hộc về 'trong'
@@ -326,7 +335,7 @@
                 showNotice("Lỗi nhận sách: " + err.message, "error");
             }
         }
-
+        
         // ================= XỬ LÝ TRẢ SÁCH TẠI KIOSK =================
         async function handleReturn() {
             const code = $('manualInput').value.trim().toUpperCase();
