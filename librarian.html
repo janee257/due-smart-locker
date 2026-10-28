@@ -645,8 +645,20 @@
         }
 
         // ================= KIỂM TRA & NGHIỆM THU SÁCH TRẢ =================
+      
+        // LẮNG NGHE SÁCH TRẢ CHỜ KIỂM TRA
+        db.collection('returns').where('trang_thai', '==', 'cho_kiem_tra').onSnapshot(snapshot => {
+            const returns = [];
+            snapshot.forEach(doc => {
+                returns.push({ id: doc.id, ...doc.data() });
+            });
+            renderInspectBooks(returns);
+        }, err => {
+            console.error("Lỗi nghe returns:", err);
+        });
+
         function renderInspectBooks(returns) {
-            document.getElementById('inspectCount').innerText = `${returns.length} cuốn`;
+            document.getElementById('inspectCount').innerText = `${returns.length} đơn`;
             const tbody = document.getElementById('inspectTableBody');
             tbody.innerHTML = '';
 
@@ -656,22 +668,25 @@
             }
 
             returns.forEach(r => {
-                const bookTitle = r.ten_sach || "Sách trả tủ Smart Locker";
-                const barcode = r.ma_vach || "DUE-BOOK";
-                const mssv = r.mssv || "Không rõ";
+                const items = r.items || [];
+                let bookNames = items.map(b => b.ten_sach).join("<br>• ");
+                if (bookNames) bookNames = "• " + bookNames;
+                else bookNames = r.ten_sach || "Sách trả Smart Locker";
+
+                let barcodes = items.map(b => b.ma_vach).join(", ") || r.ma_vach || "DUE";
 
                 tbody.innerHTML += `
                     <tr class="hover:bg-slate-50 transition border-b border-slate-100">
-                        <td class="p-3 font-bold text-blue-600">${r.so_hoc || 'Hộc tủ'}</td>
-                        <td class="p-3 font-semibold text-slate-800">${bookTitle}</td>
-                        <td class="p-3"><span class="bg-slate-100 text-slate-700 px-2 py-1 rounded-md text-xs font-mono">${barcode}</span></td>
-                        <td class="p-3 text-xs">MSSV: ${mssv}</td>
-                        <td class="p-3 text-xs text-slate-500">Hôm nay</td>
-                        <td class="p-3 text-right space-x-1.5 whitespace-nowrap">
-                            <button onclick="approveReturn('${r.id}', '${bookTitle.replace(/'/g, "\\'")}', 'binh_thuong')" class="px-3 py-1.5 bg-emerald-600 hover:bg-emerald-700 text-white rounded-lg text-xs font-bold shadow-sm transition">
+                        <td class="p-3 font-bold text-blue-600 align-top">${r.so_hoc || 'Hộc 01'}</td>
+                        <td class="p-3 font-semibold text-slate-800 text-xs leading-relaxed align-top">${bookNames}</td>
+                        <td class="p-3 align-top"><span class="bg-slate-100 text-slate-700 px-2 py-1 rounded-md text-xs font-mono font-bold">${barcodes}</span></td>
+                        <td class="p-3 text-xs align-top font-bold text-slate-700">${r.ho_ten || ''}<br><span class="font-normal text-slate-400">MSSV: ${r.mssv}</span></td>
+                        <td class="p-3 text-xs text-slate-500 align-top">Hôm nay</td>
+                        <td class="p-3 text-right space-x-1.5 whitespace-nowrap align-top">
+                            <button onclick="approveReturnOrder('${r.id}')" class="px-3 py-1.5 bg-emerald-600 hover:bg-emerald-700 text-white rounded-lg text-xs font-bold shadow-sm transition">
                                 <i class="fa-solid fa-check mr-1"></i> Tốt (Nhập kho)
                             </button>
-                            <button onclick="openReportModal('${r.id}', '${bookTitle.replace(/'/g, "\\'")}', '${mssv}')" class="px-2.5 py-1.5 bg-rose-50 hover:bg-rose-100 text-rose-600 rounded-lg text-xs font-bold transition">
+                            <button onclick="openReportModal('${r.id}')" class="px-2.5 py-1.5 bg-rose-50 hover:bg-rose-100 text-rose-600 rounded-lg text-xs font-bold transition">
                                 <i class="fa-solid fa-triangle-exclamation mr-1"></i> Viết biên bản phạt
                             </button>
                         </td>
@@ -680,6 +695,128 @@
             });
         }
 
+        // DUYỆT TRẢ TỐT -> CỘNG KHO SÁCH -> GIẢI PHÓNG HỘC TỦ -> HOÀN TẤT MƯỢN
+        async function approveReturnOrder(returnId) {
+            try {
+                const returnDoc = await db.collection('returns').doc(returnId).get();
+                if (!returnDoc.exists) return;
+                const rData = returnDoc.data();
+
+                // 1. Cập nhật đơn trả sang hoàn tất
+                await db.collection('returns').doc(returnId).update({
+                    trang_thai: 'hoan_tat',
+                    thoi_gian_duyet: firebase.firestore.FieldValue.serverTimestamp()
+                });
+
+                // 2. Mở trống hộc tủ
+                if (rData.so_hoc) {
+                    const lSnap = await db.collection('lockers').where('so_hoc', '==', rData.so_hoc).get();
+                    lSnap.forEach(ldoc => ldoc.ref.update({ trang_thai: 'trong', qr_token: null }));
+                }
+
+                // 3. Hoàn lại số lượng từng cuốn vào kho sách và cập nhật borrowings
+                const items = rData.items || [];
+                for (let it of items) {
+                    if (it.borrow_id) {
+                        await db.collection('borrowings').doc(it.borrow_id).update({
+                            trang_thai: 'hoan_tat',
+                            ngay_tra_thuc_te: new Date().toISOString().split('T')[0]
+                        });
+                    }
+                    // Cộng lại tồn kho
+                    const bSnap = await db.collection('books').where('ten_sach', '==', it.ten_sach).limit(1).get();
+                    if (!bSnap.empty) {
+                        await bSnap.docs[0].ref.update({
+                            so_luong_con: firebase.firestore.FieldValue.increment(1)
+                        });
+                    }
+                }
+
+                alert(`Đã nghiệm thu xong ${items.length} cuốn sách, giải phóng ${rData.so_hoc} và nhập kho thành công!`);
+                loadLibrarianBooks();
+            } catch (err) {
+                console.error("Lỗi duyệt sách:", err);
+                alert("Không thể hoàn tất nghiệm thu!");
+            }
+        }
+
+        // MỞ MODAL PHẠT
+        async function openReportModal(returnId) {
+            const returnDoc = await db.collection('returns').doc(returnId).get();
+            if (!returnDoc.exists) return;
+            const rData = returnDoc.data();
+            const items = rData.items || [];
+            const bookNames = items.map(b => b.ten_sach).join(", ") || rData.ten_sach;
+
+            document.getElementById('reportReturnId').value = returnId;
+            document.getElementById('reportBookTitle').value = bookNames;
+            document.getElementById('reportMssv').value = rData.mssv;
+            document.getElementById('reportReason').value = "Sách hư hỏng / rách trang / mất mát vật lý";
+            document.getElementById('reportModal').classList.remove('hidden');
+        }
+
+        function closeReportModal() {
+            document.getElementById('reportModal').classList.add('hidden');
+        }
+
+        // LẬP BIÊN BẢN PHẠT
+        async function submitReportPenalty() {
+            const returnId = document.getElementById('reportReturnId').value;
+            const tenSach = document.getElementById('reportBookTitle').value;
+            const mssv = document.getElementById('reportMssv').value;
+            const fine = parseInt(document.getElementById('reportFineAmount').value) || 0;
+            const reason = document.getElementById('reportReason').value.trim();
+
+            if (!reason) return alert("Vui lòng nhập lý do lập biên bản phạt!");
+
+            try {
+                const returnDoc = await db.collection('returns').doc(returnId).get();
+                const rData = returnDoc.data();
+
+                // 1. Cập nhật trạng thái đơn trả
+                await db.collection('returns').doc(returnId).update({
+                    trang_thai: 'hoan_tat_phat',
+                    tien_phat: fine,
+                    ly_do_phat: reason,
+                    ngay_xu_ly: firebase.firestore.FieldValue.serverTimestamp()
+                });
+
+                // 2. Mở trống hộc tủ
+                if (rData && rData.so_hoc) {
+                    const lSnap = await db.collection('lockers').where('so_hoc', '==', rData.so_hoc).get();
+                    lSnap.forEach(ldoc => ldoc.ref.update({ trang_thai: 'trong', qr_token: null }));
+                }
+
+                // 3. Hoàn tất mượn trong borrowings
+                const items = (rData && rData.items) ? rData.items : [];
+                for (let it of items) {
+                    if (it.borrow_id) {
+                        await db.collection('borrowings').doc(it.borrow_id).update({
+                            trang_thai: 'hoan_tat',
+                            tien_phat: fine,
+                            ghi_chu_phat: reason
+                        });
+                    }
+                }
+
+                // 4. Lưu biên bản kỷ luật vào collection 'penalties'
+                await db.collection('penalties').add({
+                    mssv: mssv,
+                    ten_sach: tenSach,
+                    so_tien_phat: fine,
+                    ly_do: reason,
+                    ngay_lap: firebase.firestore.FieldValue.serverTimestamp(),
+                    nguoi_lap: "Thủ thư DUE"
+                });
+
+                alert(`Đã lập biên bản phạt ${fine.toLocaleString()} đ đối với sinh viên MSSV: ${mssv} và giải phóng hộc tủ!`);
+                closeReportModal();
+                loadLibrarianBooks();
+            } catch (err) {
+                console.error("Lỗi lập biên bản:", err);
+                alert("Không thể lưu biên bản lên hệ thống!");
+            }
+        }
         function openReportModal(returnId, bookTitle, mssv) {
             document.getElementById('reportReturnId').value = returnId;
             document.getElementById('reportBookTitle').value = bookTitle;
@@ -692,64 +829,8 @@
             document.getElementById('reportModal').classList.add('hidden');
         }
 
-        async function approveReturn(returnId, tenSach, status) {
-            try {
-                await db.collection('returns').doc(returnId).update({ 
-                    trang_thai: 'hoan_tat',
-                    tinh_trang: status
-                });
-
-                // Cộng lại tồn kho sách
-                const bSnap = await db.collection('books').where('ten_sach', '==', tenSach).limit(1).get();
-                if (!bSnap.empty) {
-                    await bSnap.docs[0].ref.update({ so_luong_con: firebase.firestore.FieldValue.increment(1) });
-                }
-
-                alert("Đã nghiệm thu sách thành công và cập nhật lại kho!");
-                loadLibrarianBooks();
-            } catch (err) {
-                console.error("Lỗi duyệt sách trả:", err);
-                alert("Không thể hoàn tất thao tác!");
-            }
-        }
-
-        async function submitReportPenalty() {
-            const returnId = document.getElementById('reportReturnId').value;
-            const tenSach = document.getElementById('reportBookTitle').value;
-            const mssv = document.getElementById('reportMssv').value;
-            const fine = parseInt(document.getElementById('reportFineAmount').value) || 0;
-            const reason = document.getElementById('reportReason').value.trim();
-
-            if (!reason) return alert("Vui lòng nhập lý do lập biên bản phạt!");
-
-            try {
-                // 1. Cập nhật đơn trả thành hoàn tất nhưng có phạt
-                await db.collection('returns').doc(returnId).update({
-                    trang_thai: 'hoan_tat_phat',
-                    tien_phat: fine,
-                    ly_do_phat: reason,
-                    ngay_xu_ly: firebase.firestore.FieldValue.serverTimestamp()
-                });
-
-                // 2. Lưu biên bản vào collection 'penalties'
-                await db.collection('penalties').add({
-                    mssv: mssv,
-                    ten_sach: tenSach,
-                    so_tien_phat: fine,
-                    ly_do: reason,
-                    ngay_lap: firebase.firestore.FieldValue.serverTimestamp(),
-                    nguoi_lap: "Thủ thư DUE"
-                });
-
-                alert(`Đã lập biên bản xử lý phạt ${fine.toLocaleString()} đ đối với sinh viên MSSV: ${mssv}!`);
-                closeReportModal();
-                loadLibrarianBooks();
-            } catch (err) {
-                console.error("Lỗi lập biên bản:", err);
-                alert("Không thể lưu biên bản lên hệ thống!");
-            }
-        }
-
+        
+        
         // ================= TAB 3: QUẢN LÝ KHO SÁCH =================
         async function loadLibrarianBooks() {
             try {
