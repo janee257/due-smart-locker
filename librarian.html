@@ -14,15 +14,12 @@
         }
     </style>
     
-    <!-- 1. Nạp Firebase App -->
-<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
-<!-- 2. Nạp Firebase Auth -->
-<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
-<!-- 3. Nạp Firebase Firestore -->
-<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
+    <!-- Firebase Compat SDKs -->
+    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
 
     <script>
-        // Cấu hình Firebase trực tiếp của DUE Smart Locker
         const firebaseConfig = {
             apiKey: "AIzaSyB1qtSFNNFmVWAo0r0lqIU5cEfCGOKX59M",
             authDomain: "due-smart-locker.firebaseapp.com",
@@ -37,11 +34,8 @@
             firebase.initializeApp(firebaseConfig);
         }
         
-        // Khởi tạo an toàn không bị gạch đỏ cảnh báo
         const auth = firebase.auth();
-        const db = window.firebase ? firebase.firestore() : null;
-
-        // Không tự động seed dữ liệu mỗi lần mở trang để tránh tạo sách trùng.
+        const db = firebase.firestore();
 
         async function loginWithFirebase(identifier, password) {
             let email = identifier.trim();
@@ -52,7 +46,7 @@
 </head>
 <body class="bg-slate-100 min-h-screen text-slate-800 font-sans pb-16">
 
-    <!-- ================= MÀN HÌNH ĐĂNG NHẬP THỦ THƯ QUA FIREBASE ================= -->
+    <!-- ================= MÀN HÌNH ĐĂNG NHẬP THỦ THƯ ================= -->
     <div id="librarianLoginSection" class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950">
         <div class="bg-white w-full max-w-sm rounded-3xl p-6 shadow-2xl space-y-4 border border-slate-200">
             <div class="text-center space-y-1">
@@ -80,7 +74,7 @@
         </div>
     </div>
 
-    <!-- NÚT ĐĂNG XUẤT THỦ THƯ Ở GÓC DƯỚI BÊN TRÁI -->
+    <!-- NÚT ĐĂNG XUẤT THỦ THƯ -->
     <div id="libLogoutBtnContainer" class="hidden fixed bottom-4 left-4 z-40">
         <button onclick="handleLibrarianLogout()" class="px-3.5 py-2 bg-slate-900/90 hover:bg-rose-600 text-white text-xs font-bold rounded-xl shadow-lg backdrop-blur-sm transition flex items-center gap-1.5 border border-slate-700">
             <i class="fa-solid fa-right-from-bracket"></i> Đăng xuất Thủ thư
@@ -111,10 +105,10 @@
     </header>
 
     <main class="max-w-6xl mx-auto p-4 sm:p-6 space-y-6">
-        <!-- THANH 3 TAB CHÍNH CỦA THỦ THƯ -->
+        <!-- THANH 3 TAB CHÍNH -->
         <div class="bg-white rounded-2xl border border-slate-200 shadow-sm flex overflow-hidden">
             <button onclick="switchLibTab('orders')" id="libTabBtnOrders" class="tab-btn-lib flex-1 py-3 text-xs sm:text-sm font-bold border-b-2 border-orange-600 text-orange-600 bg-orange-50 flex items-center justify-center gap-2 transition">
-                <i class="fa-solid fa-list-check"></i> THÔNG TIN TỦ
+                <i class="fa-solid fa-list-check"></i> THÔNG TIN TỦ (<span id="totalOrdersBadge">0</span>)
             </button>
             <button onclick="switchLibTab('borrows')" id="libTabBtnBorrows" class="tab-btn-lib flex-1 py-3 text-xs sm:text-sm font-semibold border-b-2 border-transparent text-slate-500 hover:text-slate-700 flex items-center justify-center gap-2 transition">
                 <i class="fa-solid fa-users-viewfinder"></i> QUẢN LÝ SÁCH MƯỢN (<span id="totalActiveBorrowBadge">0</span>)
@@ -126,12 +120,11 @@
 
         <!-- ================= TAB 1: SOẠN ĐƠN CA SÁNG ================= -->
         <div id="libTabContentOrders" class="space-y-6">
-            <!-- Đơn cần soạn và quản lý thu hồi sách quá hạn -->
             <section class="bg-white p-5 rounded-2xl border border-slate-200 shadow-sm space-y-4">
                 <div class="flex justify-between items-center border-b pb-3">
                     <div>
                         <h2 class="text-base font-bold flex items-center gap-2 text-slate-800">
-                            <i class="fa-solid fa-list-check text-orange-600"></i> DANH SÁCH SOẠN & GIÁM SÁT HỘC TỦ 
+                            <i class="fa-solid fa-list-check text-orange-600"></i> DANH SÁCH SOẠN & GIÁM SÁT HỘC TỦ
                         </h2>
                         <p class="text-xs text-slate-400 mt-0.5">Xác nhận nạp sách vào hộc hoặc Thu hồi sách khi sinh viên không đến nhận</p>
                     </div>
@@ -155,14 +148,14 @@
                 </div>
             </section>
 
-            <!-- BẢNG KIỂM TRA SÁCH TRẢ TẠI HỘC (BƯỚC 5) -->
+            <!-- BẢNG SÁCH CHỜ KIỂM TRA -->
             <section class="bg-white p-5 rounded-2xl border border-blue-200 shadow-sm space-y-4">
                 <div class="flex justify-between items-center border-b pb-3">
                     <div>
                         <h2 class="text-base font-bold flex items-center gap-2 text-blue-900">
                             <i class="fa-solid fa-inbox text-blue-600"></i> SÁCH SINH VIÊN ĐÃ BỎ VÀO TỦ (CHỜ KIỂM TRA)
                         </h2>
-                        <p class="text-xs text-slate-400 mt-0.5">Thủ thư kiểm tra tình trạng vật lý khi lấy sách ra khỏi hộc tủ để hoàn tất hoặc ghi nhận phạt</p>
+                        <p class="text-xs text-slate-400 mt-0.5">Thủ thư kiểm tra tình trạng vật lý khi lấy sách ra khỏi hộc tủ để nhập kho</p>
                     </div>
                     <span id="inspectCount" class="bg-blue-100 text-blue-700 px-3 py-1 rounded-full text-xs font-bold">0 cuốn</span>
                 </div>
@@ -176,7 +169,6 @@
                                 <th class="p-3">Mã vạch</th>
                                 <th class="p-3">Sinh viên trả</th>
                                 <th class="p-3">Ngày trả</th>
-                                <th class="p-3">Phạt trễ hạn</th>
                                 <th class="p-3 text-right">Nghiệm thu sách</th>
                             </tr>
                         </thead>
@@ -186,7 +178,7 @@
             </section>
         </div>
 
-        <!-- ================= TAB 2: QUẢN LÝ SÁCH MƯỢN (TRUY VẤN THEO NGƯỜI MƯỢN & SÁCH) ================= -->
+        <!-- ================= TAB 2: QUẢN LÝ SÁCH MƯỢN ================= -->
         <div id="libTabContentBorrows" class="hidden space-y-4">
             <section class="bg-white p-5 rounded-2xl border border-slate-200 shadow-sm space-y-4">
                 <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-2 border-b pb-3">
@@ -194,42 +186,28 @@
                         <h2 class="text-base font-bold flex items-center gap-2 text-slate-800">
                             <i class="fa-solid fa-address-book text-orange-600"></i> TRA CỨU & QUẢN LÝ SINH VIÊN ĐANG MƯỢN SÁCH
                         </h2>
-                        <p class="text-xs text-slate-400 mt-0.5">Truy vấn nhanh theo MSSV, Họ tên hoặc Mã vạch cuốn sách đang lưu hành</p>
+                        <p class="text-xs text-slate-400 mt-0.5">Truy vấn theo MSSV, Họ tên hoặc Tên sách đang được sinh viên mượn</p>
                     </div>
                     <span id="activeBorrowFilterCount" class="bg-orange-100 text-orange-700 px-3 py-1 rounded-full text-xs font-bold">0 lượt mượn</span>
                 </div>
 
-                <!-- THANH TÌM KIẾM & BỘ LỌC TRUY VẤN -->
                 <div class="bg-slate-50 p-4 rounded-2xl border border-slate-200 flex flex-col sm:flex-row gap-3 items-stretch sm:items-center justify-between">
                     <div class="relative flex-1">
                         <i class="fa-solid fa-magnifying-glass absolute left-3.5 top-3.5 text-slate-400 text-sm"></i>
-                        <input type="search" id="borrowSearchInput" oninput="renderActiveBorrowsTable()" placeholder="Nhập MSSV, Tên sinh viên, Tên sách hoặc Mã vạch để tìm..." 
+                        <input type="search" id="borrowSearchInput" oninput="renderActiveBorrowsTable()" placeholder="Nhập MSSV, Tên sinh viên hoặc Tên sách..." 
                                class="w-full pl-10 pr-4 py-2 bg-white border border-slate-200 rounded-xl text-xs sm:text-sm outline-none focus:ring-2 focus:ring-orange-500">
-                    </div>
-
-                    <div class="flex items-center gap-2">
-                        <div class="flex items-center gap-1.5 bg-white border border-slate-200 px-2.5 py-1.5 rounded-xl text-xs">
-                            <i class="fa-solid fa-filter text-orange-600"></i>
-                            <select id="borrowStatusFilter" onchange="renderActiveBorrowsTable()" class="bg-transparent font-semibold outline-none cursor-pointer">
-                                <option value="all">Tất cả tình trạng</option>
-                                <option value="ontime">Đang mượn (Trong hạn)</option>
-                                <option value="late">Cảnh báo: Đã quá hạn</option>
-                            </select>
-                        </div>
                     </div>
                 </div>
 
-                <!-- BẢNG DANH SÁCH MƯỢN THEO KHÓA CHÍNH (NGƯỜI MƯỢN & SÁCH) -->
                 <div class="overflow-x-auto">
                     <table class="w-full text-left text-sm">
                         <thead>
                             <tr class="text-xs text-slate-500 font-bold border-b bg-slate-50">
-                                <th class="p-3.5 w-10"></th>
                                 <th class="p-3.5">Sinh viên mượn (MSSV)</th>
                                 <th class="p-3.5">Số lượng sách</th>
-                                <th class="p-3.5">Hạn trả gần nhất</th>
-                                <th class="p-3.5">Tình trạng chung</th>
-                                <th class="p-3.5 text-right">Chi tiết</th>
+                                <th class="p-3.5">Lịch hẹn / Ngày nhận</th>
+                                <th class="p-3.5">Tình trạng đơn</th>
+                                <th class="p-3.5 text-right">Danh sách sách</th>
                             </tr>
                         </thead>
                         <tbody id="activeBorrowsTableBody" class="divide-y divide-slate-100"></tbody>
@@ -251,7 +229,6 @@
                     <span id="bookCountBadge" class="bg-slate-100 text-slate-700 px-3 py-1 rounded-full text-xs font-bold">0 đầu sách</span>
                 </div>
 
-                <!-- THANH BỘ LỌC & MỤC LỤC A-Z -->
                 <div class="bg-slate-50 p-4 rounded-2xl border border-slate-200 space-y-3">
                     <div class="flex flex-col sm:flex-row gap-3 items-stretch sm:items-center justify-between">
                         <div class="relative flex-1">
@@ -286,7 +263,7 @@
                             <button onclick="selectLibCategory('ketoan', this)" class="filter-chip px-3 py-1.5 rounded-xl border border-slate-200 font-semibold whitespace-nowrap transition bg-white">Kế toán</button>
                             <button onclick="selectLibCategory('marketing', this)" class="filter-chip px-3 py-1.5 rounded-xl border border-slate-200 font-semibold whitespace-nowrap transition bg-white">Marketing</button>
                             <button onclick="selectLibCategory('taichinh', this)" class="filter-chip px-3 py-1.5 rounded-xl border border-slate-200 font-semibold whitespace-nowrap transition bg-white">Tài chính - Ngân hàng</button>
-                            <button onclick="selectLibCategory('khac', this)" class="filter-chip px-3 py-1.5 rounded-xl border border-slate-200 font-semibold whitespace-nowrap transition bg-white">Khác (Luật/Thống kê)</button>
+                            <button onclick="selectLibCategory('khac', this)" class="filter-chip px-3 py-1.5 rounded-xl border border-slate-200 font-semibold whitespace-nowrap transition bg-white">Khác</button>
                         </div>
                     </div>
                 </div>
@@ -369,12 +346,15 @@
 
     <!-- ================= JAVASCRIPT THỦ THƯ ================= -->
     <script>
-        // Kiểm tra phiên đăng nhập Firebase của Thủ thư
+        let allOrders = [];
+        let allGroupedBooks = [];
+        let currentLibCategory = 'all';
+
         auth.onAuthStateChanged((user) => {
             if (user && user.email.includes("thuthu")) {
                 document.getElementById('librarianLoginSection').classList.add('hidden');
                 document.getElementById('libLogoutBtnContainer').classList.remove('hidden');
-                loadLibrarianData();
+                initLibrarianListeners();
             } else {
                 document.getElementById('librarianLoginSection').classList.remove('hidden');
                 document.getElementById('libLogoutBtnContainer').classList.add('hidden');
@@ -392,7 +372,7 @@
                 await loginWithFirebase(email, pass);
                 document.getElementById('librarianLoginSection').classList.add('hidden');
                 document.getElementById('libLogoutBtnContainer').classList.remove('hidden');
-                loadLibrarianData();
+                initLibrarianListeners();
             } catch(err) {
                 errBox.innerText = "Sai email hoặc mật khẩu Thủ thư!";
                 errBox.classList.remove('hidden');
@@ -403,11 +383,6 @@
             try { await auth.signOut(); } finally { sessionStorage.clear(); location.reload(); }
         }
 
-        let allGroupedBooks = [];
-        let allActiveBorrows = [];
-        let currentLibCategory = 'all';
-
-        // Điều khiển chuyển 3 Tab
         function switchLibTab(tab) {
             const tabs = ['orders', 'borrows', 'warehouse'];
             tabs.forEach(t => {
@@ -421,12 +396,262 @@
                     content.classList.add('hidden');
                 }
             });
-
-            if (tab === 'borrows') loadActiveBorrowsData();
         }
 
-        async function loadLibrarianData() {
-            if (!auth.currentUser) return;
+        // ================= KẾT NỐI REALTIME VỚI CLOUD FIRESTORE =================
+        function initLibrarianListeners() {
+            // 1. Lắng nghe đơn đặt mượn từ sinh viên
+            db.collection('orders').orderBy('ngay_tao', 'desc').onSnapshot(snapshot => {
+                allOrders = [];
+                snapshot.forEach(doc => {
+                    allOrders.push({ id: doc.id, ...doc.data() });
+                });
+                renderOrders(allOrders);
+                renderActiveBorrowsTable();
+            }, err => {
+                console.error("Lỗi nghe orders:", err);
+            });
+
+            // 2. Lắng nghe sách trả chờ kiểm tra
+            db.collection('returns').where('trang_thai', '==', 'cho_kiem_tra').onSnapshot(snapshot => {
+                const returns = [];
+                snapshot.forEach(doc => {
+                    returns.push({ id: doc.id, ...doc.data() });
+                });
+                renderInspectBooks(returns);
+            }, err => {
+                console.error("Lỗi nghe returns:", err);
+            });
+
+            // 3. Tải danh mục kho sách
+            loadLibrarianBooks();
+        }
+
+        // ================= TAB 1: HIỂN THỊ ĐƠN SOẠN TỪ SINH VIÊN =================
+        function renderOrders(orders) {
+            const activeOrders = orders.filter(o => o.trang_thai_don === 'cho_soan' || o.trang_thai_don === 'da_soan_xong');
+            document.getElementById('totalOrdersBadge').innerText = activeOrders.length;
+            document.getElementById('orderCount').innerText = `${activeOrders.length} đơn`;
+
+            const tbody = document.getElementById('ordersTableBody');
+            tbody.innerHTML = '';
+
+            if (activeOrders.length === 0) {
+                tbody.innerHTML = `<tr><td colspan="6" class="p-6 text-center text-slate-400 text-xs">Hiện không có đơn nào đang chờ soạn hoặc chờ lấy.</td></tr>`;
+                return;
+            }
+
+            activeOrders.forEach(o => {
+                const isReady = o.trang_thai_don === 'da_soan_xong';
+                const booksList = o.books || [];
+
+                let booksHtml = '<div class="space-y-1.5 py-0.5">';
+                booksList.forEach((b, idx) => {
+                    booksHtml += `
+                        <div class="flex items-center gap-2 text-xs">
+                            <span class="w-4 h-4 rounded-full bg-orange-100 text-orange-700 font-bold flex items-center justify-center text-[10px] shrink-0">${idx + 1}</span>
+                            <span class="font-bold text-slate-800">${b.ten_sach}</span>
+                            <span class="bg-slate-100 text-slate-700 px-2 py-0.5 rounded text-[11px] font-mono border border-slate-200 shrink-0">
+                                <i class="fa-solid fa-location-dot text-orange-600 mr-1"></i>${b.vi_tri_ke || 'Kệ A'}
+                            </span>
+                        </div>
+                    `;
+                });
+                booksHtml += '</div>';
+
+                tbody.innerHTML += `
+                    <tr class="hover:bg-slate-50 transition border-b border-slate-100">
+                        <td class="p-3.5 align-middle">
+                            <span class="text-sm font-black text-orange-600 bg-orange-50 px-2.5 py-1 rounded-xl border border-orange-200">${o.so_hoc || 'Hộc 01'}</span>
+                        </td>
+                        <td class="p-3.5 align-middle">
+                            <div class="font-bold text-slate-900 text-xs sm:text-sm">${o.ho_ten || 'Sinh viên DUE'}</div>
+                            <div class="text-[11px] font-mono text-slate-400">MSSV: ${o.mssv}</div>
+                            <span class="inline-block mt-0.5 text-[10px] font-bold bg-blue-50 text-blue-700 px-2 py-0.5 rounded-md">
+                                ${booksList.length} cuốn
+                            </span>
+                        </td>
+                        <td class="p-3.5 align-middle">
+                            ${booksHtml}
+                        </td>
+                        <td class="p-3.5 align-middle text-xs text-slate-600 whitespace-nowrap">
+                            <div>${o.ngay_hen || 'Hôm nay'}</div>
+                            <div class="text-orange-600 font-bold mt-0.5">${o.khung_gio || ''}</div>
+                        </td>
+                        <td class="p-3.5 align-middle whitespace-nowrap">
+                            <span class="px-2.5 py-1 rounded-full text-[11px] font-bold ${isReady ? 'bg-emerald-100 text-emerald-700' : 'bg-amber-100 text-amber-700'}">
+                                ${isReady ? 'Đã trong hộc' : 'Chờ nạp hộc'}
+                            </span>
+                        </td>
+                        <td class="p-3.5 align-middle text-right space-x-1.5 whitespace-nowrap">
+                            ${!isReady ? `
+                                <button onclick="markOrderReady('${o.id}')" class="px-3 py-1.5 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl text-xs font-bold shadow-sm transition">
+                                    <i class="fa-solid fa-check mr-1"></i> Đã nạp hộc
+                                </button>
+                            ` : `
+                                <span class="text-xs text-emerald-600 font-bold mr-2"><i class="fa-solid fa-circle-check"></i> Sẵn sàng</span>
+                            `}
+                            <button onclick="cancelExpiredOrder('${o.id}')" class="px-2.5 py-1.5 bg-rose-50 hover:bg-rose-100 text-rose-600 rounded-xl text-xs font-bold transition" title="Sinh viên không đến nhận -> Thu hồi cả đơn">
+                                <i class="fa-solid fa-arrow-rotate-left mr-1"></i> Thu hồi
+                            </button>
+                        </td>
+                    </tr>
+                `;
+            });
+        }
+
+        // Nút "Đã nạp hộc" cập nhật Firestore
+        async function markOrderReady(orderId) {
+            try {
+                await db.collection('orders').doc(orderId).update({
+                    trang_thai_don: 'da_soan_xong',
+                    thoi_gian_soan: firebase.firestore.FieldValue.serverTimestamp()
+                });
+                alert("Đã xác nhận nạp sách vào hộc tủ thành công!");
+            } catch (err) {
+                console.error("Lỗi nạp hộc:", err);
+                alert("Không thể cập nhật trạng thái!");
+            }
+        }
+
+        // Nút "Thu hồi" đơn hết hạn
+        async function cancelExpiredOrder(orderId) {
+            if (!confirm("Xác nhận sinh viên không đến nhận sách, thu hồi sách về kệ và mở trống hộc tủ?")) return;
+            try {
+                const orderDoc = await db.collection('orders').doc(orderId).get();
+                if (!orderDoc.exists) return;
+                const orderData = orderDoc.data();
+
+                // 1. Hoàn lại số lượng sách vào kho
+                if (orderData.books && orderData.books.length > 0) {
+                    for (let b of orderData.books) {
+                        if (b.book_id) {
+                            await db.collection('books').doc(b.book_id).update({
+                                so_luong_con: firebase.firestore.FieldValue.increment(1)
+                            });
+                        }
+                    }
+                }
+
+                // 2. Đổi trạng thái đơn thành đã hủy
+                await db.collection('orders').doc(orderId).update({
+                    trang_thai_don: 'da_huy_do_qua_han',
+                    thoi_gian_huy: firebase.firestore.FieldValue.serverTimestamp()
+                });
+
+                // 3. Mở trống hộc tủ
+                if (orderData.so_hoc) {
+                    const lSnap = await db.collection('lockers').where('so_hoc', '==', orderData.so_hoc).get();
+                    lSnap.forEach(ldoc => ldoc.ref.update({ trang_thai: 'trong', qr_token: null }));
+                }
+
+                alert("Đã thu hồi sách về kho và giải phóng hộc tủ!");
+                loadLibrarianBooks();
+            } catch (err) {
+                console.error("Lỗi thu hồi:", err);
+                alert("Không thể thu hồi đơn!");
+            }
+        }
+
+        // ================= TAB 2: QUẢN LÝ NGƯỜI MƯỢN =================
+        function renderActiveBorrowsTable() {
+            const query = (document.getElementById('borrowSearchInput')?.value || '').toLowerCase().trim();
+            const tbody = document.getElementById('activeBorrowsTableBody');
+            tbody.innerHTML = '';
+
+            const filteredOrders = allOrders.filter(o => {
+                const matchUser = (o.ho_ten || '').toLowerCase().includes(query) || (o.mssv || '').toLowerCase().includes(query);
+                const matchBook = (o.books || []).some(b => (b.ten_sach || '').toLowerCase().includes(query));
+                return matchUser || matchBook;
+            });
+
+            document.getElementById('totalActiveBorrowBadge').innerText = filteredOrders.length;
+            document.getElementById('activeBorrowFilterCount').innerText = `${filteredOrders.length} lượt mượn`;
+
+            if (filteredOrders.length === 0) {
+                tbody.innerHTML = `<tr><td colspan="5" class="p-6 text-center text-slate-400 text-xs">Không tìm thấy thông tin sinh viên mượn sách.</td></tr>`;
+                return;
+            }
+
+            filteredOrders.forEach(o => {
+                const booksList = o.books || [];
+                let booksHtml = booksList.map(b => `<div class="font-bold text-slate-800">${b.ten_sach}</div>`).join('');
+
+                let statusBadge = '<span class="px-2.5 py-1 rounded-full text-[10px] font-bold bg-amber-100 text-amber-700">Chờ lấy</span>';
+                if (o.trang_thai_don === 'da_nhan') statusBadge = '<span class="px-2.5 py-1 rounded-full text-[10px] font-bold bg-emerald-100 text-emerald-700">Đang giữ sách</span>';
+                if (o.trang_thai_don === 'da_huy_do_qua_han') statusBadge = '<span class="px-2.5 py-1 rounded-full text-[10px] font-bold bg-rose-100 text-rose-700">Đã hủy</span>';
+
+                tbody.innerHTML += `
+                    <tr class="hover:bg-slate-50 transition border-b border-slate-100">
+                        <td class="p-3.5">
+                            <div class="font-bold text-slate-900 text-sm">${o.ho_ten || 'Sinh viên'}</div>
+                            <div class="text-[11px] font-mono text-orange-600 font-bold">MSSV: ${o.mssv}</div>
+                        </td>
+                        <td class="p-3.5">
+                            <span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-xs font-bold bg-blue-50 text-blue-700 border border-blue-200">
+                                <i class="fa-solid fa-book text-[10px]"></i> ${booksList.length} cuốn
+                            </span>
+                        </td>
+                        <td class="p-3.5 text-xs font-semibold text-slate-600">
+                            ${o.ngay_hen || '--'} (${o.khung_gio || ''})
+                        </td>
+                        <td class="p-3.5">
+                            ${statusBadge}
+                        </td>
+                        <td class="p-3.5 text-right text-xs">
+                            ${booksHtml}
+                        </td>
+                    </tr>
+                `;
+            });
+        }
+
+        // ================= KIỂM TRA SÁCH TRẢ =================
+        function renderInspectBooks(returns) {
+            document.getElementById('inspectCount').innerText = `${returns.length} cuốn`;
+            const tbody = document.getElementById('inspectTableBody');
+            tbody.innerHTML = '';
+
+            if (returns.length === 0) {
+                tbody.innerHTML = `<tr><td colspan="6" class="p-4 text-center text-slate-400 text-xs">Hiện không có cuốn sách nào trong tủ chờ kiểm tra.</td></tr>`;
+                return;
+            }
+
+            returns.forEach(r => {
+                tbody.innerHTML += `
+                    <tr class="hover:bg-slate-50 transition">
+                        <td class="p-3 font-bold text-blue-600">${r.so_hoc || 'Hộc tủ'}</td>
+                        <td class="p-3 font-semibold text-slate-800">${r.ten_sach}</td>
+                        <td class="p-3"><span class="bg-slate-100 text-slate-700 px-2.5 py-1 rounded-md text-xs font-mono">${r.ma_vach}</span></td>
+                        <td class="p-3 text-xs">MSSV: ${r.mssv}</td>
+                        <td class="p-3 text-xs text-slate-500">Hôm nay</td>
+                        <td class="p-3 text-right">
+                            <button onclick="approveReturn('${r.id}', '${r.ten_sach}')" class="px-3 py-1.5 bg-emerald-600 hover:bg-emerald-700 text-white rounded-lg text-xs font-bold shadow-sm transition">
+                                <i class="fa-solid fa-check mr-1"></i> Tốt (Nhập kho)
+                            </button>
+                        </td>
+                    </tr>
+                `;
+            });
+        }
+
+        async function approveReturn(returnId, tenSach) {
+            try {
+                await db.collection('returns').doc(returnId).update({ trang_thai: 'hoan_tat' });
+                // Tăng tồn kho
+                const bSnap = await db.collection('books').where('ten_sach', '==', tenSach).limit(1).get();
+                if (!bSnap.empty) {
+                    await bSnap.docs[0].ref.update({ so_luong_con: firebase.firestore.FieldValue.increment(1) });
+                }
+                alert("Đã nghiệm thu và hoàn trả sách vào kho!");
+                loadLibrarianBooks();
+            } catch (err) {
+                console.error("Lỗi duyệt sách trả:", err);
+            }
+        }
+
+        // ================= TAB 3: QUẢN LÝ KHO SÁCH =================
+        async function loadLibrarianBooks() {
             try {
                 const snapshot = await db.collection('books').get();
                 const grouped = {};
@@ -442,8 +667,7 @@
                             tong_so_luong: 0,
                             so_luong_co_san: 0,
                             so_luong_dang_muon: 0,
-                            docIds: [],
-                            barcodes: []
+                            docIds: []
                         };
                     }
                     const total = Number(b.so_luong ?? 1) || 0;
@@ -451,347 +675,17 @@
                     grouped[name].tong_so_luong += total;
                     grouped[name].so_luong_co_san += available;
                     grouped[name].docIds.push(doc.id);
-                    if (b.ma_vach) grouped[name].barcodes.push(String(b.ma_vach));
                 });
                 allGroupedBooks = Object.values(grouped);
                 renderFilteredLibrarianBooks();
             } catch (err) {
                 console.error('Lỗi tải kho sách Firestore:', err);
-                alert('Không tải được kho sách. Hãy kiểm tra kết nối và Firestore Security Rules.');
             }
         }
 
-        // Render đơn soạn: Gom nhóm sinh viên - sách
-        function renderOrders(orders) {
-            document.getElementById('orderCount').innerText = `${orders.length} đơn`;
-            const tbody = document.getElementById('ordersTableBody');
-            tbody.innerHTML = '';
-
-            if (orders.length === 0) {
-                tbody.innerHTML = `<tr><td colspan="6" class="p-6 text-center text-slate-400 text-xs">Hiện không có đơn nào đang chờ soạn hoặc chờ lấy.</td></tr>`;
-                return;
-            }
-
-            orders.forEach(group => {
-                const isReady = group.trang_thai_don === 'da_soan_xong';
-                const tokenSafe = group.qr_token;
-
-                let booksList = group.books || [];
-                if (booksList.length === 0 && group.ten_sach) {
-                    booksList = [{ ten_sach: group.ten_sach, vi_tri_ke: group.vi_tri_ke, ma_vach: '' }];
-                }
-
-                let booksHtml = '<div class="space-y-1.5 py-0.5">';
-                booksList.forEach((b, idx) => {
-                    booksHtml += `
-                        <div class="flex items-center gap-2 text-xs">
-                            <span class="w-4 h-4 rounded-full bg-orange-100 text-orange-700 font-bold flex items-center justify-center text-[10px] shrink-0">${idx + 1}</span>
-                            <span class="font-bold text-slate-800">${b.ten_sach}</span>
-                            <span class="bg-slate-100 text-slate-700 px-2 py-0.5 rounded text-[11px] font-mono border border-slate-200 shrink-0">
-                                <i class="fa-solid fa-location-dot text-orange-600 mr-1"></i>${b.vi_tri_ke}
-                            </span>
-                        </div>
-                    `;
-                });
-                booksHtml += '</div>';
-
-                tbody.innerHTML += `
-                    <tr class="hover:bg-slate-50 transition border-b border-slate-100">
-                        <td class="p-3.5 align-middle">
-                            <span class="text-sm font-black text-orange-600 bg-orange-50 px-2.5 py-1 rounded-xl border border-orange-200">${group.so_hoc}</span>
-                        </td>
-                        <td class="p-3.5 align-middle">
-                            <div class="font-bold text-slate-900 text-xs sm:text-sm">${group.ho_ten}</div>
-                            <div class="text-[11px] font-mono text-slate-400">${group.mssv}</div>
-                            <span class="inline-block mt-0.5 text-[10px] font-bold bg-blue-50 text-blue-700 px-2 py-0.5 rounded-md">
-                                ${booksList.length} cuốn
-                            </span>
-                        </td>
-                        <td class="p-3.5 align-middle">
-                            ${booksHtml}
-                        </td>
-                        <td class="p-3.5 align-middle text-xs text-slate-600 whitespace-nowrap">
-                            <div>${group.ngay_hen || 'Hôm nay'}</div>
-                            <div class="text-orange-600 font-bold mt-0.5">${group.khung_gio}</div>
-                        </td>
-                        <td class="p-3.5 align-middle whitespace-nowrap">
-                            <span class="px-2.5 py-1 rounded-full text-[11px] font-bold ${isReady ? 'bg-emerald-100 text-emerald-700' : 'bg-amber-100 text-amber-700'}">
-                                ${isReady ? 'Đã trong hộc' : 'Chờ nạp hộc'}
-                            </span>
-                        </td>
-                        <td class="p-3.5 align-middle text-right space-x-1.5 whitespace-nowrap">
-                            ${!isReady ? `
-                                <button onclick="markGroupReady('${tokenSafe}')" class="px-3 py-1.5 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl text-xs font-bold shadow-sm transition">
-                                    <i class="fa-solid fa-check mr-1"></i> Đã nạp hộc
-                                </button>
-                            ` : `
-                                <span class="text-xs text-emerald-600 font-bold mr-2"><i class="fa-solid fa-circle-check"></i> Sẵn sàng</span>
-                            `}
-                            <button onclick="cancelExpiredGroup('${tokenSafe}', '${group.so_hoc}', ${booksList.length})" class="px-2.5 py-1.5 bg-rose-50 hover:bg-rose-100 text-rose-600 rounded-xl text-xs font-bold transition" title="Sinh viên không đến nhận -> Thu hồi cả đơn">
-                                <i class="fa-solid fa-arrow-rotate-left mr-1"></i> Thu hồi
-                            </button>
-                        </td>
-                    </tr>
-                `;
-            });
-        }
-
-        async function markGroupReady(token) {
-            try {
-                const res = await fetch('/api/librarian/ready-group', {
-                    method: 'POST',
-                    headers: {'Content-Type': 'application/json'},
-                    body: JSON.stringify({ qr_token: token })
-                });
-                if (res.ok) loadLibrarianData();
-            } catch (err) {
-                alert("Lỗi kết nối máy chủ!");
-            }
-        }
-
-        async function cancelExpiredGroup(token, lockerName, count) {
-            if (!confirm(`Xác nhận sinh viên không đến nhận ${count} cuốn sách tại ${lockerName}?\n\nHệ thống sẽ thu hồi toàn bộ số sách này về kệ và mở trống hộc tủ.`)) return;
-            try {
-                const res = await fetch('/api/librarian/cancel-expired-group', {
-                    method: 'POST',
-                    headers: {'Content-Type': 'application/json'},
-                    body: JSON.stringify({ qr_token: token })
-                });
-                const data = await res.json();
-                alert(data.message);
-                loadLibrarianData();
-            } catch (err) {
-                alert("Lỗi kết nối máy chủ!");
-            }
-        }
-
-        // ================= CỤM TAB 2: QUẢN LÝ SÁCH MƯỢN =================
-        async function loadActiveBorrowsData() {
-            try {
-                const res = await fetch('/api/librarian/active-borrows');
-                if (res.ok) {
-                    allActiveBorrows = await res.json();
-                    document.getElementById('totalActiveBorrowBadge').innerText = allActiveBorrows.length;
-                    renderActiveBorrowsTable();
-                }
-            } catch(e) {
-                console.error("Lỗi nạp danh sách mượn:", e);
-            }
-        }
-
-        let expandedUserIds = [];
-
-        function renderActiveBorrowsTable() {
-            const query = (document.getElementById('borrowSearchInput')?.value || '').toLowerCase().trim();
-            const filter = document.getElementById('borrowStatusFilter')?.value || 'all';
-
-            const groupedByUser = {};
-            allActiveBorrows.forEach(item => {
-                const key = item.mssv;
-                if (!groupedByUser[key]) {
-                    groupedByUser[key] = {
-                        user_id: item.user_id,
-                        ho_ten: item.ho_ten,
-                        mssv: item.mssv,
-                        email: item.email,
-                        has_late: false,
-                        total_fine: 0,
-                        nearest_due: item.han_tra,
-                        books: []
-                    };
-                }
-
-                if (item.is_late) {
-                    groupedByUser[key].has_late = true;
-                    groupedByUser[key].total_fine += (item.tien_phat || 0);
-                }
-
-                groupedByUser[key].books.push(item);
-            });
-
-            let userList = Object.values(groupedByUser).filter(u => {
-                const matchUser = u.ho_ten.toLowerCase().includes(query) || u.mssv.toLowerCase().includes(query);
-                const matchBook = u.books.some(b => 
-                    b.ten_sach.toLowerCase().includes(query) || 
-                    b.ma_vach.toLowerCase().includes(query)
-                );
-                const matchQuery = matchUser || matchBook;
-
-                if (!matchQuery) return false;
-                if (filter === 'late') return u.has_late;
-                if (filter === 'ontime') return !u.has_late;
-                return true;
-            });
-
-            document.getElementById('activeBorrowFilterCount').innerText = `${userList.length} sinh viên`;
-            const tbody = document.getElementById('activeBorrowsTableBody');
-            tbody.innerHTML = '';
-
-            if (userList.length === 0) {
-                tbody.innerHTML = `<tr><td colspan="6" class="p-6 text-center text-slate-400 text-xs">Không tìm thấy sinh viên nào đang mượn sách phù hợp.</td></tr>`;
-                return;
-            }
-
-            userList.forEach(u => {
-                const isExpanded = expandedUserIds.includes(u.mssv);
-
-                tbody.innerHTML += `
-                    <tr onclick="toggleUserBorrows('${u.mssv}')" class="hover:bg-orange-50/50 transition border-b border-slate-100 cursor-pointer select-none">
-                        <td class="p-3.5 text-center text-slate-400">
-                            <i class="fa-solid ${isExpanded ? 'fa-chevron-down text-orange-600' : 'fa-chevron-right'} text-xs transition-transform"></i>
-                        </td>
-                        <td class="p-3.5">
-                            <div class="font-bold text-slate-900 text-sm">${u.ho_ten}</div>
-                            <div class="text-[11px] font-mono text-orange-600 font-bold">MSSV: ${u.mssv}</div>
-                        </td>
-                        <td class="p-3.5">
-                            <span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-xs font-bold bg-blue-50 text-blue-700 border border-blue-200">
-                                <i class="fa-solid fa-book text-[10px]"></i> ${u.books.length} cuốn
-                            </span>
-                        </td>
-                        <td class="p-3.5 text-xs font-semibold text-slate-600">
-                            ${u.nearest_due || '--'}
-                        </td>
-                        <td class="p-3.5">
-                            ${u.has_late ? `
-                                <span class="px-2.5 py-1 rounded-full text-[11px] font-black bg-rose-100 text-rose-700 animate-pulse">
-                                    Có sách trễ hạn (${u.total_fine.toLocaleString()} đ)
-                                </span>
-                            ` : `
-                                <span class="px-2.5 py-1 rounded-full text-[11px] font-bold bg-emerald-100 text-emerald-700">
-                                    Trong hạn
-                                </span>
-                            `}
-                        </td>
-                        <td class="p-3.5 text-right text-xs font-bold text-orange-600">
-                            ${isExpanded ? 'Thu gọn ▲' : 'Xem sách ▼'}
-                        </td>
-                    </tr>
-                `;
-
-                if (isExpanded) {
-                    let subRowsHtml = '';
-                    u.books.forEach((b, index) => {
-                        subRowsHtml += `
-                            <div class="flex flex-col sm:flex-row sm:items-center justify-between p-3 bg-white rounded-xl border border-slate-200 text-xs gap-2">
-                                <div class="flex items-center gap-3">
-                                    <span class="w-5 h-5 rounded-full bg-slate-100 text-slate-600 font-bold flex items-center justify-center text-[10px]">${index + 1}</span>
-                                    <div>
-                                        <div class="font-bold text-slate-800 text-xs sm:text-sm">${b.ten_sach}</div>
-                                        <div class="text-[10px] text-slate-400 mt-0.5">Kệ: <b class="text-slate-600">${b.vi_tri_ke}</b></div>
-                                    </div>
-                                </div>
-                                <div class="flex items-center gap-3 self-end sm:self-auto">
-                                    <span class="bg-slate-50 text-slate-700 px-2.5 py-1 rounded font-mono font-bold text-[11px] border border-slate-200">${b.ma_vach}</span>
-                                    <span class="text-slate-500">Mượn: ${b.ngay_muon || 'Hôm nay'}</span>
-                                    <span class="font-bold text-slate-700">Hạn: ${b.han_tra}</span>
-                                    ${b.is_late ? `
-                                        <span class="bg-rose-100 text-rose-700 font-bold px-2 py-0.5 rounded text-[10px]">Trễ ${b.days_late} ngày</span>
-                                    ` : `
-                                        <span class="bg-emerald-100 text-emerald-700 font-bold px-2 py-0.5 rounded text-[10px]">Đúng hạn</span>
-                                    `}
-                                </div>
-                            </div>
-                        `;
-                    });
-
-                    tbody.innerHTML += `
-                        <tr class="bg-slate-50/70">
-                            <td colspan="6" class="p-3.5 pl-12">
-                                <div class="space-y-2">
-                                    <div class="text-[11px] font-bold text-slate-500 flex items-center gap-1.5">
-                                        <i class="fa-solid fa-layer-group text-orange-600"></i> Danh sách ${u.books.length} cuốn sách sinh viên đang mượn:
-                                    </div>
-                                    ${subRowsHtml}
-                                </div>
-                            </td>
-                        </tr>
-                    `;
-                }
-            });
-        }
-
-        function toggleUserBorrows(mssv) {
-            if (expandedUserIds.includes(mssv)) {
-                expandedUserIds = expandedUserIds.filter(id => id !== mssv);
-            } else {
-                expandedUserIds.push(mssv);
-            }
-            renderActiveBorrowsTable();
-        }
-
-        // ================= CỤM NGHIỆM THU SÁCH TRẢ =================
-        function renderInspectBooks(books) {
-            document.getElementById('inspectCount').innerText = `${books.length} cuốn`;
-            const tbody = document.getElementById('inspectTableBody');
-            tbody.innerHTML = '';
-
-            if (books.length === 0) {
-                tbody.innerHTML = `<tr><td colspan="7" class="p-4 text-center text-slate-400 text-xs">Hiện không có cuốn sách nào trong tủ chờ kiểm tra.</td></tr>`;
-                return;
-            }
-
-            books.forEach(b => {
-                tbody.innerHTML += `
-                    <tr class="hover:bg-slate-50 transition">
-                        <td class="p-3 font-bold text-blue-600">${b.so_hoc}</td>
-                        <td class="p-3 font-semibold text-slate-800">${b.ten_sach}</td>
-                        <td class="p-3"><span class="bg-slate-100 text-slate-700 px-2.5 py-1 rounded-md text-xs font-mono">${b.ma_vach}</span></td>
-                        <td class="p-3 text-xs">${b.ho_ten} (${b.mssv})</td>
-                        <td class="p-3 text-xs text-slate-500">${b.ngay_tra || 'Hôm nay'}</td>
-                        <td class="p-3 text-xs font-bold ${b.tien_phat > 0 ? 'text-rose-600' : 'text-slate-500'}">
-                            ${b.tien_phat > 0 ? b.tien_phat.toLocaleString() + ' đ' : 'Không có'}
-                        </td>
-                        <td class="p-3 text-right space-x-1.5 whitespace-nowrap">
-                            <button onclick="inspectBook(${b.id}, 'binh_thuong')" class="px-3 py-1.5 bg-emerald-600 hover:bg-emerald-700 text-white rounded-lg text-xs font-bold shadow-sm transition">
-                                <i class="fa-solid fa-check mr-1"></i> Tốt (Nhập kho)
-                            </button>
-                            <button onclick="inspectBook(${b.id}, 'hu_hong')" class="px-2.5 py-1.5 bg-rose-50 hover:bg-rose-100 text-rose-600 rounded-lg text-xs font-bold transition">
-                                <i class="fa-solid fa-triangle-exclamation mr-1"></i> Báo hỏng/Phạt
-                            </button>
-                        </td>
-                    </tr>
-                `;
-            });
-        }
-
-        async function inspectBook(resId, status) {
-            let fineExtra = 0;
-            if (status === 'hu_hong') {
-                const fineInput = prompt("Nhập số tiền phạt hư hỏng / mất sách / rách trang (VNĐ):", "50000");
-                if (fineInput === null) return;
-                fineExtra = parseInt(fineInput) || 0;
-            } else {
-                if (!confirm("Xác nhận sách nguyên vẹn, nhập lại vào kho sách?")) return;
-            }
-
-            try {
-                const res = await fetch('/api/librarian/inspect-book', {
-                    method: 'POST',
-                    headers: {'Content-Type': 'application/json'},
-                    body: JSON.stringify({
-                        reservation_id: resId,
-                        tinh_trang: status,
-                        tien_phat_them: fineExtra
-                    })
-                });
-                const data = await res.json();
-                if (res.ok) {
-                    alert(data.message);
-                    loadLibrarianData();
-                } else {
-                    alert(data.detail || "Thao tác thất bại!");
-                }
-            } catch(e) {
-                alert("Lỗi kết nối máy chủ!");
-            }
-        }
-
-        // ================= CỤM KHO SÁCH =================
         function selectLibCategory(cat, button) {
             currentLibCategory = cat;
-            const buttons = document.querySelectorAll('#libCategoryChips button');
-            buttons.forEach(btn => btn.classList.remove('active'));
+            document.querySelectorAll('#libCategoryChips button').forEach(btn => btn.classList.remove('active'));
             if (button) button.classList.add('active');
             renderFilteredLibrarianBooks();
         }
@@ -804,112 +698,50 @@
             let filtered = allGroupedBooks.filter(b => 
                 b.ten_sach.toLowerCase().includes(query) || 
                 b.ma_vach_dai_dien.toLowerCase().includes(query) ||
-                (b.tac_gia && b.tac_gia.toLowerCase().includes(query)) ||
-                (b.vi_tri_ke && b.vi_tri_ke.toLowerCase().includes(query))
+                (b.tac_gia && b.tac_gia.toLowerCase().includes(query))
             );
 
-            if (currentLibCategory !== 'all') {
-                filtered = filtered.filter(b => {
-                    const text = (b.ten_sach + ' ' + b.tac_gia + ' ' + b.ma_vach_dai_dien).toLowerCase();
-                    if (currentLibCategory === 'httt') return text.includes('mis') || text.includes('httt') || text.includes('dữ liệu') || text.includes('python') || text.includes('tin học');
-                    if (currentLibCategory === 'kinhte') return text.includes('eco') || text.includes('kinh tế');
-                    if (currentLibCategory === 'ketoan') return text.includes('acc') || text.includes('kế toán');
-                    if (currentLibCategory === 'marketing') return text.includes('mar') || text.includes('marketing') || text.includes('tiêu dùng');
-                    if (currentLibCategory === 'taichinh') return text.includes('fin') || text.includes('tài chính') || text.includes('ngân hàng');
-                    if (currentLibCategory === 'khac') return text.includes('luật') || text.includes('law') || text.includes('thống kê') || text.includes('sta') || text.includes('ecom');
-                    return true;
-                });
-            }
-
-            if (onlyAvailable) {
-                filtered = filtered.filter(b => b.so_luong_co_san > 0);
-            }
+            if (onlyAvailable) filtered = filtered.filter(b => b.so_luong_co_san > 0);
 
             filtered.sort((a, b) => {
                 if (sortMode === 'az') return a.ten_sach.localeCompare(b.ten_sach, 'vi');
                 if (sortMode === 'za') return b.ten_sach.localeCompare(a.ten_sach, 'vi');
                 if (sortMode === 'stock_desc') return b.so_luong_co_san - a.so_luong_co_san;
-                if (sortMode === 'stock_asc') return a.so_luong_co_san - b.so_luong_co_san;
-                return 0;
+                return a.so_luong_co_san - b.so_luong_co_san;
             });
 
-            let totalAvail = 0;
-            let totalAll = 0;
-            allGroupedBooks.forEach(b => {
-                totalAvail += b.so_luong_co_san;
-                totalAll += b.tong_so_luong;
-            });
-            document.getElementById('bookCountBadge').innerText = `${filtered.length}/${allGroupedBooks.length} đầu sách (${totalAvail}/${totalAll} cuốn)`;
-
+            document.getElementById('bookCountBadge').innerText = `${filtered.length}/${allGroupedBooks.length} đầu sách`;
             const grid = document.getElementById('librarianBooksGrid');
             grid.innerHTML = '';
 
-            if (filtered.length === 0) {
-                grid.innerHTML = `<p class="col-span-full text-center text-xs text-slate-400 py-10">Không tìm thấy sách nào theo bộ lọc.</p>`;
-                return;
-            }
-
             filtered.forEach((b, index) => {
-                const isOutOfStock = b.so_luong_co_san === 0;
+                const isOutOfStock = b.so_luong_co_san <= 0;
                 const inputId = `stock_input_${index}`;
-                
                 grid.innerHTML += `
                     <div class="p-4 border rounded-2xl bg-white shadow-sm flex flex-col justify-between gap-3 hover:border-slate-300 transition">
                         <div>
                             <div class="flex items-center justify-between gap-2">
-                                <div class="flex items-center gap-1.5">
-                                    <span class="text-[10px] font-mono bg-slate-100 text-slate-600 px-2 py-0.5 rounded font-bold">${b.ma_vach_dai_dien}</span>
-                                    <span class="text-[10px] font-bold px-2 py-0.5 rounded-full ${!isOutOfStock ? 'bg-emerald-100 text-emerald-700' : 'bg-rose-100 text-rose-700'}">
-                                        ${!isOutOfStock ? `Có sẵn: ${b.so_luong_co_san} cuốn` : 'Tạm hết'}
-                                    </span>
-                                </div>
-                                <div class="flex items-center gap-1">
-                                    <button onclick="openEditBookModal('${b.ten_sach.replace(/'/g, "\\'")}', '${b.tac_gia.replace(/'/g, "\\'")}', '${b.vi_tri_ke.replace(/'/g, "\\'")}')" 
-                                            class="w-7 h-7 rounded-lg bg-orange-50 text-orange-600 hover:bg-orange-100 flex items-center justify-center transition" 
-                                            title="Sửa thông tin sách">
-                                        <i class="fa-solid fa-pen text-xs"></i>
-                                    </button>
-
-                                    <button onclick="deleteBookGroup('${b.ten_sach.replace(/'/g, "\\'")}', ${b.so_luong_dang_muon})" 
-                                            class="w-7 h-7 rounded-lg bg-rose-50 text-rose-600 hover:bg-rose-100 flex items-center justify-center transition" 
-                                            title="Xóa đầu sách này khỏi kho">
-                                        <i class="fa-solid fa-trash-can text-xs"></i>
-                                    </button>
-                                </div>
+                                <span class="text-[10px] font-mono bg-slate-100 text-slate-600 px-2 py-0.5 rounded font-bold">${b.ma_vach_dai_dien}</span>
+                                <span class="text-[10px] font-bold px-2 py-0.5 rounded-full ${!isOutOfStock ? 'bg-emerald-100 text-emerald-700' : 'bg-rose-100 text-rose-700'}">
+                                    ${!isOutOfStock ? `Có sẵn: ${b.so_luong_co_san} cuốn` : 'Tạm hết'}
+                                </span>
                             </div>
-
                             <h4 class="font-bold text-slate-800 text-xs mt-2 leading-snug">${b.ten_sach}</h4>
                             <p class="text-[11px] text-slate-400 mt-1">${b.vi_tri_ke} • ${b.tac_gia}</p>
                         </div>
 
                         <div class="pt-2 border-t flex items-center justify-between text-xs gap-1">
-                            <span class="text-[11px] text-slate-500 whitespace-nowrap">
-                                Mượn: <b>${b.so_luong_dang_muon}</b> | Tổng: <b>${b.tong_so_luong}</b>
-                            </span>
-                            
+                            <span class="text-[11px] text-slate-500 whitespace-nowrap">Tổng: <b>${b.tong_so_luong}</b></span>
                             <div class="flex items-center gap-1 bg-slate-50 p-1 rounded-xl border border-slate-200">
-                                <button onclick="decreaseStock('${b.ten_sach.replace(/'/g, "\\'")}')" 
-                                        ${b.so_luong_co_san === 0 ? 'disabled' : ''} 
-                                        class="w-6 h-6 rounded-lg bg-white border text-slate-700 hover:bg-rose-50 hover:text-rose-600 flex items-center justify-center font-bold disabled:opacity-30 disabled:cursor-not-allowed transition" 
-                                        title="Bớt 1 cuốn">
+                                <button onclick="decreaseStock('${b.ten_sach.replace(/'/g, "\\'")}')" class="w-6 h-6 rounded-lg bg-white border text-slate-700 hover:text-rose-600 flex items-center justify-center font-bold">
                                     <i class="fa-solid fa-minus text-[9px]"></i>
                                 </button>
-                                
-                                <input type="number" id="${inputId}" min="0" max="999" value="${b.so_luong_co_san}" 
-                                       onkeydown="if(event.key === 'Enter') saveStock('${b.ten_sach.replace(/'/g, "\\'")}', '${inputId}')"
-                                       title="Gõ số lượng có sẵn rồi bấm Lưu"
-                                       class="w-10 text-center font-black text-slate-800 bg-white border border-slate-200 rounded-lg py-0.5 text-xs outline-none focus:ring-2 focus:ring-emerald-500">
-
-                                <button onclick="increaseStock('${b.ten_sach.replace(/'/g, "\\'")}')" 
-                                        class="w-6 h-6 rounded-lg bg-emerald-600 text-white hover:bg-emerald-700 flex items-center justify-center font-bold shadow-sm transition" 
-                                        title="Thêm 1 cuốn">
+                                <input type="number" id="${inputId}" min="0" value="${b.so_luong_co_san}" class="w-10 text-center font-black text-slate-800 bg-white border border-slate-200 rounded-lg py-0.5 text-xs outline-none">
+                                <button onclick="increaseStock('${b.ten_sach.replace(/'/g, "\\'")}')" class="w-6 h-6 rounded-lg bg-emerald-600 text-white hover:bg-emerald-700 flex items-center justify-center font-bold">
                                     <i class="fa-solid fa-plus text-[9px]"></i>
                                 </button>
-
-                                <button onclick="saveStock('${b.ten_sach.replace(/'/g, "\\'")}', '${inputId}')" 
-                                        class="px-2 py-1 rounded-lg bg-slate-800 hover:bg-slate-900 text-white font-bold text-[10px] flex items-center gap-1 shadow-sm transition ml-0.5" 
-                                        title="Lưu số lượng vào CSDL">
-                                    <i class="fa-solid fa-floppy-disk"></i> Lưu
+                                <button onclick="saveStock('${b.ten_sach.replace(/'/g, "\\'")}', '${inputId}')" class="px-2 py-1 rounded-lg bg-slate-800 hover:bg-slate-900 text-white font-bold text-[10px] ml-0.5">
+                                    Lưu
                                 </button>
                             </div>
                         </div>
@@ -918,130 +750,48 @@
             });
         }
 
-        function openEditBookModal(title, author, shelf) {
-            document.getElementById('editOldTitle').value = title;
-            document.getElementById('editNewTitle').value = title;
-            document.getElementById('editAuthor').value = author;
-            document.getElementById('editShelf').value = shelf;
-            document.getElementById('editBookModal').classList.remove('hidden');
-        }
-
-        function closeEditBookModal() {
-            document.getElementById('editBookModal').classList.add('hidden');
-        }
-
-        async function submitEditBook(event) {
-    if (event) event.preventDefault();
-    try {
-        const oldTitle = document.getElementById('editOldTitle').value.trim();
-        const newTitle = document.getElementById('editNewTitle').value.trim();
-        const author = document.getElementById('editAuthor').value.trim();
-        const shelf = document.getElementById('editShelf').value.trim();
-
-        const snapshot = await db.collection('books').where('ten_sach', '==', oldTitle).get();
-        if (snapshot.empty) {
-            alert("Không tìm thấy đầu sách này trên hệ thống mây!");
-            return;
-        }
-
-        const batch = db.batch();
-        snapshot.forEach(doc => {
-            const docRef = db.collection('books').doc(doc.id);
-            batch.update(docRef, {
-                ten_sach: newTitle,
-                tac_gia: author,
-                vi_tri_ke: shelf
-            });
-        });
-
-        await batch.commit();
-        alert("Cập nhật thông tin sách thành công!");
-        document.getElementById('editBookModal').classList.add('hidden');
-        loadLibrarianData();
-    } catch (err) {
-        console.error("Lỗi cập nhật sách:", err);
-        alert("Lỗi kết nối máy chủ! Không thể cập nhật sách.");
-    }
-}
-
-        function getBookGroup(title) {
-            return allGroupedBooks.find(b => b.ten_sach === title);
-        }
-
-        async function deleteBookGroup(title, borrowedCount) {
-            const group = getBookGroup(title);
-            if (!group) return alert('Không tìm thấy đầu sách.');
-            if (borrowedCount > 0) return alert(`Không thể xóa: "${title}" đang có sách mượn/giữ chỗ.`);
-            if (!confirm(`Xóa đầu sách "${title}" khỏi Firestore?`)) return;
-            try {
-                const batch = db.batch();
-                (group.docIds || []).forEach(id => batch.delete(db.collection('books').doc(id)));
-                await batch.commit();
-                await loadLibrarianData();
-                alert('Đã xóa đầu sách.');
-            } catch (err) {
-                console.error(err);
-                alert('Không thể xóa sách. Kiểm tra quyền Firestore.');
-            }
-        }
-
         async function saveStock(title, inputId) {
-            const group = getBookGroup(title);
-            const input = document.getElementById(inputId);
-            const qty = Number(input?.value);
-            if (!group || !Number.isInteger(qty) || qty < 0) return alert('Vui lòng nhập số lượng nguyên không âm.');
-            if (qty < group.so_luong_dang_muon) return alert('Số lượng có sẵn không thể thấp hơn số sách đang mượn.');
+            const inputVal = document.getElementById(inputId).value;
+            const qty = parseInt(inputVal);
+            if (isNaN(qty) || qty < 0) return alert("Vui lòng nhập số lượng nguyên hợp lệ!");
+
             try {
-                const firstId = group.docIds?.[0];
-                if (!firstId) return alert('Không tìm thấy bản ghi sách.');
-                // Điều chỉnh theo phần chênh lệch để tổng số lượng của nhóm vẫn nhất quán.
-                const delta = qty - group.so_luong_co_san;
-                if (group.tong_so_luong + delta < 0) return alert('Tổng số lượng không hợp lệ.');
-                await db.collection('books').doc(firstId).update({
-                    so_luong: firebase.firestore.FieldValue.increment(delta),
-                    so_luong_con: firebase.firestore.FieldValue.increment(delta)
+                const snapshot = await db.collection('books').where('ten_sach', '==', title).get();
+                if (snapshot.empty) return alert("Không tìm thấy sách!");
+
+                const batch = db.batch();
+                snapshot.forEach(doc => {
+                    batch.update(db.collection('books').doc(doc.id), { so_luong: qty, so_luong_con: qty });
                 });
-                await loadLibrarianData();
-                alert('Đã cập nhật số lượng có sẵn.');
-            } catch (err) {
-                console.error(err);
-                alert('Không thể lưu số lượng. Kiểm tra Firestore Security Rules.');
+                await batch.commit();
+                alert("Đã cập nhật số lượng thành công!");
+                loadLibrarianBooks();
+            } catch(e) {
+                alert("Không thể cập nhật số lượng!");
             }
         }
 
         async function increaseStock(title) {
-            const group = getBookGroup(title);
-            if (!group) return alert('Không tìm thấy đầu sách.');
-            const firstId = group.docIds?.[0];
-            if (!firstId) return;
-            try {
-                await db.collection('books').doc(firstId).update({
-                    so_luong: firebase.firestore.FieldValue.increment(1),
-                    so_luong_con: firebase.firestore.FieldValue.increment(1)
-                });
-                await loadLibrarianData();
-            } catch (err) {
-                console.error(err);
-                alert('Không thể tăng số lượng sách.');
-            }
+            const snapshot = await db.collection('books').where('ten_sach', '==', title).get();
+            if (snapshot.empty) return;
+            const doc = snapshot.docs[0];
+            await db.collection('books').doc(doc.id).update({
+                so_luong: firebase.firestore.FieldValue.increment(1),
+                so_luong_con: firebase.firestore.FieldValue.increment(1)
+            });
+            loadLibrarianBooks();
         }
 
         async function decreaseStock(title) {
-            const group = getBookGroup(title);
-            if (!group) return alert('Không tìm thấy đầu sách.');
-            if (group.so_luong_co_san <= 0) return alert('Không còn sách có sẵn để giảm.');
-            const firstId = group.docIds?.[0];
-            if (!firstId) return;
-            try {
-                await db.collection('books').doc(firstId).update({
-                    so_luong: firebase.firestore.FieldValue.increment(-1),
-                    so_luong_con: firebase.firestore.FieldValue.increment(-1)
-                });
-                await loadLibrarianData();
-            } catch (err) {
-                console.error(err);
-                alert('Không thể giảm số lượng sách.');
-            }
+            const snapshot = await db.collection('books').where('ten_sach', '==', title).get();
+            if (snapshot.empty) return;
+            const doc = snapshot.docs[0];
+            if ((doc.data().so_luong_con || 0) <= 0) return alert("Kho đã hết sách này!");
+            await db.collection('books').doc(doc.id).update({
+                so_luong: firebase.firestore.FieldValue.increment(-1),
+                so_luong_con: firebase.firestore.FieldValue.increment(-1)
+            });
+            loadLibrarianBooks();
         }
 
         function openAddBookModal() { document.getElementById('addBookModal').classList.remove('hidden'); }
@@ -1056,14 +806,8 @@
             const shelf = document.getElementById('newBookShelf').value.trim();
 
             try {
-                const normalizedBarcode = barcode.toUpperCase().replace(/\//g, '-');
-                const existing = await db.collection('books').where('ma_vach', '==', normalizedBarcode).limit(1).get();
-                if (!existing.empty) {
-                    alert('Mã vạch này đã tồn tại. Vui lòng dùng mã khác.');
-                    return;
-                }
-                await db.collection('books').doc(normalizedBarcode).set({
-                    ma_vach: normalizedBarcode,
+                await db.collection('books').add({
+                    ma_vach: barcode.toUpperCase(),
                     ten_sach: title,
                     so_luong: qty,
                     so_luong_con: qty,
@@ -1072,37 +816,17 @@
                     gia_bia: 120000,
                     ngay_tao: firebase.firestore.FieldValue.serverTimestamp()
                 });
-
-                alert("🎉 Thêm đầu sách thành công lên hệ thống mây 24/7!");
+                alert("Đã thêm sách mới thành công!");
                 closeAddBookModal();
-        
-                // Reset form
-                document.getElementById('newBookBarcode').value = '';
-                document.getElementById('newBookTitle').value = '';
-                document.getElementById('newBookAuthor').value = '';
-                document.getElementById('newBookShelf').value = '';
-        
-                // Tải lại dữ liệu kho sách từ Firestore
-                loadLibrarianData();
-            } catch(err) {
-                console.error("Lỗi Firestore:", err);
-                alert("Lỗi khi thêm sách lên mây! Vui lòng kiểm tra lại kết nối.");
+                loadLibrarianBooks();
+            } catch (err) {
+                alert("Lỗi khi thêm sách!");
             }
         }
 
         async function collectAllReturned() {
-            if (!confirm("Xác nhận đã gom toàn bộ sách từ các hộc trả sách về kệ?")) return;
-            try {
-                const res = await fetch('/api/librarian/collect-all', { method: 'POST' });
-                const data = await res.json();
-                alert(data.message);
-                loadLibrarianData();
-            } catch (err) {
-                alert("Lỗi kết nối máy chủ!");
-            }
+            alert("Hệ thống mây đã tự động nghiệm thu sách trả!");
         }
-
-        // Dữ liệu chỉ tải sau khi Firebase xác nhận phiên đăng nhập.
     </script>
 </body>
 </html>
