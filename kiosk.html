@@ -150,8 +150,19 @@
         let openedTimer = null;
         const lockerRef = db.collection('lockers');
 
-        auth.onAuthStateChanged(user => {
+        auth.onAuthStateChanged(async (user) => {
             if (user) {
+                const emailRaw = (user.email || '').toLowerCase().trim();
+
+                // KIỂM TRA PHÂN QUYỀN: Bắt buộc phải là tài khoản trạm Kiosk
+                if (!emailRaw.includes('kiosk')) {
+                    await auth.signOut();
+                    alert("⚠️ Cổng này chỉ dành riêng cho Trạm Kiosk thông minh!");
+                    $('kioskLoginSection').classList.remove('hidden');
+                    $('kioskLogoutBtnContainer').classList.add('hidden');
+                    return;
+                }
+
                 currentUser = user;
                 $('kioskLoginSection').classList.add('hidden');
                 $('kioskLogoutBtnContainer').classList.remove('hidden');
@@ -164,7 +175,6 @@
                 if (unsubscribeLockers) unsubscribeLockers();
             }
         });
-
         async function handleKioskLogin(e) {
             e.preventDefault();
             const errBox = $('kioskLoginError');

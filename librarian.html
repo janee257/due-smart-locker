@@ -399,7 +399,18 @@
         let currentLibCategory = 'all';
 
         auth.onAuthStateChanged(async (user) => {
-            if (user && user.email.includes("thuthu")) {
+            if (user) {
+                const emailRaw = (user.email || '').toLowerCase().trim();
+
+                // KIỂM TRA PHÂN QUYỀN: Bắt buộc phải là tài khoản Thủ thư
+                if (!emailRaw.includes('thuthu')) {
+                    await auth.signOut();
+                    alert("⚠️ Cổng này chỉ dành riêng cho Cán bộ Thủ thư DUE!");
+                    document.getElementById('librarianLoginSection').classList.remove('hidden');
+                    document.getElementById('libLogoutBtnContainer').classList.add('hidden');
+                    return;
+                }
+
                 document.getElementById('librarianLoginSection').classList.add('hidden');
                 document.getElementById('libLogoutBtnContainer').classList.remove('hidden');
                 await autoSeedDatabaseIfEmpty(false);
@@ -409,7 +420,6 @@
                 document.getElementById('libLogoutBtnContainer').classList.add('hidden');
             }
         });
-
         async function handleLibrarianLogin(e) {
             e.preventDefault();
             const email = document.getElementById('libEmail').value.trim();

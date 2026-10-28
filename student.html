@@ -340,12 +340,22 @@
         let calendarViewDate = new Date(new Date().getFullYear(), new Date().getMonth(), 1);
         let selectedBookingDate = '';
 
-        auth.onAuthStateChanged(user => {
+        auth.onAuthStateChanged(async (user) => {
             if (user) {
-                const mssvClean = user.email.replace('@due.udn.vn', '');
+                const emailRaw = (user.email || '').toLowerCase().trim();
+
+                // KIỂM TRA PHÂN QUYỀN: Nếu là Thủ thư hoặc Kiosk thì đăng xuất ngay
+                if (emailRaw.includes('thuthu') || emailRaw.includes('kiosk')) {
+                    await auth.signOut();
+                    alert("⚠️ Đây là cổng dành riêng cho Sinh viên. Cán bộ hoặc Trạm Kiosk vui lòng truy cập đúng cổng chức năng!");
+                    showLogin();
+                    return;
+                }
+
+                const mssvClean = emailRaw.replace('@due.udn.vn', '').trim();
                 currentUser = {
                     mssv: mssvClean,
-                    ho_ten: user.displayName || "Sinh viên DUE",
+                    ho_ten: user.displayName || `Sinh viên (${mssvClean})`,
                     email: user.email,
                     tien_no_phat: 0
                 };
@@ -356,7 +366,7 @@
                 showLogin();
             }
         });
-
+        
         async function handleLogin(e) {
             e.preventDefault();
             const mssv = document.getElementById('loginMssv').value.trim();
