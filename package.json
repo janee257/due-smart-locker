@@ -1,0 +1,17 @@
+{
+  "name": "due-smart-locker",
+  "version": "2.0.0",
+  "private": true,
+  "description": "DUE Smart Locker: giao diện tĩnh + API serverless trên Vercel, dữ liệu Firestore, đăng nhập Firebase Auth",
+  "engines": {
+    "node": "22.x"
+  },
+  "scripts": {
+    "seed": "node scripts/seed.js",
+    "test": "node test/run.js",
+    "test:e2e": "node test/e2e.js"
+  },
+  "dependencies": {
+    "firebase-admin": "^12.7.0"
+  }
+}

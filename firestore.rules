@@ -1,0 +1,18 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    // Dữ liệu thật chỉ đi qua API trên Vercel (firebase-admin bỏ qua Rules).
+    // Client bị chặn hoàn toàn, trừ một tài liệu "tín hiệu" để kiosk và thủ thư
+    // biết lúc nào cần tải lại dữ liệu (không chứa thông tin cá nhân).
+    match /meta/sync {
+      allow read: if request.auth != null
+                  && request.auth.token.role in ['kiosk', 'thu_thu'];
+      allow write: if false;
+    }
+
+    match /{document=**} {
+      allow read, write: if false;
+    }
+  }
+}

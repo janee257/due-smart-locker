@@ -1,2 +1,12 @@
+# Bí mật: KHÔNG BAO GIỜ đưa lên Git
+serviceAccountKey*.json
+*-firebase-adminsdk-*.json
+.env
+.env.*
 
-serviceAccountKey.json
+# Công cụ / file tạm
+node_modules/
+.vercel/
+__pycache__/
+*.pyc
+cloudflared.exe
