@@ -836,16 +836,30 @@
         }
 
         async function fetchBorrowedBooks() {
-            if (!currentUser) return;
-            try {
-                const res = await fetch(`/api/student/borrowed/${currentUser.id}`);
-                borrowedBooks = await res.json();
-                document.getElementById('borrowedCount').innerText = borrowedBooks.length;
-                renderBorrowedBooks();
-            } catch (err) {
-                console.error("Lỗi nạp sách đang mượn:", err);
-            }
-        }
+    if (!currentUser) return;
+    try {
+        const firestoreDb = window.db || firebase.firestore();
+        // Truy vấn các lượt mượn đang hoạt động của sinh viên theo MSSV
+        const mssv = currentUser.mssv || "";
+        const snapshot = await firestoreDb.collection('borrowings')
+            .where('mssv', '==', mssv)
+            .where('trang_thai', '==', 'dang_muon')
+            .get();
+
+        borrowedBooks = [];
+        snapshot.forEach(doc => {
+            borrowedBooks.push({ res_id: doc.id, ...doc.data() });
+        });
+
+        document.getElementById('borrowedCount').innerText = borrowedBooks.length;
+        renderBorrowedBooks();
+    } catch (err) {
+        console.warn("Chưa có dữ liệu sách đang mượn trên Firestore:", err);
+        borrowedBooks = [];
+        document.getElementById('borrowedCount').innerText = "0";
+        renderBorrowedBooks();
+    }
+}
 
         let selectedReturnIds = [];
 
@@ -1033,53 +1047,57 @@
         }
 
         async function fetchHistory() {
-            if (!currentUser) return;
-            try {
-                const res = await fetch(`/api/student/history/${currentUser.id}`);
-                const historyData = await res.json();
-                const list = document.getElementById('historyList');
-                list.innerHTML = '';
+    if (!currentUser) return;
+    try {
+        const firestoreDb = window.db || firebase.firestore();
+        const mssv = currentUser.mssv || "";
+        const snapshot = await firestoreDb.collection('borrowings')
+            .where('mssv', '==', mssv)
+            .get();
 
-                if (historyData.length === 0) {
-                    list.innerHTML = `<p class="col-span-full text-center text-xs sm:text-sm text-slate-400 py-10">Chưa có lịch sử mượn trả sách.</p>`;
-                    return;
-                }
+        const historyData = [];
+        snapshot.forEach(doc => {
+            historyData.push({ id: doc.id, ...doc.data() });
+        });
 
-                historyData.forEach(h => {
-                    const isCompleted = h.trang_thai_don === 'hoan_tat';
-                    const isCancelled = h.trang_thai_don === 'da_huy_do_qua_han';
-                    
-                    let statusBadge = '';
-                    if (isCompleted) {
-                        statusBadge = `<span class="px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-slate-100 text-slate-600">Đã hoàn tất trả</span>`;
-                    } else if (isCancelled) {
-                        statusBadge = `<span class="px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-rose-100 text-rose-700">Đã hủy (Không đến lấy)</span>`;
-                    } else {
-                        statusBadge = `<span class="px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-amber-100 text-amber-700">Đang xử lý</span>`;
-                    }
+        const list = document.getElementById('historyList');
+        list.innerHTML = '';
 
-                    list.innerHTML += `
-                        <div class="bg-white p-4 rounded-2xl border border-slate-200 shadow-sm text-xs space-y-1.5">
-                            <div class="flex justify-between items-center">
-                                <span class="font-mono text-[10px] text-slate-400 bg-slate-50 px-2 py-0.5 rounded">${h.ma_vach}</span>
-                                ${statusBadge}
-                            </div>
-                            <h4 class="font-bold text-slate-800 leading-snug">${h.ten_sach}</h4>
-                            <div class="text-[11px] text-slate-500 flex justify-between pt-1 border-t">
-                                <span>Lịch hẹn: <b>${h.ngay_hen || '--'}</b></span>
-                                <span>Trạng thái: <b>${isCancelled ? 'Hết hạn nhận' : (h.ngay_tra ? 'Đã trả' : 'Đang giữ')}</b></span>
-                            </div>
-                            <div class="flex justify-between text-[11px]">
-                                <span class="text-slate-400">Hạn quy định: ${h.han_tra || '--'}</span>
-                                ${h.tien_phat > 0 ? `<span class="text-rose-600 font-bold">Nộp phạt: ${h.tien_phat.toLocaleString()} đ</span>` : ''}
-                            </div>
-                        </div>
-                    `;
-                });
-            } catch (err) {
-                console.error("Lỗi nạp lịch sử:", err);
-            }
+        if (historyData.length === 0) {
+            list.innerHTML = `<p class="col-span-full text-center text-xs sm:text-sm text-slate-400 py-10">Chưa có lịch sử mượn trả sách.</p>`;
+            return;
         }
+
+        historyData.forEach(h => {
+            const isCompleted = h.trang_thai === 'hoan_tat';
+            const isCancelled = h.trang_thai === 'da_huy_do_qua_han';
+            
+            let statusBadge = '';
+            if (isCompleted) {
+                statusBadge = `<span class="px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-slate-100 text-slate-600">Đã hoàn tất trả</span>`;
+            } else if (isCancelled) {
+                statusBadge = `<span class="px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-rose-100 text-rose-700">Đã hủy</span>`;
+            } else {
+                statusBadge = `<span class="px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-amber-100 text-amber-700">Đang mượn</span>`;
+            }
+
+            list.innerHTML += `
+                <div class="bg-white p-4 rounded-2xl border border-slate-200 shadow-sm text-xs space-y-1.5">
+                    <div class="flex justify-between items-center">
+                        <span class="font-mono text-[10px] text-slate-400 bg-slate-50 px-2 py-0.5 rounded">${h.ma_vach || 'DUE'}</span>
+                        ${statusBadge}
+                    </div>
+                    <h4 class="font-bold text-slate-800 leading-snug">${h.ten_sach}</h4>
+                    <div class="text-[11px] text-slate-500 flex justify-between pt-1 border-t">
+                        <span>Hạn trả: <b>${h.han_tra || '--'}</b></span>
+                    </div>
+                </div>
+            `;
+        });
+    } catch (err) {
+        console.warn("Chưa có lịch sử trên Firestore:", err);
+    }
+}
 
         function showBarcodeModal(barcode, title) {
             document.getElementById('barcodeBookTitle').innerText = title;
