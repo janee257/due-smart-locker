@@ -641,6 +641,10 @@
             }
         }
 
+        // ================= TỰ ĐỘNG ĐÓNG QR KHI KIOSK QUÉT THÀNH CÔNG =================
+        let unsubscribeActivePickupQr = null;
+        let unsubscribeActiveReturnQr = null;
+
         function showQr(title, slot, locker, token) {
             const card = document.getElementById('activeQrCard');
             card.classList.remove('hidden');
@@ -653,8 +657,56 @@
             qrContainer.innerHTML = '';
             new QRCode(qrContainer, { text: token, width: 140, height: 140 });
             window.scrollTo({ top: 0, behavior: 'smooth' });
+
+            // Lắng nghe realtime đơn hàng trong bảng 'orders'
+            if (unsubscribeActivePickupQr) unsubscribeActivePickupQr();
+            unsubscribeActivePickupQr = db.collection('orders')
+                .where('qr_token', '==', token)
+                .onSnapshot(snapshot => {
+                    snapshot.forEach(doc => {
+                        const data = doc.data();
+                        // Khi Kiosk quét thành công -> đơn chuyển sang 'da_nhan'
+                        if (data.trang_thai_don === 'da_nhan') {
+                            card.classList.add('hidden'); // Tắt QR ngay lập tức
+                            alert(`🎉 Bạn đã nhận sách thành công tại ${locker}! Vui lòng kiểm tra sách trong tab "Đang mượn".`);
+                            unsubscribeActivePickupQr();
+                            unsubscribeActivePickupQr = null;
+                            fetchBorrowedBooks(); // Làm mới tab đang mượn
+                        }
+                    });
+                });
         }
 
+        function showReturnQr(count, lockerName, token) {
+            const card = document.getElementById('activeReturnQrCard');
+            card.classList.remove('hidden');
+            document.getElementById('returnBookCount').innerText = count;
+            document.getElementById('returnLockerNum').innerText = lockerName;
+            document.getElementById('returnTokenVal').innerText = token;
+
+            const qrBox = document.getElementById('returnQrcode');
+            qrBox.innerHTML = '';
+            new QRCode(qrBox, { text: token, width: 140, height: 140 });
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+
+            // Lắng nghe realtime đơn trả trong bảng 'returns'
+            if (unsubscribeActiveReturnQr) unsubscribeActiveReturnQr();
+            unsubscribeActiveReturnQr = db.collection('returns')
+                .where('qr_token', '==', token)
+                .onSnapshot(snapshot => {
+                    snapshot.forEach(doc => {
+                        const data = doc.data();
+                        // Khi Kiosk quét thành công -> đơn trả chuyển sang 'cho_kiem_tra'
+                        if (data.trang_thai === 'cho_kiem_tra') {
+                            card.classList.add('hidden'); // Tắt QR ngay lập tức
+                            alert(`🎉 Đã mở ${lockerName}! Bạn đã gửi sách vào tủ thành công, vui lòng chờ Thủ thư kiểm tra.`);
+                            unsubscribeActiveReturnQr();
+                            unsubscribeActiveReturnQr = null;
+                            fetchBorrowedBooks(); // Cập nhật lại trạng thái sách sang "Chờ kiểm tra"
+                        }
+                    });
+                });
+        }
         // TẢI SÁCH ĐANG MƯỢN CỦA SINH VIÊN TỪ FIRESTORE
         async function fetchBorrowedBooks() {
             if (!currentUser) return;
@@ -834,63 +886,86 @@
             }
         }
 
-        function showReturnQr(count, lockerName, token) {
-            const card = document.getElementById('activeReturnQrCard');
-            card.classList.remove('hidden');
-            document.getElementById('returnBookCount').innerText = count;
-            document.getElementById('returnLockerNum').innerText = lockerName;
-            document.getElementById('returnTokenVal').innerText = token;
+    // ================= TAB 3: LỊCH SỬ MƯỢN TRẢ REALTIME =================
+        let unsubscribeHistory = null;
 
-            const qrBox = document.getElementById('returnQrcode');
-            qrBox.innerHTML = '';
-            new QRCode(qrBox, { text: token, width: 140, height: 140 });
-            window.scrollTo({ top: 0, behavior: 'smooth' });
-        }
+        function fetchHistory() {
+            if (!currentUser || !currentUser.mssv) return;
 
-        // TẢI LỊCH SỬ MƯỢN TRẢ
-        async function fetchHistory() {
-            if (!currentUser) return;
-            try {
-                const snapshot = await db.collection('borrowings')
-                    .where('mssv', '==', currentUser.mssv)
-                    .get();
+            const mssv = currentUser.mssv.trim();
+            const list = document.getElementById('historyList');
 
-                const historyData = [];
-                snapshot.forEach(doc => historyData.push({ id: doc.id, ...doc.data() }));
+            if (unsubscribeHistory) unsubscribeHistory();
 
-                const list = document.getElementById('historyList');
-                list.innerHTML = '';
+            unsubscribeHistory = db.collection('borrowings')
+                .where('mssv', '==', mssv)
+                .onSnapshot(snapshot => {
+                    const historyData = [];
+                    snapshot.forEach(doc => {
+                        historyData.push({ id: doc.id, ...doc.data() });
+                    });
 
-                if (historyData.length === 0) {
-                    list.innerHTML = `<p class="col-span-full text-center text-xs sm:text-sm text-slate-400 py-10">Chưa có lịch sử mượn trả sách.</p>`;
-                    return;
-                }
+                    // Sắp xếp các lượt mượn/trả mới nhất lên đầu
+                    historyData.sort((a, b) => {
+                        const timeA = a.ngay_tao ? a.ngay_tao.toMillis() : 0;
+                        const timeB = b.ngay_tao ? b.ngay_tao.toMillis() : 0;
+                        return timeB - timeA;
+                    });
 
-                historyData.forEach(h => {
-                    const isCompleted = h.trang_thai === 'hoan_tat';
-                    let statusBadge = isCompleted ? 
-                        `<span class="px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-slate-100 text-slate-600">Đã hoàn tất trả</span>` :
-                        `<span class="px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-amber-100 text-amber-700">Đang lưu hành</span>`;
+                    list.innerHTML = '';
 
-                    list.innerHTML += `
-                        <div class="bg-white p-4 rounded-2xl border border-slate-200 shadow-sm text-xs space-y-1.5">
-                            <div class="flex justify-between items-center">
-                                <span class="font-mono text-[10px] text-slate-400 bg-slate-50 px-2 py-0.5 rounded">${h.ma_vach || 'DUE'}</span>
-                                ${statusBadge}
+                    if (historyData.length === 0) {
+                        list.innerHTML = `
+                            <div class="col-span-full text-center py-12 space-y-2 bg-white rounded-3xl border border-dashed border-slate-200">
+                                <i class="fa-solid fa-clock-rotate-left text-3xl text-slate-300"></i>
+                                <p class="text-xs sm:text-sm text-slate-500 font-medium">Bạn chưa có lịch sử mượn trả sách nào.</p>
                             </div>
-                            <h4 class="font-bold text-slate-800 leading-snug">${h.ten_sach}</h4>
-                            <div class="text-[11px] text-slate-500 flex justify-between pt-1 border-t">
-                                <span>Mượn ngày: <b>${h.ngay_muon || '--'}</b></span>
-                                <span>Hạn trả: <b>${h.han_tra || '--'}</b></span>
+                        `;
+                        return;
+                    }
+
+                    historyData.forEach(h => {
+                        const status = h.trang_thai;
+                        let statusBadge = '';
+
+                        if (status === 'hoan_tat') {
+                            statusBadge = `<span class="px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-slate-100 text-slate-600"><i class="fa-solid fa-check mr-1 text-emerald-600"></i>Đã hoàn tất trả</span>`;
+                        } else if (status === 'cho_kiem_tra') {
+                            statusBadge = `<span class="px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-blue-100 text-blue-700"><i class="fa-solid fa-box-archive mr-1"></i>Đã gửi vào tủ</span>`;
+                        } else if (status === 'dang_muon') {
+                            statusBadge = `<span class="px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-amber-100 text-amber-700"><i class="fa-solid fa-book-reader mr-1"></i>Đang giữ sách</span>`;
+                        } else {
+                            statusBadge = `<span class="px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-slate-100 text-slate-500">${status}</span>`;
+                        }
+
+                        list.innerHTML += `
+                            <div class="bg-white p-4 rounded-2xl border border-slate-200 shadow-xs text-xs space-y-2 hover:border-orange-300 transition">
+                                <div class="flex justify-between items-center">
+                                    <span class="font-mono text-[10px] text-slate-500 bg-slate-100 px-2 py-0.5 rounded-md font-bold">${h.ma_vach || 'DUE'}</span>
+                                    ${statusBadge}
+                                </div>
+                                <h4 class="font-bold text-slate-800 text-xs sm:text-sm leading-snug">${h.ten_sach}</h4>
+                                <div class="text-[11px] text-slate-500 flex justify-between pt-1.5 border-t border-slate-100">
+                                    <span>Ngày mượn: <b>${h.ngay_muon || '--'}</b></span>
+                                    <span>Hạn trả: <b class="text-orange-600">${h.han_tra || '--'}</b></span>
+                                </div>
+                                ${h.ngay_tra_thuc_te ? `
+                                    <div class="text-[10px] text-emerald-600 font-semibold">
+                                        <i class="fa-regular fa-calendar-check mr-1"></i>Đã trả vào ngày: ${h.ngay_tra_thuc_te}
+                                    </div>
+                                ` : ''}
+                                ${h.tien_phat ? `
+                                    <div class="text-[10px] text-rose-600 font-bold bg-rose-50 p-1.5 rounded-lg border border-rose-100">
+                                        Phạt: ${h.tien_phat.toLocaleString()} đ ${h.ghi_chu_phat ? `(${h.ghi_chu_phat})` : ''}
+                                    </div>
+                                ` : ''}
                             </div>
-                        </div>
-                    `;
+                        `;
+                    });
+                }, err => {
+                    console.error("Lỗi nghe lịch sử:", err);
                 });
-            } catch (err) {
-                console.error("Lỗi nạp lịch sử:", err);
-            }
         }
-
         // ================= CỤM LỊCH THÁNG =================
         function openBookingCartModal() {
             if (cart.length === 0) return alert("Giỏ hàng đang trống!");
