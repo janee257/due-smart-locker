@@ -1070,61 +1070,58 @@ function removeFromCart(bookId) {
 
     try {
         const firestoreDb = window.db || firebase.firestore();
-
-        // Lấy thông tin chi tiết các cuốn sách sinh viên đang chọn trả từ mảng borrowedBooks
         const booksToReturn = borrowedBooks.filter(b => selectedReturnIds.includes(b.res_id));
 
-        // 1. Tìm 1 hộc tủ trống để nhận sách trả
+        // 1. Tìm 1 hộc trống
         const lockerSnap = await firestoreDb.collection('lockers')
             .where('trang_thai', '==', 'trong')
             .limit(1)
             .get();
 
         if (lockerSnap.empty) {
-            return alert("Hiện tại tất cả hộc tủ Smart Locker đều đã đầy, không còn chỗ nhận sách trả!");
+            return alert("Hiện tại tất cả hộc tủ Smart Locker đều đã bận, không còn chỗ nhận sách trả!");
         }
 
         const lockerDoc = lockerSnap.docs[0];
         const assignedLocker = lockerDoc.data().so_hoc || "Hộc 01";
-
-        // 2. Tạo mã Token trả sách duy nhất
         const returnToken = "TRA-" + Math.random().toString(36).substring(2, 8).toUpperCase();
 
-        // 3. Chuẩn bị danh sách tên sách và mã vạch để Thủ thư dễ dàng kiểm tra
-        const bookNames = booksToReturn.map(b => b.ten_sach).join(", ");
-        const barcodes = booksToReturn.map(b => b.ma_vach).join(", ");
-
         const batch = firestoreDb.batch();
-        
-        // Cập nhật trạng thái hộc tủ
+
+        // 2. Đặt trước hộc tủ nhận trả
         batch.update(lockerDoc.ref, {
-            trang_thai: 'chua_sach_tra',
+            trang_thai: 'cho_tra',
             qr_token: returnToken,
             cap_nhat_luc: firebase.firestore.FieldValue.serverTimestamp()
         });
 
-        // Lưu thông tin đầy đủ vào bảng 'returns' cho Thủ thư
+        // 3. Chuẩn bị danh sách chi tiết từng cuốn
+        const itemsList = booksToReturn.map(b => ({
+            borrow_id: b.res_id,
+            ten_sach: b.ten_sach,
+            ma_vach: b.ma_vach || "DUE-BOOK"
+        }));
+
+        // 4. Lưu đơn trả vào 'returns'
         const returnRef = firestoreDb.collection('returns').doc();
         batch.set(returnRef, {
             mssv: currentUser.mssv || "251121514110",
             ho_ten: currentUser.ho_ten || "Sinh viên DUE",
             so_hoc: assignedLocker,
             qr_token: returnToken,
-            ma_vach: barcodes,
-            ten_sach: bookNames,
-            reservation_ids: selectedReturnIds,
-            trang_thai: 'cho_kiem_tra',
-            ngay_tra: firebase.firestore.FieldValue.serverTimestamp()
+            items: itemsList,
+            so_luong: itemsList.length,
+            trang_thai: 'cho_tra_tai_kiosk',
+            ngay_tao: firebase.firestore.FieldValue.serverTimestamp()
         });
 
         await batch.commit();
 
-        // Hiển thị mã QR trả sách lên giao diện sinh viên
-        showReturnQr(selectedReturnIds.length, assignedLocker, returnToken);
+        showReturnQr(itemsList.length, assignedLocker, returnToken);
 
     } catch (err) {
         console.error("Lỗi tạo mã trả sách:", err);
-        alert("Lỗi kết nối hệ thống mây! Không thể tạo mã trả sách.");
+        alert("Lỗi kết nối hệ thống! Vui lòng thử lại.");
     }
 }
 

@@ -217,32 +217,26 @@
   }
 
   // LẮNG NGHE REALTIME 20 HỘC TỦ VÀ ĐƠN HÀNG TRÊN FIRESTORE
+    // LẮNG NGHE REALTIME 20 HỘC TỦ
   function subscribeLockers() {
     stopLockerSubscription();
     
-    // Lắng nghe đồng thời cả bảng 'lockers' và bảng 'orders' để đồng bộ trạng thái hộc
-    unsubscribeLockers = db.collection('orders').where('trang_thai_don', 'in', ['cho_soan', 'da_soan_xong']).onSnapshot(orderSnap => {
-      const activeLockersMap = new Map();
-      
-      orderSnap.forEach(doc => {
+    // Lắng nghe trực tiếp từ bảng lockers trên Firestore
+    unsubscribeLockers = lockerRef.onSnapshot(snapshot => {
+      lockersMap.clear();
+      snapshot.forEach(doc => {
         const d = doc.data();
-        if (d.so_hoc) {
-          // Nếu đơn chờ soạn -> hiện màu vàng (Chờ lấy / Đang nạp)
-          activeLockersMap.set(d.so_hoc, {
-            so_hoc: d.so_hoc,
-            trang_thai: d.trang_thai_don === 'da_soan_xong' ? 'cho_nhan' : 'cho_soan'
-          });
-        }
+        const soHoc = d.so_hoc || doc.id;
+        lockersMap.set(soHoc, { id: doc.id, ...d, so_hoc: soHoc });
       });
 
-      // Tạo danh sách chuẩn 20 hộc từ Hộc 01 đến Hộc 20
       const list = [];
       for (let i = 1; i <= 20; i++) {
         const key = `Hộc ${i < 10 ? '0' + i : i}`;
-        if (activeLockersMap.has(key)) {
-          list.push(activeLockersMap.get(key));
+        if (lockersMap.has(key)) {
+          list.push(lockersMap.get(key));
         } else {
-          list.push({ so_hoc: key, trang_thai: 'trong' });
+          list.push({ id: `hoc_${i}`, so_hoc: key, trang_thai: 'trong' });
         }
       }
 
@@ -250,10 +244,69 @@
       $('connectionState').textContent = 'Firestore trực tuyến (Realtime)';
     }, err => {
       console.error('Lỗi Firestore lockers:', err);
-      $('connectionState').textContent = 'Mất kết nối Firestore';
     });
   }
-  
+
+  // XỬ LÝ QUÉT MÃ TRẢ SÁCH TẠI KIOSK
+  async function handleReturn() {
+    if (!currentUser) return showNotice('Vui lòng kích hoạt trạm Kiosk trước.', 'error');
+    const code = $('manualInput').value.trim().toUpperCase();
+    if (!code) return showNotice('Vui lòng quét QR trả sách (TRA-...) hoặc nhập mã.', 'error');
+
+    try {
+      // 1. Tìm đơn trả sách theo mã QR token trong collection 'returns'
+      const returnSnap = await db.collection('returns').where('qr_token', '==', code).limit(1).get();
+      
+      if (returnSnap.empty) {
+        return showNotice('Mã trả sách không tồn tại hoặc đã được xử lý!', 'error');
+      }
+
+      const returnDoc = returnSnap.docs[0];
+      const returnData = returnDoc.data();
+
+      if (returnData.trang_thai !== 'cho_tra_tai_kiosk') {
+        return showNotice('Đơn trả này đã được bỏ vào tủ trước đó!', 'error');
+      }
+
+      const targetLocker = returnData.so_hoc;
+
+      // 2. Cập nhật hộc tủ sang 'chua_sach_tra'
+      const lSnap = await lockerRef.where('so_hoc', '==', targetLocker).limit(1).get();
+      if (!lSnap.empty) {
+        await lSnap.docs[0].ref.update({
+          trang_thai: 'chua_sach_tra',
+          qr_token: code,
+          cap_nhat_luc: firebase.firestore.FieldValue.serverTimestamp()
+        });
+      }
+
+      // 3. Cập nhật trạng thái đơn trả sang 'cho_kiem_tra' (chờ thủ thư)
+      await returnDoc.ref.update({
+        trang_thai: 'cho_kiem_tra',
+        thoi_gian_bo_tu: firebase.firestore.FieldValue.serverTimestamp()
+      });
+
+      // 4. Đổi trạng thái các cuốn sách trong 'borrowings' sang 'cho_kiem_tra'
+      const items = returnData.items || [];
+      const batch = db.batch();
+      items.forEach(it => {
+        if (it.borrow_id) {
+          batch.update(db.collection('borrowings').doc(it.borrow_id), {
+            trang_thai: 'cho_kiem_tra',
+            so_hoc_tra: targetLocker
+          });
+        }
+      });
+      await batch.commit();
+
+      $('manualInput').value = '';
+      showNotice(`🎉 Chốt điện đã mở ${targetLocker}! Vui lòng bỏ ${items.length} cuốn sách vào hộc và đóng cửa tủ.`, 'success');
+
+    } catch (err) {
+      console.error(err);
+      showNotice('Lỗi xử lý trả sách: ' + (err.message || 'Lỗi Firestore.'), 'error');
+    }
+  }
   function stopLockerSubscription() { 
     if (unsubscribeLockers) unsubscribeLockers(); 
     unsubscribeLockers = null; 
@@ -373,46 +426,7 @@
   }
 
   // ================= XỬ LÝ QUÉT / NHẬP TRẢ SÁCH =================
-  async function handleReturn() {
-    if (!currentUser) return showNotice('Vui lòng kích hoạt trạm Kiosk trước.', 'error');
-    const code = $('manualInput').value.trim();
-    if (!code) return showNotice('Vui lòng quét QR trả sách (TRA-...) hoặc mã vạch sách.', 'error');
 
-    try {
-      // 1. Tìm hộc tủ trống để nhận sách trả
-      const emptyLockerSnap = await lockerRef.where('trang_thai', '==', 'trong').limit(1).get();
-      if (emptyLockerSnap.empty) {
-        return showNotice('Hiện tại tất cả 20 hộc tủ đều đang bận, vui lòng liên hệ Thủ thư!', 'error');
-      }
-
-      const emptyDoc = emptyLockerSnap.docs[0];
-      const emptyLockerName = emptyDoc.data().so_hoc || 'Hộc tủ';
-
-      // 2. Chuyển hộc tủ sang 'chua_sach_tra'
-      await emptyDoc.ref.update({
-        trang_thai: 'chua_sach_tra',
-        ma_tra: code,
-        cap_nhat_luc: firebase.firestore.FieldValue.serverTimestamp()
-      });
-
-      // 3. Đẩy thông tin vào collection 'returns' để Thủ thư kiểm tra
-      await db.collection('returns').add({
-        so_hoc: emptyLockerName,
-        ma_vach: code,
-        ten_sach: `Sách trả mã ${code}`,
-        mssv: 'Sinh viên',
-        trang_thai: 'cho_kiem_tra',
-        ngay_tra: firebase.firestore.FieldValue.serverTimestamp()
-      });
-
-      $('manualInput').value = '';
-      showNotice(`🎉 Đã mở ${emptyLockerName} để nhận sách trả! Vui lòng bỏ sách vào hộc và đóng cửa tủ.`, 'success');
-
-    } catch (err) {
-      console.error(err);
-      showNotice('Lỗi ghi nhận trả sách: ' + (err.message || 'Lỗi Firestore.'), 'error');
-    }
-  }
 
   function showNotice(message, type) {
     const box = $('statusBox');
