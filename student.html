@@ -886,86 +886,136 @@
             }
         }
 
-    // ================= TAB 3: LỊCH SỬ MƯỢN TRẢ REALTIME =================
-        let unsubscribeHistory = null;
+        // ================= TAB 3: TỔNG HỢP TOÀN BỘ LỊCH SỬ TỪ SERVER =================
+        let unsubscribeHistoryOrders = null;
+        let unsubscribeHistoryBorrows = null;
 
         function fetchHistory() {
             if (!currentUser || !currentUser.mssv) return;
 
-            const mssv = currentUser.mssv.trim();
+            const mssv = String(currentUser.mssv).trim();
             const list = document.getElementById('historyList');
 
-            if (unsubscribeHistory) unsubscribeHistory();
+            if (unsubscribeHistoryOrders) unsubscribeHistoryOrders();
+            if (unsubscribeHistoryBorrows) unsubscribeHistoryBorrows();
 
-            unsubscribeHistory = db.collection('borrowings')
+            let historyOrders = [];
+            let historyBorrows = [];
+
+            function renderCombinedHistory() {
+                // Hợp nhất dữ liệu từ cả 2 nguồn: orders và borrowings
+                const combined = [...historyBorrows, ...historyOrders];
+
+                // Sắp xếp thời gian mới nhất lên đầu
+                combined.sort((a, b) => {
+                    const timeA = a.sortTime || 0;
+                    const timeB = b.sortTime || 0;
+                    return timeB - timeA;
+                });
+
+                list.innerHTML = '';
+
+                if (combined.length === 0) {
+                    list.innerHTML = `
+                        <div class="col-span-full text-center py-12 space-y-2 bg-white rounded-3xl border border-dashed border-slate-200">
+                            <i class="fa-solid fa-clock-rotate-left text-3xl text-slate-300"></i>
+                            <p class="text-xs sm:text-sm text-slate-500 font-medium">Chưa có bản ghi lịch sử nào cho tài khoản này.</p>
+                        </div>
+                    `;
+                    return;
+                }
+
+                combined.forEach(h => {
+                    list.innerHTML += `
+                        <div class="bg-white p-4 rounded-2xl border border-slate-200 shadow-xs text-xs space-y-2 hover:border-orange-300 transition">
+                            <div class="flex justify-between items-center">
+                                <span class="font-mono text-[10px] text-slate-500 bg-slate-100 px-2 py-0.5 rounded-md font-bold">${h.barcode}</span>
+                                ${h.statusBadge}
+                            </div>
+                            <h4 class="font-bold text-slate-800 text-xs sm:text-sm leading-snug">${h.title}</h4>
+                            <div class="text-[11px] text-slate-500 flex justify-between pt-1.5 border-t border-slate-100">
+                                <span>${h.timeLabel}: <b>${h.timeValue}</b></span>
+                                <span>Hạn trả: <b class="text-orange-600">${h.dueDate}</b></span>
+                            </div>
+                            ${h.extraInfo ? `<div class="text-[10px] text-emerald-600 font-semibold">${h.extraInfo}</div>` : ''}
+                            ${h.fineInfo ? `<div class="text-[10px] text-rose-600 font-bold bg-rose-50 p-1.5 rounded-lg border border-rose-100">${h.fineInfo}</div>` : ''}
+                        </div>
+                    `;
+                });
+            }
+
+            // 1. Lắng nghe các cuốn sách trong 'borrowings' (Đang giữ, Chờ kiểm tra, Đã hoàn tất)
+            unsubscribeHistoryBorrows = db.collection('borrowings')
                 .where('mssv', '==', mssv)
                 .onSnapshot(snapshot => {
-                    const historyData = [];
+                    historyBorrows = [];
                     snapshot.forEach(doc => {
-                        historyData.push({ id: doc.id, ...doc.data() });
-                    });
-
-                    // Sắp xếp các lượt mượn/trả mới nhất lên đầu
-                    historyData.sort((a, b) => {
-                        const timeA = a.ngay_tao ? a.ngay_tao.toMillis() : 0;
-                        const timeB = b.ngay_tao ? b.ngay_tao.toMillis() : 0;
-                        return timeB - timeA;
-                    });
-
-                    list.innerHTML = '';
-
-                    if (historyData.length === 0) {
-                        list.innerHTML = `
-                            <div class="col-span-full text-center py-12 space-y-2 bg-white rounded-3xl border border-dashed border-slate-200">
-                                <i class="fa-solid fa-clock-rotate-left text-3xl text-slate-300"></i>
-                                <p class="text-xs sm:text-sm text-slate-500 font-medium">Bạn chưa có lịch sử mượn trả sách nào.</p>
-                            </div>
-                        `;
-                        return;
-                    }
-
-                    historyData.forEach(h => {
-                        const status = h.trang_thai;
-                        let statusBadge = '';
-
-                        if (status === 'hoan_tat') {
-                            statusBadge = `<span class="px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-slate-100 text-slate-600"><i class="fa-solid fa-check mr-1 text-emerald-600"></i>Đã hoàn tất trả</span>`;
-                        } else if (status === 'cho_kiem_tra') {
-                            statusBadge = `<span class="px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-blue-100 text-blue-700"><i class="fa-solid fa-box-archive mr-1"></i>Đã gửi vào tủ</span>`;
-                        } else if (status === 'dang_muon') {
-                            statusBadge = `<span class="px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-amber-100 text-amber-700"><i class="fa-solid fa-book-reader mr-1"></i>Đang giữ sách</span>`;
+                        const d = doc.data();
+                        const t = d.ngay_tao ? (d.ngay_tao.toMillis ? d.ngay_tao.toMillis() : new Date(d.ngay_tao).getTime()) : 0;
+                        
+                        let badge = '';
+                        if (d.trang_thai === 'hoan_tat') {
+                            badge = `<span class="px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-slate-100 text-slate-600"><i class="fa-solid fa-check mr-1 text-emerald-600"></i>Đã hoàn tất trả</span>`;
+                        } else if (d.trang_thai === 'cho_kiem_tra') {
+                            badge = `<span class="px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-blue-100 text-blue-700"><i class="fa-solid fa-box-archive mr-1"></i>Đã gửi vào tủ</span>`;
                         } else {
-                            statusBadge = `<span class="px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-slate-100 text-slate-500">${status}</span>`;
+                            badge = `<span class="px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-amber-100 text-amber-700"><i class="fa-solid fa-book-reader mr-1"></i>Đang giữ sách</span>`;
                         }
 
-                        list.innerHTML += `
-                            <div class="bg-white p-4 rounded-2xl border border-slate-200 shadow-xs text-xs space-y-2 hover:border-orange-300 transition">
-                                <div class="flex justify-between items-center">
-                                    <span class="font-mono text-[10px] text-slate-500 bg-slate-100 px-2 py-0.5 rounded-md font-bold">${h.ma_vach || 'DUE'}</span>
-                                    ${statusBadge}
-                                </div>
-                                <h4 class="font-bold text-slate-800 text-xs sm:text-sm leading-snug">${h.ten_sach}</h4>
-                                <div class="text-[11px] text-slate-500 flex justify-between pt-1.5 border-t border-slate-100">
-                                    <span>Ngày mượn: <b>${h.ngay_muon || '--'}</b></span>
-                                    <span>Hạn trả: <b class="text-orange-600">${h.han_tra || '--'}</b></span>
-                                </div>
-                                ${h.ngay_tra_thuc_te ? `
-                                    <div class="text-[10px] text-emerald-600 font-semibold">
-                                        <i class="fa-regular fa-calendar-check mr-1"></i>Đã trả vào ngày: ${h.ngay_tra_thuc_te}
-                                    </div>
-                                ` : ''}
-                                ${h.tien_phat ? `
-                                    <div class="text-[10px] text-rose-600 font-bold bg-rose-50 p-1.5 rounded-lg border border-rose-100">
-                                        Phạt: ${h.tien_phat.toLocaleString()} đ ${h.ghi_chu_phat ? `(${h.ghi_chu_phat})` : ''}
-                                    </div>
-                                ` : ''}
-                            </div>
-                        `;
+                        historyBorrows.push({
+                            id: doc.id,
+                            barcode: d.ma_vach || 'DUE-BOOK',
+                            title: d.ten_sach,
+                            timeLabel: 'Ngày mượn',
+                            timeValue: d.ngay_muon || 'Hôm nay',
+                            dueDate: d.han_tra || '--',
+                            statusBadge: badge,
+                            extraInfo: d.ngay_tra_thuc_te ? `<i class="fa-regular fa-calendar-check mr-1"></i>Đã trả vào: ${d.ngay_tra_thuc_te}` : null,
+                            fineInfo: d.tien_phat ? `Phạt: ${d.tien_phat.toLocaleString()} đ ${d.ghi_chu_phat ? `(${d.ghi_chu_phat})` : ''}` : null,
+                            sortTime: t
+                        });
                     });
-                }, err => {
-                    console.error("Lỗi nghe lịch sử:", err);
+                    renderCombinedHistory();
+                });
+
+            // 2. Lắng nghe các đơn đặt mượn trong 'orders' (Đơn hẹn chờ lấy hoặc đã hủy do quá hạn)
+            unsubscribeHistoryOrders = db.collection('orders')
+                .where('mssv', '==', mssv)
+                .onSnapshot(snapshot => {
+                    historyOrders = [];
+                    snapshot.forEach(doc => {
+                        const o = doc.data();
+                        // Chỉ lấy các đơn đang chờ soạn / chờ lấy hoặc đơn bị hủy (các đơn 'da_nhan' đã chuyển thành borrowings)
+                        if (['cho_soan', 'da_soan_xong', 'da_huy_do_qua_han'].includes(o.trang_thai_don)) {
+                            const t = o.ngay_tao ? (o.ngay_tao.toMillis ? o.ngay_tao.toMillis() : new Date(o.ngay_tao).getTime()) : 0;
+                            const books = o.books || [];
+                            const titles = books.map(b => b.ten_sach).join(', ') || 'Đơn mượn sách';
+
+                            let badge = '';
+                            if (o.trang_thai_don === 'da_huy_do_qua_han') {
+                                badge = `<span class="px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-rose-100 text-rose-700">Đã hủy (Quá hạn)</span>`;
+                            } else {
+                                badge = `<span class="px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-purple-100 text-purple-700">Chờ nhận tại ${o.so_hoc || 'tủ'}</span>`;
+                            }
+
+                            historyOrders.push({
+                                id: doc.id,
+                                barcode: o.qr_token || 'TOKEN',
+                                title: `${books.length} cuốn: ${titles}`,
+                                timeLabel: 'Hẹn lấy',
+                                timeValue: `${o.ngay_hen || 'Hôm nay'} (${o.khung_gio || ''})`,
+                                dueDate: '--',
+                                statusBadge: badge,
+                                extraInfo: null,
+                                fineInfo: null,
+                                sortTime: t
+                            });
+                        }
+                    });
+                    renderCombinedHistory();
                 });
         }
+
         // ================= CỤM LỊCH THÁNG =================
         function openBookingCartModal() {
             if (cart.length === 0) return alert("Giỏ hàng đang trống!");
