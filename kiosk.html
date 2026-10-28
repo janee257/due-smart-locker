@@ -1,17 +1,42 @@
 <!DOCTYPE html>
 <html lang="vi">
 <head>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
-    <script src="/firebase-init.js"></script>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>DUE Smart Locker - Trạm Kiosk Tủ Thông Minh</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <!-- Firebase Compat SDKs -->
+    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
     <script src="https://unpkg.com/html5-qrcode"></script>
+
+    <script>
+        const firebaseConfig = {
+            apiKey: "AIzaSyB1qtSFNNFmVWAo0r0lqIU5cEfCGOKX59M",
+            authDomain: "due-smart-locker.firebaseapp.com",
+            projectId: "due-smart-locker",
+            storageBucket: "due-smart-locker.firebasestorage.app",
+            messagingSenderId: "639064006349",
+            appId: "1:639064006349:web:ea10677c76872b13989384",
+            measurementId: "G-078Z3QDM27"
+        };
+
+        if (!firebase.apps || !firebase.apps.length) {
+            firebase.initializeApp(firebaseConfig);
+        }
+        
+        const auth = firebase.auth();
+        const db = firebase.firestore();
+
+        async function loginWithFirebase(identifier, password) {
+            let email = identifier.trim();
+            if (!email.includes("@")) email += "@due.udn.vn";
+            return auth.signInWithEmailAndPassword(email, password);
+        }
+    </script>
 </head>
 <body class="bg-slate-900 text-white min-h-screen flex flex-col font-sans">
 
@@ -27,12 +52,12 @@
             <form onsubmit="handleKioskLogin(event)" class="space-y-3.5 text-xs">
                 <div>
                     <label class="block font-bold text-slate-300 mb-1">Email Thiết bị:</label>
-                    <input type="text" id="kioskEmail" required autocomplete="username" placeholder="kiosk@due.udn.vn" 
+                    <input type="text" id="kioskEmail" value="kiosk@due.udn.vn" required autocomplete="username" placeholder="kiosk@due.udn.vn" 
                            class="w-full px-3.5 py-2.5 bg-slate-800 border border-slate-700 rounded-xl text-sm outline-none focus:border-orange-500 text-white">
                 </div>
                 <div>
                     <label class="block font-bold text-slate-300 mb-1">Mật khẩu trạm:</label>
-                    <input type="password" id="kioskPassword" required placeholder="Nhập mật khẩu" 
+                    <input type="password" id="kioskPassword" value="123456" required placeholder="Nhập mật khẩu" 
                            class="w-full px-3.5 py-2.5 bg-slate-800 border border-slate-700 rounded-xl text-sm outline-none focus:border-orange-500 text-white">
                 </div>
                 <div id="kioskLoginError" class="hidden p-2.5 rounded-xl bg-rose-900/50 border border-rose-500 text-rose-200 font-semibold text-xs"></div>
@@ -43,14 +68,14 @@
         </div>
     </div>
 
-    <!-- NÚT ĐĂNG XUẤT KIOSK Ở GÓC DƯỚI BÊN TRÁI -->
+    <!-- NÚT KHÓA KIOSK Ở GÓC DƯỚI BÊN TRÁI -->
     <div id="kioskLogoutBtnContainer" class="hidden fixed bottom-4 left-4 z-40">
         <button onclick="handleKioskLogout()" class="px-3.5 py-2 bg-slate-800 hover:bg-rose-600 text-white text-xs font-bold rounded-xl shadow-lg transition flex items-center gap-1.5 border border-slate-700">
             <i class="fa-solid fa-power-off"></i> Khóa Kiosk
         </button>
     </div>
 
-    <!-- Thanh trạng thái tủ kèm Logo chiếc khiên DUE -->
+    <!-- Thanh header -->
     <header class="bg-slate-800 border-b border-slate-700 p-3.5 flex justify-between items-center shadow-md">
         <div class="flex items-center gap-3">
             <img src="/logo_due.png" alt="DUE Logo" class="h-11 w-auto bg-white p-1 rounded-xl shadow-sm object-contain" onerror="this.onerror=null; this.src='https://due.udn.vn/Portals/0/logo-due.png';">
@@ -58,14 +83,13 @@
                 <h1 class="text-base sm:text-lg font-bold leading-tight flex items-center gap-2">
                     TRẠM TỦ THÔNG MINH <span class="bg-orange-600 text-white text-[10px] px-2 py-0.5 rounded-full uppercase tracking-wider font-bold">Kiosk</span>
                 </h1>
-                <p class="text-xs text-slate-400">Thư viện DUE • Tủ 20 ngăn • Khóa điện tử tự động</p>
+                <p class="text-xs text-slate-400">Thư viện DUE • Tủ 20 ngăn • Đồng bộ Firestore Realtime</p>
             </div>
         </div>
         <div class="flex items-center gap-3 sm:gap-4 text-xs font-semibold">
             <span class="flex items-center gap-1.5"><span class="w-2.5 h-2.5 rounded-full bg-slate-500"></span> Trống</span>
             <span class="flex items-center gap-1.5"><span class="w-2.5 h-2.5 rounded-full bg-amber-500"></span> Chờ lấy</span>
             <span class="flex items-center gap-1.5"><span class="w-2.5 h-2.5 rounded-full bg-blue-500"></span> Sách trả</span>
-            <span class="flex items-center gap-1.5"><span class="w-2.5 h-2.5 rounded-full bg-violet-500"></span> Chờ trả</span>
             <span class="flex items-center gap-1.5"><span class="w-2.5 h-2.5 rounded-full bg-emerald-400 animate-ping"></span> 🔓 Đang mở</span>
         </div>
     </header>
@@ -94,7 +118,7 @@
                             <i class="fa-solid fa-box-open"></i> Nhận Sách (Mở Hộc)
                         </button>
                         <button onclick="handleReturn()" class="py-3 bg-blue-600 hover:bg-blue-500 font-bold text-sm rounded-xl transition flex items-center justify-center gap-2 shadow-lg">
-                            <i class="fa-solid fa-rotate-left"></i> Trả Sách (Ca Chiều)
+                            <i class="fa-solid fa-rotate-left"></i> Trả Sách (Mở Hộc)
                         </button>
                     </div>
                 </div>
@@ -108,7 +132,7 @@
         <div class="lg:col-span-7 bg-slate-800/60 p-5 rounded-2xl border border-slate-700">
             <h2 class="text-base font-bold mb-4 flex items-center justify-between text-slate-300">
                 <span><i class="fa-solid fa-table-cells mr-2"></i>TRẠNG THÁI 20 HỘC TỦ</span>
-                <span id="connStatus" class="text-xs font-normal text-slate-400">Đang kết nối...</span>
+                <span id="connStatus" class="text-xs font-normal text-emerald-400">Firestore Trực tuyến</span>
             </h2>
             <div id="lockersGrid" class="grid grid-cols-4 sm:grid-cols-5 gap-3">
                 <!-- Render 20 hộc qua JS -->
@@ -118,25 +142,26 @@
 
     <script>
         const $ = (id) => document.getElementById(id);
+        let currentUser = null;
+        let unsubscribeLockers = null;
+        let cameraStarted = false;
+        let isScanningLocked = false;
         let openedLockerName = null;
         let openedTimer = null;
-        let isScanningLocked = false;
-        let unsubscribeSync = null;
-        let pollTimer = null;
-        let cameraStarted = false;
+        const lockerRef = db.collection('lockers');
 
-        // ---- Đăng nhập: kiểm tra role "kiosk" (hoặc thủ thư) trong Firebase, không dựa vào chữ trong email ----
-        fbAuth.watch(['kiosk', 'thu_thu'], {
-            onIn: () => {
+        auth.onAuthStateChanged(user => {
+            if (user) {
+                currentUser = user;
                 $('kioskLoginSection').classList.add('hidden');
                 $('kioskLogoutBtnContainer').classList.remove('hidden');
-                startKiosk();
-            },
-            onOut: (msg) => {
+                subscribeLockers();
+                startCamera();
+            } else {
+                currentUser = null;
                 $('kioskLoginSection').classList.remove('hidden');
                 $('kioskLogoutBtnContainer').classList.add('hidden');
-                stopKiosk();
-                if (msg) { const e = $('kioskLoginError'); e.innerText = msg; e.classList.remove('hidden'); }
+                if (unsubscribeLockers) unsubscribeLockers();
             }
         });
 
@@ -145,45 +170,42 @@
             const errBox = $('kioskLoginError');
             errBox.classList.add('hidden');
             try {
-                await fbAuth.login($('kioskEmail').value, $('kioskPassword').value);
+                await loginWithFirebase($('kioskEmail').value, $('kioskPassword').value);
             } catch (err) {
-                errBox.innerText = fbAuth.errMsg(err);
+                errBox.innerText = "Sai tài khoản hoặc mật khẩu trạm!";
                 errBox.classList.remove('hidden');
             }
         }
 
         async function handleKioskLogout() {
-            await fbAuth.logout();
+            await auth.signOut();
             location.reload();
         }
 
-        function startKiosk() {
-            fetchLockers();
-            if (!unsubscribeSync) unsubscribeSync = fbAuth.watchSync(fetchLockers); // cập nhật ngay khi có thay đổi
-            clearInterval(pollTimer);
-            pollTimer = setInterval(() => { if (!document.hidden) fetchLockers(); }, 60000); // dự phòng khi mất kết nối realtime
-            startCamera();
-        }
+        // LẮNG NGHE REALTIME 20 HỘC TỦ TỪ CLOUD FIRESTORE
+        function subscribeLockers() {
+            if (unsubscribeLockers) unsubscribeLockers();
+            unsubscribeLockers = lockerRef.onSnapshot(snapshot => {
+                const map = new Map();
+                snapshot.forEach(doc => {
+                    const d = doc.data();
+                    const name = d.so_hoc || doc.id;
+                    map.set(name, { id: doc.id, ...d, so_hoc: name });
+                });
 
-        function stopKiosk() {
-            if (unsubscribeSync) { unsubscribeSync(); unsubscribeSync = null; }
-            clearInterval(pollTimer);
-        }
-
-        // ---- Trạng thái 20 hộc ----
-        async function fetchLockers() {
-            const badge = $('connStatus');
-            try {
-                const res = await fetch('/api/lockers');
-                if (!res.ok) throw new Error('HTTP ' + res.status);
-                renderLockers(await res.json());
-                badge.innerText = 'Trực tuyến';
-                badge.className = 'text-xs font-semibold text-emerald-400';
-            } catch (err) {
-                console.error('Lỗi nạp hộc tủ:', err);
-                badge.innerText = 'Mất kết nối máy chủ';
-                badge.className = 'text-xs font-semibold text-rose-400';
-            }
+                const list = [];
+                for (let i = 1; i <= 20; i++) {
+                    const key = `Hộc ${i < 10 ? '0' + i : i}`;
+                    if (map.has(key)) {
+                        list.push(map.get(key));
+                    } else {
+                        list.push({ id: `hoc_${i < 10 ? '0' + i : i}`, so_hoc: key, trang_thai: 'trong' });
+                    }
+                }
+                renderLockers(list);
+            }, err => {
+                console.error("Lỗi lockers:", err);
+            });
         }
 
         function renderLockers(lockers) {
@@ -194,15 +216,15 @@
                 let icon = "fa-lock";
                 let statusText = "Trống";
 
-                if (l.so_hoc === openedLockerName) {
-                    colorClass = "bg-emerald-500/20 border-emerald-400 text-emerald-300 animate-pulse ring-2 ring-emerald-400";
-                    icon = "fa-lock-open text-emerald-400";
+                if (l.so_hoc === openedLockerName || l.trang_thai === 'dang_mo') {
+                    colorClass = "bg-emerald-500/30 border-emerald-400 text-emerald-300 animate-pulse ring-2 ring-emerald-400";
+                    icon = "fa-door-open text-emerald-400";
                     statusText = "ĐANG MỞ";
                 } else if (l.trang_thai === 'cho_nhan') {
                     colorClass = "bg-amber-500/20 border-amber-500/60 text-amber-300";
                     icon = "fa-box";
                     statusText = "Chờ lấy";
-                } else if (l.trang_thai === 'chua_sach_tra') {
+                } else if (l.trang_thai === 'chua_sach_tra' || l.trang_thai === 'cho_kiem_tra') {
                     colorClass = "bg-blue-500/20 border-blue-500/60 text-blue-300";
                     icon = "fa-inbox";
                     statusText = "Sách trả";
@@ -222,52 +244,154 @@
             });
         }
 
-        // ---- Mở hộc: chỉ báo thành công khi máy chủ xác nhận, mọi lỗi đều hiển thị thật ----
-        async function callKiosk(path, payload) {
-            let res;
-            try {
-                res = await fetch(path, {
-                    method: 'POST',
-                    headers: {'Content-Type': 'application/json'},
-                    body: JSON.stringify(payload)
-                });
-            } catch (err) {
-                throw new Error("Lỗi kết nối máy chủ, vui lòng thử lại!");
-            }
-            let data = {};
-            try { data = await res.json(); } catch (err) {}
-            if (!res.ok) throw new Error(data.detail || `Máy chủ báo lỗi (${res.status})`);
-            return data;
-        }
-
-        function onOpened(data) {
-            openedLockerName = data.opened_locker;
-            showNotice(`🔓 ${data.message}`, "success");
-            $('manualInput').value = '';
-            fetchLockers();
-            clearTimeout(openedTimer);
-            openedTimer = setTimeout(() => { openedLockerName = null; fetchLockers(); }, 10000);
-        }
-
+        // ================= XỬ LÝ NHẬN SÁCH TẠI KIOSK =================
         async function handlePickup() {
             const token = $('manualInput').value.trim().toUpperCase();
-            if (!token) return showNotice("Vui lòng nhập hoặc quét mã QR Token!", "error");
+            if (!token) return showNotice("Vui lòng nhập hoặc quét mã QR Token nhận sách!", "error");
+
             try {
-                onOpened(await callKiosk('/api/locker/pickup', { qr_token: token }));
+                // 1. Tìm đơn trong collection 'orders'
+                const orderSnap = await db.collection('orders').where('qr_token', '==', token).limit(1).get();
+                if (orderSnap.empty) return showNotice("Mã Token không hợp lệ hoặc không tồn tại!", "error");
+
+                const orderDoc = orderSnap.docs[0];
+                const order = orderDoc.data();
+                const lockerName = order.so_hoc || "Hộc 01";
+
+                if (order.trang_thai_don === 'da_nhan') {
+                    return showNotice(`Đơn sách tại ${lockerName} đã được nhận trước đó!`, "error");
+                }
+
+                // 2. Chuyển hộc tủ sang "ĐANG MỞ"
+                const lSnap = await lockerRef.where('so_hoc', '==', lockerName).limit(1).get();
+                let lockerDocRef = null;
+                if (!lSnap.empty) {
+                    lockerDocRef = lSnap.docs[0].ref;
+                    await lockerDocRef.update({
+                        trang_thai: 'dang_mo',
+                        cap_nhat_luc: firebase.firestore.FieldValue.serverTimestamp()
+                    });
+                }
+
+                // 3. Cập nhật trạng thái đơn thành 'da_nhan'
+                await orderDoc.ref.update({
+                    trang_thai_don: 'da_nhan',
+                    thoi_gian_nhan: firebase.firestore.FieldValue.serverTimestamp()
+                });
+
+                // 4. Lưu từng cuốn vào collection 'borrowings' của sinh viên
+                const booksList = order.books || [];
+                const batch = db.batch();
+                const dueDate = new Date();
+                dueDate.setDate(dueDate.getDate() + 14);
+                const dueDateStr = dueDate.toISOString().split('T')[0];
+
+                booksList.forEach(b => {
+                    const borrowRef = db.collection('borrowings').doc();
+                    batch.set(borrowRef, {
+                        order_id: orderDoc.id,
+                        mssv: order.mssv || '251121514110',
+                        ho_ten: order.ho_ten || 'Sinh viên DUE',
+                        ten_sach: b.ten_sach,
+                        ma_vach: b.ma_vach || 'DUE-BOOK',
+                        vi_tri_ke: b.vi_tri_ke || 'Kệ chính',
+                        ngay_muon: new Date().toISOString().split('T')[0],
+                        han_tra: dueDateStr,
+                        trang_thai: 'dang_muon',
+                        ngay_tao: firebase.firestore.FieldValue.serverTimestamp()
+                    });
+                });
+                await batch.commit();
+
+                // Kích hoạt hiệu ứng mở tủ trên giao diện Kiosk
+                openedLockerName = lockerName;
+                showNotice(`🔓 ĐANG MỞ ${lockerName}! Sinh viên hãy lấy ${booksList.length} cuốn sách. Cửa sẽ tự đóng sau 5 giây.`, "success");
+                $('manualInput').value = '';
+
+                // Sau 5 giây tự động giải phóng hộc về 'trong'
+                clearTimeout(openedTimer);
+                openedTimer = setTimeout(async () => {
+                    openedLockerName = null;
+                    if (lockerDocRef) {
+                        await lockerDocRef.update({
+                            trang_thai: 'trong',
+                            qr_token: null,
+                            cap_nhat_luc: firebase.firestore.FieldValue.serverTimestamp()
+                        });
+                    }
+                }, 5000);
+
             } catch (err) {
-                showNotice(`⚠️ ${err.message}`, "error");
+                console.error(err);
+                showNotice("Lỗi nhận sách: " + err.message, "error");
             }
         }
 
+        // ================= XỬ LÝ TRẢ SÁCH TẠI KIOSK =================
         async function handleReturn() {
             const code = $('manualInput').value.trim().toUpperCase();
-            if (!code) return showNotice("Vui lòng nhập hoặc quét mã QR Trả sách / Barcode!", "error");
-            // Mã QR nhận (QR-) và mã QR trả (TRA-) đều xử lý ở /api/locker/pickup
-            if (code.startsWith("TRA-") || code.startsWith("QR-")) return handlePickup();
+            if (!code) return showNotice("Vui lòng nhập hoặc quét mã QR Trả sách (TRA-...)!", "error");
+
             try {
-                onOpened(await callKiosk('/api/locker/return', { ma_vach: code }));
+                // 1. Tìm đơn trả sách trong collection 'returns'
+                const returnSnap = await db.collection('returns').where('qr_token', '==', code).limit(1).get();
+                if (returnSnap.empty) return showNotice("Mã trả sách không tồn tại hoặc đã xử lý!", "error");
+
+                const returnDoc = returnSnap.docs[0];
+                const rData = returnDoc.data();
+                const lockerName = rData.so_hoc;
+
+                // 2. Chuyển hộc tủ sang "ĐANG MỞ"
+                const lSnap = await lockerRef.where('so_hoc', '==', lockerName).limit(1).get();
+                let lockerDocRef = null;
+                if (!lSnap.empty) {
+                    lockerDocRef = lSnap.docs[0].ref;
+                    await lockerDocRef.update({
+                        trang_thai: 'dang_mo',
+                        cap_nhat_luc: firebase.firestore.FieldValue.serverTimestamp()
+                    });
+                }
+
+                // 3. Cập nhật đơn trả sang 'cho_kiem_tra'
+                await returnDoc.ref.update({
+                    trang_thai: 'cho_kiem_tra',
+                    thoi_gian_bo_tu: firebase.firestore.FieldValue.serverTimestamp()
+                });
+
+                // 4. Đổi trạng thái các cuốn trong 'borrowings' sang 'cho_kiem_tra' (để sinh viên không còn bị báo đang mượn)
+                const items = rData.items || [];
+                const batch = db.batch();
+                items.forEach(it => {
+                    if (it.borrow_id) {
+                        batch.update(db.collection('borrowings').doc(it.borrow_id), {
+                            trang_thai: 'cho_kiem_tra',
+                            so_hoc_tra: lockerName,
+                            ngay_tra_tai_tu: firebase.firestore.FieldValue.serverTimestamp()
+                        });
+                    }
+                });
+                await batch.commit();
+
+                openedLockerName = lockerName;
+                showNotice(`🔓 ĐANG MỞ ${lockerName}! Hãy đặt ${items.length} cuốn sách vào hộc và đóng cửa tủ.`, "success");
+                $('manualInput').value = '';
+
+                // Sau 5 giây tự động chuyển hộc sang 'chua_sach_tra'
+                clearTimeout(openedTimer);
+                openedTimer = setTimeout(async () => {
+                    openedLockerName = null;
+                    if (lockerDocRef) {
+                        await lockerDocRef.update({
+                            trang_thai: 'chua_sach_tra',
+                            qr_token: code,
+                            cap_nhat_luc: firebase.firestore.FieldValue.serverTimestamp()
+                        });
+                    }
+                }, 5000);
+
             } catch (err) {
-                showNotice(`⚠️ ${err.message}`, "error");
+                console.error(err);
+                showNotice("Lỗi trả sách: " + err.message, "error");
             }
         }
 
@@ -282,7 +406,7 @@
             box.innerText = msg;
         }
 
-        // ---- Camera quét mã (chỉ bật sau khi đăng nhập) ----
+        // Khởi động Camera quét mã
         function startCamera() {
             if (cameraStarted) return;
             cameraStarted = true;
@@ -298,8 +422,7 @@
                         const cleanCode = decodedText.trim().toUpperCase();
                         $('manualInput').value = cleanCode;
 
-                        // Mã vạch cuốn sách (DUE-...) -> trả bằng barcode; còn lại (QR-, TRA-) -> /api/locker/pickup
-                        if (cleanCode.startsWith("DUE-")) {
+                        if (cleanCode.startsWith("TRA-")) {
                             handleReturn();
                         } else {
                             handlePickup();
@@ -310,7 +433,7 @@
                     (err) => {}
                 ).catch(err => console.log("Không tìm thấy camera"));
             } catch (e) {
-                console.log("Trình quét camera khởi chạy ở chế độ tương thích.");
+                console.log("Trình quét camera chạy ở chế độ tương thích.");
             }
         }
     </script>
