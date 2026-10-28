@@ -1071,6 +1071,9 @@ function removeFromCart(bookId) {
     try {
         const firestoreDb = window.db || firebase.firestore();
 
+        // Lấy thông tin chi tiết các cuốn sách sinh viên đang chọn trả từ mảng borrowedBooks
+        const booksToReturn = borrowedBooks.filter(b => selectedReturnIds.includes(b.res_id));
+
         // 1. Tìm 1 hộc tủ trống để nhận sách trả
         const lockerSnap = await firestoreDb.collection('lockers')
             .where('trang_thai', '==', 'trong')
@@ -1087,23 +1090,28 @@ function removeFromCart(bookId) {
         // 2. Tạo mã Token trả sách duy nhất
         const returnToken = "TRA-" + Math.random().toString(36).substring(2, 8).toUpperCase();
 
-        // 3. Cập nhật trạng thái các cuốn sách đang mượn sang chờ kiểm tra trả
+        // 3. Chuẩn bị danh sách tên sách và mã vạch để Thủ thư dễ dàng kiểm tra
+        const bookNames = booksToReturn.map(b => b.ten_sach).join(", ");
+        const barcodes = booksToReturn.map(b => b.ma_vach).join(", ");
+
         const batch = firestoreDb.batch();
         
-        // Cập nhật thông tin hộc tủ sang chứa sách trả
+        // Cập nhật trạng thái hộc tủ
         batch.update(lockerDoc.ref, {
             trang_thai: 'chua_sach_tra',
             qr_token: returnToken,
             cap_nhat_luc: firebase.firestore.FieldValue.serverTimestamp()
         });
 
-        // Lưu thông tin vào bảng 'returns' để Thủ thư nghiệm thu
+        // Lưu thông tin đầy đủ vào bảng 'returns' cho Thủ thư
         const returnRef = firestoreDb.collection('returns').doc();
         batch.set(returnRef, {
             mssv: currentUser.mssv || "251121514110",
             ho_ten: currentUser.ho_ten || "Sinh viên DUE",
             so_hoc: assignedLocker,
             qr_token: returnToken,
+            ma_vach: barcodes,
+            ten_sach: bookNames,
             reservation_ids: selectedReturnIds,
             trang_thai: 'cho_kiem_tra',
             ngay_tra: firebase.firestore.FieldValue.serverTimestamp()
@@ -1111,7 +1119,7 @@ function removeFromCart(bookId) {
 
         await batch.commit();
 
-        // Hiển thị mã QR trả sách lên giao diện
+        // Hiển thị mã QR trả sách lên giao diện sinh viên
         showReturnQr(selectedReturnIds.length, assignedLocker, returnToken);
 
     } catch (err) {
