@@ -359,6 +359,24 @@
         let currentUser = null;
         let allBooks = [];
         let borrowedBooks = [];
+        async function getNextAvailableLocker(firestoreDb) {
+    const snap = await firestoreDb.collection('lockers').get();
+    const map = new Map();
+    snap.forEach(doc => {
+        const d = doc.data();
+        map.set(d.so_hoc || doc.id, { id: doc.id, ...d });
+    });
+
+    for (let i = 1; i <= 20; i++) {
+        const name = `Hộc ${i < 10 ? '0' + i : i}`;
+        const locker = map.get(name);
+        if (!locker || locker.trang_thai === 'trong') {
+            const docId = locker ? locker.id : `hoc_${i < 10 ? '0' + i : i}`;
+            return { docId, so_hoc: name };
+        }
+    }
+    return null;
+}
         let cart = [];
         let currentCategory = 'all';
 
@@ -795,28 +813,14 @@ function removeFromCart(bookId) {
 
     try {
         const firestoreDb = window.db || firebase.firestore();
-        
-        // 1. Tìm 1 hộc tủ trống trong collection 'lockers'
-        const lockerSnap = await firestoreDb.collection('lockers')
-            .where('trang_thai', '==', 'trong')
-            .limit(1)
-            .get();
+        const availableLocker = await getNextAvailableLocker(firestoreDb);
+        if (!availableLocker) return alert("Toàn bộ 20 hộc tủ đều đang bận!");
 
-        let assignedLocker = "Hộc 01";
-        let lockerDocId = null;
-
-        if (!lockerSnap.empty) {
-            const lDoc = lockerSnap.docs[0];
-            lockerDocId = lDoc.id;
-            assignedLocker = lDoc.data().so_hoc || "Hộc 01";
-        }
-
-        // Tạo mã QR Token duy nhất cho đơn
+        const assignedLocker = availableLocker.so_hoc;
         const qrToken = "QR-" + Math.random().toString(36).substring(2, 8).toUpperCase();
         const mssv = currentUser.mssv || "251121514110";
         const hoTen = currentUser.ho_ten || "Sinh viên DUE";
 
-        // Danh sách sách trong đơn
         const booksList = cart.map(b => ({
             book_id: b.id,
             ten_sach: b.ten_sach,
@@ -824,7 +828,6 @@ function removeFromCart(bookId) {
             ma_vach: b.ma_vach
         }));
 
-        // 2. Lưu đơn đặt mượn vào collection 'orders'
         await firestoreDb.collection('orders').add({
             mssv: mssv,
             ho_ten: hoTen,
@@ -837,45 +840,34 @@ function removeFromCart(bookId) {
             ngay_tao: firebase.firestore.FieldValue.serverTimestamp()
         });
 
-        // 3. Cập nhật trạng thái hộc tủ (nếu có hộc trong database)
-        if (lockerDocId) {
-            await firestoreDb.collection('lockers').doc(lockerDocId).update({
-                trang_thai: 'cho_nhan',
-                qr_token: qrToken,
-                cap_nhat_luc: firebase.firestore.FieldValue.serverTimestamp()
+        await firestoreDb.collection('lockers').doc(availableLocker.docId).set({
+            so_hoc: assignedLocker,
+            trang_thai: 'cho_nhan',
+            qr_token: qrToken,
+            cap_nhat_luc: firebase.firestore.FieldValue.serverTimestamp()
+        }, { merge: true });
+
+        for (let b of cart) {
+            await firestoreDb.collection('books').doc(b.id).update({
+                so_luong_con: firebase.firestore.FieldValue.increment(-1)
             });
         }
 
-        // 4. Trừ số lượng có sẵn trong kho Firestore
-        for (let b of cart) {
-            try {
-                await firestoreDb.collection('books').doc(b.id).update({
-                    so_luong_con: firebase.firestore.FieldValue.increment(-1)
-                });
-            } catch (err) {
-                console.warn("Lỗi cập nhật số lượng từng cuốn:", err);
-            }
-        }
-
         const bookTitles = cart.map(b => b.ten_sach).join(", ");
-        const count = cart.length;
-
-        alert(`Đặt hẹn thành công ${count} cuốn sách! Hộc nhận dự kiến: ${assignedLocker}`);
+        alert(`Đặt hẹn thành công! Bạn nhận tại ${assignedLocker}`);
         
         closeBookingCartModal();
+        const orderedCount = cart.length;
         cart = [];
         updateCartUI();
-        fetchBooks(); // Tải lại kho sách hiển thị số lượng mới
-        
-        // Hiển thị mã QR lên màn hình
-        showQr(`${count} cuốn: ${bookTitles}`, `${date} (${slot})`, assignedLocker, qrToken);
+        fetchBooks();
+        showQr(`${orderedCount} cuốn: ${bookTitles}`, `${date} (${slot})`, assignedLocker, qrToken);
 
     } catch (err) {
-        console.error("Lỗi đặt mượn sách:", err);
-        alert("Lỗi khi xác nhận đặt mượn! Vui lòng kiểm tra lại kết nối.");
+        console.error(err);
+        alert("Lỗi khi xác nhận mượn sách!");
     }
 }
-
         function showQr(title, slot, locker, token) {
             const card = document.getElementById('activeQrCard');
             card.classList.remove('hidden');
@@ -890,15 +882,15 @@ function removeFromCart(bookId) {
             window.scrollTo({ top: 0, behavior: 'smooth' });
         }
 
+        let selectedReturnIds = [];
         async function fetchBorrowedBooks() {
     if (!currentUser) return;
     try {
         const firestoreDb = window.db || firebase.firestore();
-        // Truy vấn các lượt mượn đang hoạt động của sinh viên theo MSSV
         const mssv = currentUser.mssv || "";
         const snapshot = await firestoreDb.collection('borrowings')
             .where('mssv', '==', mssv)
-            .where('trang_thai', '==', 'dang_muon')
+            .where('trang_thai', 'in', ['dang_muon', 'cho_kiem_tra'])
             .get();
 
         borrowedBooks = [];
@@ -906,80 +898,61 @@ function removeFromCart(bookId) {
             borrowedBooks.push({ res_id: doc.id, ...doc.data() });
         });
 
-        document.getElementById('borrowedCount').innerText = borrowedBooks.length;
+        const activeCount = borrowedBooks.filter(b => b.trang_thai === 'dang_muon').length;
+        document.getElementById('borrowedCount').innerText = activeCount;
         renderBorrowedBooks();
     } catch (err) {
-        console.warn("Chưa có dữ liệu sách đang mượn trên Firestore:", err);
-        borrowedBooks = [];
-        document.getElementById('borrowedCount').innerText = "0";
-        renderBorrowedBooks();
+        console.warn(err);
     }
 }
 
-        let selectedReturnIds = [];
+function renderBorrowedBooks() {
+    const list = document.getElementById('borrowedBooksList');
+    list.innerHTML = '';
+    selectedReturnIds = [];
+    updateSelectedReturnCount();
 
-        function renderBorrowedBooks() {
-            const list = document.getElementById('borrowedBooksList');
-            list.innerHTML = '';
-            selectedReturnIds = [];
-            updateSelectedReturnCount();
+    if (borrowedBooks.length === 0) {
+        list.innerHTML = `<p class="col-span-full text-center text-xs sm:text-sm text-slate-400 py-10">Hiện bạn không mượn cuốn sách nào.</p>`;
+        document.getElementById('confirmReturnBar').classList.add('hidden');
+        return;
+    }
 
-            if (borrowedBooks.length === 0) {
-                list.innerHTML = `<p class="col-span-full text-center text-xs sm:text-sm text-slate-400 py-10">Hiện bạn không mượn cuốn sách nào.</p>`;
-                document.getElementById('confirmReturnBar').classList.add('hidden');
-                return;
-            }
+    document.getElementById('confirmReturnBar').classList.remove('hidden');
 
-            document.getElementById('confirmReturnBar').classList.remove('hidden');
-            const today = new Date();
-            today.setHours(0, 0, 0, 0);
+    borrowedBooks.forEach(b => {
+        const isWaitingInspect = b.trang_thai === 'cho_kiem_tra';
+        let statusBadge = isWaitingInspect ?
+            `<span class="px-2.5 py-1 rounded-full text-[10px] font-bold bg-blue-100 text-blue-700"><i class="fa-solid fa-spinner animate-spin mr-1"></i>Đã gửi tủ (Chờ kiểm tra)</span>` :
+            `<span class="px-2.5 py-1 rounded-full text-[10px] font-bold bg-emerald-100 text-emerald-700">Đang giữ sách</span>`;
 
-            borrowedBooks.forEach(b => {
-                let statusBadge = '';
-                let lateInfo = '';
-
-                if (b.han_tra) {
-                    const dueDate = new Date(b.han_tra);
-                    dueDate.setHours(0, 0, 0, 0);
-                    const diffTime = today - dueDate;
-                    const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
-
-                    if (diffDays > 0) {
-                        statusBadge = `<span class="px-2.5 py-1 rounded-full text-[10px] font-bold bg-rose-100 text-rose-700">Trễ hạn</span>`;
-                        lateInfo = `<p class="text-[11px] text-rose-600 font-bold mt-1">Trễ: ${diffDays} ngày (Phí: ${(diffDays * 5000).toLocaleString()} đ)</p>`;
-                    } else {
-                        statusBadge = `<span class="px-2.5 py-1 rounded-full text-[10px] font-bold bg-emerald-100 text-emerald-700">Đang mượn</span>`;
-                        lateInfo = `<p class="text-[11px] text-slate-500 mt-1">Còn ${Math.abs(diffDays)} ngày</p>`;
-                    }
-                }
-
-                list.innerHTML += `
-                    <div id="card_book_${b.res_id}" 
-                         onclick="toggleBookCard(event, ${b.res_id})" 
-                         class="bg-white p-4 rounded-2xl border-2 border-slate-200 shadow-sm flex items-start gap-3 hover:border-blue-300 transition cursor-pointer select-none">
-                        <div class="pt-1">
-                            <input type="checkbox" 
-                                   id="chk_${b.res_id}" 
-                                   value="${b.res_id}" 
-                                   onclick="event.stopPropagation();"
-                                   onchange="onCheckboxClick(${b.res_id})" 
-                                   class="w-5 h-5 accent-blue-600 rounded cursor-pointer">
-                        </div>
-                        <div class="flex-1 space-y-1">
-                            <div class="flex justify-between items-start gap-1">
-                                <span class="text-[10px] font-mono bg-blue-50 text-blue-700 px-2 py-0.5 rounded font-bold">${b.ma_vach}</span>
-                                ${statusBadge}
-                            </div>
-                            <h4 class="font-bold text-slate-800 text-xs sm:text-sm leading-snug">${b.ten_sach}</h4>
-                            <p class="text-[11px] text-slate-400">Ngày mượn: <b>${b.ngay_muon || 'Hôm nay'}</b></p>
-                            <p class="text-[11px] text-slate-600">Hạn trả: <b class="text-orange-600">${b.han_tra}</b></p>
-                            ${lateInfo}
-                        </div>
+        list.innerHTML += `
+            <div id="card_book_${b.res_id}" 
+                 onclick="${isWaitingInspect ? '' : `toggleBookCard(event, '${b.res_id}')`}" 
+                 class="bg-white p-4 rounded-2xl border-2 ${isWaitingInspect ? 'border-dashed border-slate-300 opacity-80' : 'border-slate-200 cursor-pointer hover:border-blue-300'} shadow-sm flex items-start gap-3 transition select-none">
+                <div class="pt-1">
+                    <input type="checkbox" 
+                           id="chk_${b.res_id}" 
+                           value="${b.res_id}" 
+                           ${isWaitingInspect ? 'disabled' : ''}
+                           onclick="event.stopPropagation();"
+                           onchange="onCheckboxClick('${b.res_id}')" 
+                           class="w-5 h-5 accent-blue-600 rounded cursor-pointer disabled:opacity-30">
+                </div>
+                <div class="flex-1 space-y-1">
+                    <div class="flex justify-between items-start gap-1">
+                        <span class="text-[10px] font-mono bg-blue-50 text-blue-700 px-2 py-0.5 rounded font-bold">${b.ma_vach}</span>
+                        ${statusBadge}
                     </div>
-                `;
-            });
-        }
-
+                    <h4 class="font-bold text-slate-800 text-xs sm:text-sm leading-snug">${b.ten_sach}</h4>
+                    <p class="text-[11px] text-slate-400">Ngày mượn: <b>${b.ngay_muon || 'Hôm nay'}</b></p>
+                    <p class="text-[11px] text-slate-600">Hạn trả: <b class="text-orange-600">${b.han_tra}</b></p>
+                    ${isWaitingInspect ? `<p class="text-[10px] text-blue-600 font-semibold mt-1">Đã đặt vào ${b.so_hoc_tra || 'hộc tủ'}, chờ Thủ thư nghiệm thu.</p>` : ''}
+                </div>
+            </div>
+        `;
+    });
+}
         function toggleBookCard(event, resId) {
             const chk = document.getElementById(`chk_${resId}`);
             if (chk) {
@@ -1070,39 +1043,27 @@ function removeFromCart(bookId) {
 
     try {
         const firestoreDb = window.db || firebase.firestore();
+        const availableLocker = await getNextAvailableLocker(firestoreDb);
+        if (!availableLocker) return alert("Tất cả hộc tủ đều đang bận!");
+
+        const assignedLocker = availableLocker.so_hoc;
+        const returnToken = "TRA-" + Math.random().toString(36).substring(2, 8).toUpperCase();
         const booksToReturn = borrowedBooks.filter(b => selectedReturnIds.includes(b.res_id));
 
-        // 1. Tìm 1 hộc trống
-        const lockerSnap = await firestoreDb.collection('lockers')
-            .where('trang_thai', '==', 'trong')
-            .limit(1)
-            .get();
-
-        if (lockerSnap.empty) {
-            return alert("Hiện tại tất cả hộc tủ Smart Locker đều đã bận, không còn chỗ nhận sách trả!");
-        }
-
-        const lockerDoc = lockerSnap.docs[0];
-        const assignedLocker = lockerDoc.data().so_hoc || "Hộc 01";
-        const returnToken = "TRA-" + Math.random().toString(36).substring(2, 8).toUpperCase();
-
         const batch = firestoreDb.batch();
-
-        // 2. Đặt trước hộc tủ nhận trả
-        batch.update(lockerDoc.ref, {
+        batch.set(firestoreDb.collection('lockers').doc(availableLocker.docId), {
+            so_hoc: assignedLocker,
             trang_thai: 'cho_tra',
             qr_token: returnToken,
             cap_nhat_luc: firebase.firestore.FieldValue.serverTimestamp()
-        });
+        }, { merge: true });
 
-        // 3. Chuẩn bị danh sách chi tiết từng cuốn
         const itemsList = booksToReturn.map(b => ({
             borrow_id: b.res_id,
             ten_sach: b.ten_sach,
             ma_vach: b.ma_vach || "DUE-BOOK"
         }));
 
-        // 4. Lưu đơn trả vào 'returns'
         const returnRef = firestoreDb.collection('returns').doc();
         batch.set(returnRef, {
             mssv: currentUser.mssv || "251121514110",
@@ -1116,15 +1077,13 @@ function removeFromCart(bookId) {
         });
 
         await batch.commit();
-
         showReturnQr(itemsList.length, assignedLocker, returnToken);
 
     } catch (err) {
-        console.error("Lỗi tạo mã trả sách:", err);
-        alert("Lỗi kết nối hệ thống! Vui lòng thử lại.");
+        console.error(err);
+        alert("Lỗi tạo mã trả sách!");
     }
 }
-
         function showReturnQr(count, lockerName, token) {
             const card = document.getElementById('activeReturnQrCard');
             card.classList.remove('hidden');
