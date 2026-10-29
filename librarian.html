@@ -577,9 +577,14 @@ async function loginWithFirebase(identifier, password) {
                 return;
             }
 
+            const todayStr = new Date().toISOString().split('T')[0];
+
             activeOrders.forEach(o => {
                 const isReady = o.trang_thai_don === 'da_soan_xong';
                 const booksList = o.books || [];
+                
+                // Kiểm tra xem đơn đã quá ngày hẹn lấy sách chưa
+                const isExpired = o.ngay_hen && o.ngay_hen < todayStr;
 
                 let booksHtml = '<div class="space-y-1.5 py-0.5">';
                 booksList.forEach((b, idx) => {
@@ -596,7 +601,7 @@ async function loginWithFirebase(identifier, password) {
                 booksHtml += '</div>';
 
                 tbody.innerHTML += `
-                    <tr class="hover:bg-slate-50 transition border-b border-slate-100">
+                    <tr class="hover:bg-slate-50 transition border-b border-slate-100 ${isExpired ? 'bg-rose-50/40' : ''}">
                         <td class="p-3.5 align-middle whitespace-nowrap">
                             <div class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-orange-50 border border-orange-200 text-orange-700 font-black text-xs sm:text-sm shadow-sm">
                                 <i class="fa-solid fa-box text-orange-500 text-[11px]"></i>
@@ -614,8 +619,9 @@ async function loginWithFirebase(identifier, password) {
                             ${booksHtml}
                         </td>
                         <td class="p-3.5 align-middle text-xs text-slate-600 whitespace-nowrap">
-                            <div>${o.ngay_hen || 'Hôm nay'}</div>
+                            <div class="${isExpired ? 'text-rose-600 font-bold' : ''}">${o.ngay_hen || 'Hôm nay'}</div>
                             <div class="text-orange-600 font-bold mt-0.5">${o.khung_gio || ''}</div>
+                            ${isExpired ? '<span class="inline-block mt-1 px-2 py-0.5 rounded bg-rose-100 text-rose-700 font-bold text-[10px]">Đã quá hạn nhận</span>' : ''}
                         </td>
                         <td class="p-3.5 align-middle whitespace-nowrap">
                             <span class="px-2.5 py-1 rounded-full text-[11px] font-bold ${isReady ? 'bg-emerald-100 text-emerald-700' : 'bg-amber-100 text-amber-700'}">
@@ -630,7 +636,7 @@ async function loginWithFirebase(identifier, password) {
                             ` : `
                                 <span class="text-xs text-emerald-600 font-bold mr-2"><i class="fa-solid fa-circle-check"></i> Sẵn sàng</span>
                             `}
-                            <button onclick="cancelExpiredOrder('${o.id}')" class="px-2.5 py-1.5 bg-rose-50 hover:bg-rose-100 text-rose-600 rounded-xl text-xs font-bold transition" title="Sinh viên không đến nhận -> Thu hồi cả đơn">
+                            <button onclick="cancelExpiredOrder('${o.id}')" class="px-2.5 py-1.5 ${isExpired ? 'bg-rose-600 text-white hover:bg-rose-700' : 'bg-rose-50 hover:bg-rose-100 text-rose-600'} rounded-xl text-xs font-bold transition shadow-xs" title="Sinh viên không đến nhận -> Thu hồi cả đơn">
                                 <i class="fa-solid fa-arrow-rotate-left mr-1"></i> Thu hồi
                             </button>
                         </td>
@@ -638,7 +644,6 @@ async function loginWithFirebase(identifier, password) {
                 `;
             });
         }
-
         async function markOrderReady(orderId) {
             try {
                 await db.collection('orders').doc(orderId).update({

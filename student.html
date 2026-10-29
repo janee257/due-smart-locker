@@ -667,25 +667,38 @@ async function loginWithFirebase(identifier, password) {
             new QRCode(qrContainer, { text: token, width: 140, height: 140 });
             window.scrollTo({ top: 0, behavior: 'smooth' });
 
-            // Lắng nghe realtime đơn hàng trong bảng 'orders'
+            // Lắng nghe realtime trạng thái đơn từ bảng 'orders'
             if (unsubscribeActivePickupQr) unsubscribeActivePickupQr();
             unsubscribeActivePickupQr = db.collection('orders')
                 .where('qr_token', '==', token)
                 .onSnapshot(snapshot => {
                     snapshot.forEach(doc => {
                         const data = doc.data();
-                        // Khi Kiosk quét thành công -> đơn chuyển sang 'da_nhan'
+                        
+                        // 1. Nếu sinh viên đã lấy sách tại Kiosk
                         if (data.trang_thai_don === 'da_nhan') {
-                            card.classList.add('hidden'); // Tắt QR ngay lập tức
+                            card.classList.add('hidden');
                             alert(`🎉 Bạn đã nhận sách thành công tại ${locker}! Vui lòng kiểm tra sách trong tab "Đang mượn".`);
-                            unsubscribeActivePickupQr();
-                            unsubscribeActivePickupQr = null;
-                            fetchBorrowedBooks(); // Làm mới tab đang mượn
+                            if (unsubscribeActivePickupQr) {
+                                unsubscribeActivePickupQr();
+                                unsubscribeActivePickupQr = null;
+                            }
+                            fetchBorrowedBooks();
+                        }
+                        
+                        // 2. NẾU THỦ THƯ ĐÃ THU HỒI SÁCH DO QUÁ HẠN LẤY
+                        else if (data.trang_thai_don === 'da_huy_do_qua_han') {
+                            card.classList.add('hidden'); // Tắt mã QR ngay lập tức
+                            alert(`⚠️ Đơn mượn sách tại ${locker} đã bị Thủ thư thu hồi do quá hạn đến nhận! Hộc tủ đã được mở trống.`);
+                            if (unsubscribeActivePickupQr) {
+                                unsubscribeActivePickupQr();
+                                unsubscribeActivePickupQr = null;
+                            }
+                            fetchBooks(); // Cập nhật lại số lượng sách có sẵn trong kho
                         }
                     });
                 });
         }
-
         function showReturnQr(count, lockerName, token) {
             const card = document.getElementById('activeReturnQrCard');
             card.classList.remove('hidden');
