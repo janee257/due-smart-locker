@@ -366,7 +366,7 @@
                 showLogin();
             }
         });
-        
+
         async function handleLogin(e) {
             e.preventDefault();
             const mssv = document.getElementById('loginMssv').value.trim();
@@ -900,132 +900,147 @@
         let unsubscribeHistoryOrders = null;
         let unsubscribeHistoryBorrows = null;
 
+       // ================= TAB 3: LỊCH SỬ THẢ XUỐNG THEO NGÀY (ACCORDION) =================
+        let unsubscribeHistory = null;
+        let expandedHistoryDates = []; // Lưu các ngày đang được mở thả xuống
+
+        function toggleHistoryDate(dateStr) {
+            if (expandedHistoryDates.includes(dateStr)) {
+                expandedHistoryDates = expandedHistoryDates.filter(d => d !== dateStr);
+            } else {
+                expandedHistoryDates.push(dateStr);
+            }
+            renderHistoryAccordion();
+        }
+
+        let currentHistoryRawList = [];
+
         function fetchHistory() {
             if (!currentUser || !currentUser.mssv) return;
 
             const mssv = String(currentUser.mssv).trim();
-            const list = document.getElementById('historyList');
+            if (unsubscribeHistory) unsubscribeHistory();
 
-            if (unsubscribeHistoryOrders) unsubscribeHistoryOrders();
-            if (unsubscribeHistoryBorrows) unsubscribeHistoryBorrows();
-
-            let historyOrders = [];
-            let historyBorrows = [];
-
-            function renderCombinedHistory() {
-                // Hợp nhất dữ liệu từ cả 2 nguồn: orders và borrowings
-                const combined = [...historyBorrows, ...historyOrders];
-
-                // Sắp xếp thời gian mới nhất lên đầu
-                combined.sort((a, b) => {
-                    const timeA = a.sortTime || 0;
-                    const timeB = b.sortTime || 0;
-                    return timeB - timeA;
-                });
-
-                list.innerHTML = '';
-
-                if (combined.length === 0) {
-                    list.innerHTML = `
-                        <div class="col-span-full text-center py-12 space-y-2 bg-white rounded-3xl border border-dashed border-slate-200">
-                            <i class="fa-solid fa-clock-rotate-left text-3xl text-slate-300"></i>
-                            <p class="text-xs sm:text-sm text-slate-500 font-medium">Chưa có bản ghi lịch sử nào cho tài khoản này.</p>
-                        </div>
-                    `;
-                    return;
-                }
-
-                combined.forEach(h => {
-                    list.innerHTML += `
-                        <div class="bg-white p-4 rounded-2xl border border-slate-200 shadow-xs text-xs space-y-2 hover:border-orange-300 transition">
-                            <div class="flex justify-between items-center">
-                                <span class="font-mono text-[10px] text-slate-500 bg-slate-100 px-2 py-0.5 rounded-md font-bold">${h.barcode}</span>
-                                ${h.statusBadge}
-                            </div>
-                            <h4 class="font-bold text-slate-800 text-xs sm:text-sm leading-snug">${h.title}</h4>
-                            <div class="text-[11px] text-slate-500 flex justify-between pt-1.5 border-t border-slate-100">
-                                <span>${h.timeLabel}: <b>${h.timeValue}</b></span>
-                                <span>Hạn trả: <b class="text-orange-600">${h.dueDate}</b></span>
-                            </div>
-                            ${h.extraInfo ? `<div class="text-[10px] text-emerald-600 font-semibold">${h.extraInfo}</div>` : ''}
-                            ${h.fineInfo ? `<div class="text-[10px] text-rose-600 font-bold bg-rose-50 p-1.5 rounded-lg border border-rose-100">${h.fineInfo}</div>` : ''}
-                        </div>
-                    `;
-                });
-            }
-
-            // 1. Lắng nghe các cuốn sách trong 'borrowings' (Đang giữ, Chờ kiểm tra, Đã hoàn tất)
-            unsubscribeHistoryBorrows = db.collection('borrowings')
+            unsubscribeHistory = db.collection('borrowings')
                 .where('mssv', '==', mssv)
-                .onSnapshot(snapshot => {
-                    historyBorrows = [];
+                .onSnapshot({ includeMetadataChanges: false }, snapshot => {
+                    currentHistoryRawList = [];
                     snapshot.forEach(doc => {
-                        const d = doc.data();
-                        const t = d.ngay_tao ? (d.ngay_tao.toMillis ? d.ngay_tao.toMillis() : new Date(d.ngay_tao).getTime()) : 0;
-                        
-                        let badge = '';
-                        if (d.trang_thai === 'hoan_tat') {
-                            badge = `<span class="px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-slate-100 text-slate-600"><i class="fa-solid fa-check mr-1 text-emerald-600"></i>Đã hoàn tất trả</span>`;
-                        } else if (d.trang_thai === 'cho_kiem_tra') {
-                            badge = `<span class="px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-blue-100 text-blue-700"><i class="fa-solid fa-box-archive mr-1"></i>Đã gửi vào tủ</span>`;
-                        } else {
-                            badge = `<span class="px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-amber-100 text-amber-700"><i class="fa-solid fa-book-reader mr-1"></i>Đang giữ sách</span>`;
-                        }
-
-                        historyBorrows.push({
-                            id: doc.id,
-                            barcode: d.ma_vach || 'DUE-BOOK',
-                            title: d.ten_sach,
-                            timeLabel: 'Ngày mượn',
-                            timeValue: d.ngay_muon || 'Hôm nay',
-                            dueDate: d.han_tra || '--',
-                            statusBadge: badge,
-                            extraInfo: d.ngay_tra_thuc_te ? `<i class="fa-regular fa-calendar-check mr-1"></i>Đã trả vào: ${d.ngay_tra_thuc_te}` : null,
-                            fineInfo: d.tien_phat ? `Phạt: ${d.tien_phat.toLocaleString()} đ ${d.ghi_chu_phat ? `(${d.ghi_chu_phat})` : ''}` : null,
-                            sortTime: t
-                        });
+                        currentHistoryRawList.push({ id: doc.id, ...doc.data() });
                     });
-                    renderCombinedHistory();
-                });
-
-            // 2. Lắng nghe các đơn đặt mượn trong 'orders' (Đơn hẹn chờ lấy hoặc đã hủy do quá hạn)
-            unsubscribeHistoryOrders = db.collection('orders')
-                .where('mssv', '==', mssv)
-                .onSnapshot(snapshot => {
-                    historyOrders = [];
-                    snapshot.forEach(doc => {
-                        const o = doc.data();
-                        // Chỉ lấy các đơn đang chờ soạn / chờ lấy hoặc đơn bị hủy (các đơn 'da_nhan' đã chuyển thành borrowings)
-                        if (['cho_soan', 'da_soan_xong', 'da_huy_do_qua_han'].includes(o.trang_thai_don)) {
-                            const t = o.ngay_tao ? (o.ngay_tao.toMillis ? o.ngay_tao.toMillis() : new Date(o.ngay_tao).getTime()) : 0;
-                            const books = o.books || [];
-                            const titles = books.map(b => b.ten_sach).join(', ') || 'Đơn mượn sách';
-
-                            let badge = '';
-                            if (o.trang_thai_don === 'da_huy_do_qua_han') {
-                                badge = `<span class="px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-rose-100 text-rose-700">Đã hủy (Quá hạn)</span>`;
-                            } else {
-                                badge = `<span class="px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-purple-100 text-purple-700">Chờ nhận tại ${o.so_hoc || 'tủ'}</span>`;
-                            }
-
-                            historyOrders.push({
-                                id: doc.id,
-                                barcode: o.qr_token || 'TOKEN',
-                                title: `${books.length} cuốn: ${titles}`,
-                                timeLabel: 'Hẹn lấy',
-                                timeValue: `${o.ngay_hen || 'Hôm nay'} (${o.khung_gio || ''})`,
-                                dueDate: '--',
-                                statusBadge: badge,
-                                extraInfo: null,
-                                fineInfo: null,
-                                sortTime: t
-                            });
-                        }
-                    });
-                    renderCombinedHistory();
+                    renderHistoryAccordion();
+                }, err => {
+                    console.error("Lỗi nghe lịch sử:", err);
                 });
         }
 
+        function renderHistoryAccordion() {
+            const list = document.getElementById('historyList');
+            list.className = "col-span-full space-y-3"; // Đổi grid thành danh sách dọc thả xuống
+            list.innerHTML = '';
+
+            if (currentHistoryRawList.length === 0) {
+                list.innerHTML = `
+                    <div class="col-span-full text-center py-12 space-y-2 bg-white rounded-3xl border border-dashed border-slate-200">
+                        <i class="fa-solid fa-clock-rotate-left text-3xl text-slate-300"></i>
+                        <p class="text-xs sm:text-sm text-slate-500 font-medium">Bạn chưa có lịch sử mượn trả sách nào.</p>
+                    </div>
+                `;
+                return;
+            }
+
+            // 1. Gom nhóm danh sách sách theo Ngày mượn
+            const groupedByDate = {};
+            currentHistoryRawList.forEach(item => {
+                const dateKey = item.ngay_muon || 'Chưa xác định';
+                if (!groupedByDate[dateKey]) {
+                    groupedByDate[dateKey] = {
+                        date: dateKey,
+                        sortTime: item.ngay_tao ? (item.ngay_tao.toMillis ? item.ngay_tao.toMillis() : new Date(item.ngay_tao).getTime()) : 0,
+                        books: []
+                    };
+                }
+                groupedByDate[dateKey].books.push(item);
+            });
+
+            // Sắp xếp các ngày gần nhất lên trên cùng
+            const sortedDates = Object.values(groupedByDate).sort((a, b) => b.sortTime - a.sortTime);
+
+            // Mặc định tự động mở ngày mới nhất nếu chưa có ngày nào mở
+            if (expandedHistoryDates.length === 0 && sortedDates.length > 0) {
+                expandedHistoryDates.push(sortedDates[0].date);
+            }
+
+            // 2. Render Accordion từng ngày
+            sortedDates.forEach(group => {
+                const isExpanded = expandedHistoryDates.includes(group.date);
+                const totalCount = group.books.length;
+                const completedCount = group.books.filter(b => b.trang_thai === 'hoan_tat').length;
+
+                // Danh sách sách thả xuống bên trong ngày
+                let booksHtml = '';
+                group.books.forEach((b, idx) => {
+                    let statusBadge = '';
+                    if (b.trang_thai === 'hoan_tat') {
+                        statusBadge = `<span class="px-2 py-0.5 rounded text-[10px] font-bold bg-slate-100 text-slate-600"><i class="fa-solid fa-check mr-1 text-emerald-600"></i>Đã trả xong</span>`;
+                    } else if (b.trang_thai === 'cho_kiem_tra') {
+                        statusBadge = `<span class="px-2 py-0.5 rounded text-[10px] font-bold bg-blue-100 text-blue-700"><i class="fa-solid fa-box-archive mr-1"></i>Đã gửi vào tủ</span>`;
+                    } else {
+                        statusBadge = `<span class="px-2 py-0.5 rounded text-[10px] font-bold bg-amber-100 text-amber-700"><i class="fa-solid fa-book-reader mr-1"></i>Đang giữ</span>`;
+                    }
+
+                    booksHtml += `
+                        <div class="flex flex-col sm:flex-row sm:items-center justify-between p-3 bg-white rounded-xl border border-slate-200 text-xs gap-2 shadow-2xs hover:border-orange-200 transition">
+                            <div class="flex items-center gap-2.5">
+                                <span class="w-5 h-5 rounded-full bg-orange-50 text-orange-700 font-bold flex items-center justify-center text-[10px] shrink-0">${idx + 1}</span>
+                                <div>
+                                    <div class="font-bold text-slate-800 text-xs sm:text-sm leading-snug">${b.ten_sach}</div>
+                                    <div class="text-[10px] font-mono text-slate-400 mt-0.5">
+                                        Mã vạch: <b class="text-slate-600">${b.ma_vach || 'DUE'}</b> • Vị trí: ${b.vi_tri_ke || 'Kệ chính'}
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="flex items-center gap-3 self-end sm:self-auto text-[11px]">
+                                <span class="text-slate-500">Hạn trả: <b class="text-orange-600 font-bold">${b.han_tra || '--'}</b></span>
+                                ${b.ngay_tra_thuc_te ? `<span class="text-emerald-600 font-medium text-[10px]"><i class="fa-regular fa-calendar-check mr-0.5"></i>Trả: ${b.ngay_tra_thuc_te}</span>` : ''}
+                                ${statusBadge}
+                            </div>
+                        </div>
+                    `;
+                });
+
+                // Khung cha đại diện cho ngày mượn
+                list.innerHTML += `
+                    <div class="bg-white rounded-2xl border border-slate-200 shadow-xs overflow-hidden transition">
+                        <!-- HEADER NGÀY MƯỢN (BẤM VÀO ĐỂ THẢ XUỐNG / THU GỌN) -->
+                        <div onclick="toggleHistoryDate('${group.date}')" class="p-4 bg-slate-50 hover:bg-orange-50/50 cursor-pointer flex items-center justify-between select-none transition border-b ${isExpanded ? 'border-slate-200' : 'border-transparent'}">
+                            <div class="flex items-center gap-3">
+                                <div class="w-8 h-8 rounded-xl bg-orange-100 text-orange-700 flex items-center justify-center font-bold text-xs shadow-2xs">
+                                    <i class="fa-regular fa-calendar-days"></i>
+                                </div>
+                                <div>
+                                    <div class="font-bold text-slate-800 text-xs sm:text-sm flex items-center gap-2">
+                                        Ngày mượn: <span>${group.date}</span>
+                                    </div>
+                                    <div class="text-[11px] text-slate-400 mt-0.5">
+                                        Tổng số: <b class="text-slate-700">${totalCount} cuốn</b> • Đã trả: <b class="text-emerald-600">${completedCount}/${totalCount}</b>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="flex items-center gap-2 text-xs font-bold text-orange-600">
+                                <span>${isExpanded ? 'Thu gọn' : 'Xem chi tiết'}</span>
+                                <i class="fa-solid ${isExpanded ? 'fa-chevron-up' : 'fa-chevron-down'} text-[11px] transition-transform"></i>
+                            </div>
+                        </div>
+
+                        <!-- DANH SÁCH CON (HIỂN THỊ KHI ĐƯỢC THẢ XUỐNG) -->
+                        <div class="${isExpanded ? 'p-3 space-y-2 bg-slate-100/50' : 'hidden'}">
+                            ${booksHtml}
+                        </div>
+                    </div>
+                `;
+            });
+        }
         // ================= CỤM LỊCH THÁNG =================
         function openBookingCartModal() {
             if (cart.length === 0) return alert("Giỏ hàng đang trống!");
