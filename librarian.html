@@ -21,27 +21,31 @@
 
     <script>
         const firebaseConfig = {
-            apiKey: "AIzaSyB1qtSFNNFmVWAo0r0lqIU5cEfCGOKX59M",
-            authDomain: "due-smart-locker.firebaseapp.com",
-            projectId: "due-smart-locker",
-            storageBucket: "due-smart-locker.firebasestorage.app",
-            messagingSenderId: "639064006349",
-            appId: "1:639064006349:web:ea10677c76872b13989384",
-            measurementId: "G-078Z3QDM27"
-        };
+    apiKey: "AIzaSyB1qtSFNNFmVWAo0r0lqIU5cEfCGOKX59M",
+    authDomain: "due-smart-locker.firebaseapp.com",
+    projectId: "due-smart-locker",
+    storageBucket: "due-smart-locker.firebasestorage.app",
+    messagingSenderId: "639064006349",
+    appId: "1:639064006349:web:ea10677c76872b13989384",
+    measurementId: "G-078Z3QDM27"
+};
 
-        if (!firebase.apps || !firebase.apps.length) {
-            firebase.initializeApp(firebaseConfig);
-        }
-        
-        const auth = firebase.auth();
-        const db = firebase.firestore();
+if (!firebase.apps || !firebase.apps.length) {
+    firebase.initializeApp(firebaseConfig);
+}
 
-        async function loginWithFirebase(identifier, password) {
-            let email = identifier.trim();
-            if (!email.includes("@")) email += "@due.udn.vn";
-            return auth.signInWithEmailAndPassword(email, password);
-        }
+const auth = firebase.auth();
+const db = firebase.firestore();
+
+// Ép Firebase lưu thông tin đăng nhập vào LocalStorage vĩnh viễn
+auth.setPersistence(firebase.auth.Auth.Persistence.LOCAL)
+    .catch(err => console.error("Lỗi setPersistence:", err));
+
+async function loginWithFirebase(identifier, password) {
+    let email = identifier.trim();
+    if (!email.includes("@")) email += "@due.udn.vn";
+    return auth.signInWithEmailAndPassword(email, password);
+}
     </script>
 </head>
 <body class="bg-slate-100 min-h-screen text-slate-800 font-sans pb-16">
@@ -399,28 +403,33 @@
         let currentLibCategory = 'all';
 
         auth.onAuthStateChanged(async (user) => {
-            if (user) {
-                const emailRaw = (user.email || '').toLowerCase().trim();
+    if (user) {
+        const emailRaw = (user.email || '').toLowerCase().trim();
+        if (!emailRaw.includes('thuthu')) {
+            document.getElementById('librarianLoginSection').classList.remove('hidden');
+            document.getElementById('libLogoutBtnContainer').classList.add('hidden');
+            return;
+        }
+        document.getElementById('librarianLoginSection').classList.add('hidden');
+        document.getElementById('libLogoutBtnContainer').classList.remove('hidden');
+        
+        try {
+            initLibrarianListeners();
+        } catch (e) {
+            console.error(e);
+        }
+        try {
+            await autoSeedDatabaseIfEmpty(false);
+        } catch (e) {
+            console.warn(e);
+        }
+    } else {
+        document.getElementById('librarianLoginSection').classList.remove('hidden');
+        document.getElementById('libLogoutBtnContainer').classList.add('hidden');
+    }
+});
 
-                // KIỂM TRA PHÂN QUYỀN: Bắt buộc phải là tài khoản Thủ thư
-                if (!emailRaw.includes('thuthu')) {
-                    await auth.signOut();
-                    alert("⚠️ Cổng này chỉ dành riêng cho Cán bộ Thủ thư DUE!");
-                    document.getElementById('librarianLoginSection').classList.remove('hidden');
-                    document.getElementById('libLogoutBtnContainer').classList.add('hidden');
-                    return;
-                }
-
-                document.getElementById('librarianLoginSection').classList.add('hidden');
-                document.getElementById('libLogoutBtnContainer').classList.remove('hidden');
-                await autoSeedDatabaseIfEmpty(false);
-                initLibrarianListeners();
-            } else {
-                document.getElementById('librarianLoginSection').classList.remove('hidden');
-                document.getElementById('libLogoutBtnContainer').classList.add('hidden');
-            }
-        });
-        async function handleLibrarianLogin(e) {
+         async function handleLibrarianLogin(e) {
             e.preventDefault();
             const email = document.getElementById('libEmail').value.trim();
             const pass = document.getElementById('libPassword').value.trim();

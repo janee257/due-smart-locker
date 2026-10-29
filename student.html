@@ -15,28 +15,32 @@
     
     <script>
         const firebaseConfig = {
-            apiKey: "AIzaSyB1qtSFNNFmVWAo0r0lqIU5cEfCGOKX59M",
-            authDomain: "due-smart-locker.firebaseapp.com",
-            projectId: "due-smart-locker",
-            storageBucket: "due-smart-locker.firebasestorage.app",
-            messagingSenderId: "639064006349",
-            appId: "1:639064006349:web:ea10677c76872b13989384",
-            measurementId: "G-078Z3QDM27"
-        };
+    apiKey: "AIzaSyB1qtSFNNFmVWAo0r0lqIU5cEfCGOKX59M",
+    authDomain: "due-smart-locker.firebaseapp.com",
+    projectId: "due-smart-locker",
+    storageBucket: "due-smart-locker.firebasestorage.app",
+    messagingSenderId: "639064006349",
+    appId: "1:639064006349:web:ea10677c76872b13989384",
+    measurementId: "G-078Z3QDM27"
+};
 
-        if (!firebase.apps || !firebase.apps.length) {
-            firebase.initializeApp(firebaseConfig);
-        }
-        
-        const auth = firebase.auth();
-        const db = firebase.firestore();
+if (!firebase.apps || !firebase.apps.length) {
+    firebase.initializeApp(firebaseConfig);
+}
 
-        async function loginWithFirebase(identifier, password) {
-            let email = identifier.trim();
-            if (!email.includes("@")) email += "@due.udn.vn";
-            return auth.signInWithEmailAndPassword(email, password);
-        }
-    </script>
+const auth = firebase.auth();
+const db = firebase.firestore();
+
+// Ép Firebase lưu thông tin đăng nhập vào LocalStorage vĩnh viễn
+auth.setPersistence(firebase.auth.Auth.Persistence.LOCAL)
+    .catch(err => console.error("Lỗi setPersistence:", err));
+
+async function loginWithFirebase(identifier, password) {
+    let email = identifier.trim();
+    if (!email.includes("@")) email += "@due.udn.vn";
+    return auth.signInWithEmailAndPassword(email, password);
+}
+ </script>
     
     <style>
         .tab-btn.active {
@@ -340,32 +344,27 @@
         let calendarViewDate = new Date(new Date().getFullYear(), new Date().getMonth(), 1);
         let selectedBookingDate = '';
 
-        auth.onAuthStateChanged(async (user) => {
-            if (user) {
-                const emailRaw = (user.email || '').toLowerCase().trim();
-
-                // KIỂM TRA PHÂN QUYỀN: Nếu là Thủ thư hoặc Kiosk thì đăng xuất ngay
-                if (emailRaw.includes('thuthu') || emailRaw.includes('kiosk')) {
-                    await auth.signOut();
-                    alert("⚠️ Đây là cổng dành riêng cho Sinh viên. Cán bộ hoặc Trạm Kiosk vui lòng truy cập đúng cổng chức năng!");
-                    showLogin();
-                    return;
-                }
-
-                const mssvClean = emailRaw.replace('@due.udn.vn', '').trim();
-                currentUser = {
-                    mssv: mssvClean,
-                    ho_ten: user.displayName || `Sinh viên (${mssvClean})`,
-                    email: user.email,
-                    tien_no_phat: 0
-                };
-                sessionStorage.setItem('due_student_user', JSON.stringify(currentUser));
-                showApp();
-            } else {
-                currentUser = null;
-                showLogin();
-            }
-        });
+        auth.onAuthStateChanged(user => {
+    if (user) {
+        const emailRaw = (user.email || '').toLowerCase().trim();
+        // Không gọi auth.signOut() ở đây, chỉ đổi giao diện
+        if (emailRaw.includes('thuthu') || emailRaw.includes('kiosk')) {
+            showLogin();
+            return;
+        }
+        const mssvClean = emailRaw.replace('@due.udn.vn', '').trim();
+        currentUser = {
+            mssv: mssvClean,
+            ho_ten: user.displayName || `Sinh viên (${mssvClean})`,
+            email: user.email,
+            tien_no_phat: 0
+        };
+        showApp();
+    } else {
+        currentUser = null;
+        showLogin();
+    }
+});
 
         async function handleLogin(e) {
             e.preventDefault();
