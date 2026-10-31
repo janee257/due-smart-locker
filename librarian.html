@@ -16,7 +16,8 @@
             border-color: #ea580c;
         }
     </style>
-    
+    <!-- TOAST THÔNG BÁO DÙNG CHUNG -->
+    <script src="/toast.js"></script>
     <!-- Firebase Compat SDKs -->
     <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
@@ -615,7 +616,7 @@
                     trang_thai_don: 'da_soan_xong',
                     thoi_gian_soan: firebase.firestore.FieldValue.serverTimestamp()
                 });
-                alert("Đã xác nhận nạp sách vào hộc tủ thành công!");
+                showToast.success("Nạp hộc thành công!", `Đã xác nhận nạp sách vào ${orderData.so_hoc || 'hộc tủ'}, sinh viên đã có thể lấy sách!`);
             } catch (err) {
                 console.error("Lỗi nạp hộc:", err);
                 alert("Không thể cập nhật trạng thái!");
@@ -625,22 +626,52 @@
         // THU HỒI ĐƠN QUÁ HẠN: đổi trạng thái + nhả hộc + hoàn tồn kho trong 1 transaction (chống bấm 2 lần)
         async function cancelExpiredOrder(orderId) {
             if (!(await App.confirm("Xác nhận sinh viên không đến nhận sách, thu hồi sách về kệ và mở trống hộc tủ?"))) return;
+            
             try {
                 const oref = db.collection('orders').doc(orderId);
                 const pre = (await oref.get()).data();
                 if (!pre) return;
+                
                 const { refs, missing } = await App.stockRefs(pre.books || []);
+                
                 await db.runTransaction(async tx => {
                     const st = (await tx.get(oref)).data().trang_thai_don;
-                    if (st !== 'cho_soan' && st !== 'da_soan_xong') throw new Error("Đơn này đã được xử lý (đã nhận hoặc đã thu hồi).");
-                    tx.update(oref, { trang_thai_don: 'da_huy_do_qua_han', thoi_gian_huy: App.FV.serverTimestamp() });
-                    if (pre.so_hoc) tx.set(App.lockerRef(pre.so_hoc), { so_hoc: pre.so_hoc, trang_thai: 'trong', qr_token: null, cap_nhat_luc: App.FV.serverTimestamp() }, { merge: true });
+                    if (st !== 'cho_soan' && st !== 'da_soan_xong') {
+                        throw new Error("Đơn này đã được xử lý (đã nhận hoặc đã thu hồi trước đó).");
+                    }
+                    tx.update(oref, { 
+                        trang_thai_don: 'da_huy_do_qua_han', 
+                        thoi_gian_huy: App.FV.serverTimestamp() 
+                    });
+                    if (pre.so_hoc) {
+                        tx.set(App.lockerRef(pre.so_hoc), { 
+                            so_hoc: pre.so_hoc, 
+                            trang_thai: 'trong', 
+                            qr_token: null, 
+                            cap_nhat_luc: App.FV.serverTimestamp() 
+                        }, { merge: true });
+                    }
                     refs.forEach(r => r && tx.update(r, { so_luong_con: App.FV.increment(1) }));
                 });
-                alert("Đã thu hồi sách về kho và giải phóng hộc tủ!" + (missing.length ? "\nChưa cộng được tồn kho cho: " + missing.join(", ") : ""));
-            } catch (err) { console.error("Lỗi thu hồi:", err); alert(err.message || "Không thể thu hồi đơn!"); }
-        }
 
+                // Gom thông báo kết quả: Nếu có sách thiếu mã thì cảnh báo warning, nếu đủ thì báo success
+                if (missing && missing.length > 0) {
+                    showToast.warning(
+                        "Thu hồi kèm lưu ý!", 
+                        `Đã mở trống ${pre.so_hoc || 'hộc tủ'}, nhưng chưa cộng được tồn kho cho: ${missing.join(", ")}`
+                    );
+                } else {
+                    showToast.success(
+                        "Thu hồi hoàn tất!", 
+                        `Đã thu hồi sách về kệ và mở trống ${pre.so_hoc || 'hộc tủ'} thành công.`
+                    );
+                }
+
+            } catch (err) { 
+                console.error("Lỗi thu hồi:", err); 
+                showToast.error("Không thể thu hồi!", err.message || "Đã xảy ra lỗi trong quá trình thu hồi đơn.");
+            }
+        }
         // ================= BẢNG KIỂM TRA SÁCH TRẢ =================
         function renderInspectBooks(returns) {
             document.getElementById('inspectCount').innerText = `${returns.length} đơn`;
@@ -703,8 +734,28 @@
         async function approveReturnOrder(returnId) {
             try {
                 const r = await finishReturn(returnId);
-                alert(`Đã nghiệm thu ${r.items.length} cuốn, cộng lại tồn kho và giải phóng ${r.pre.so_hoc}!` + (r.missing.length ? "\nChưa khớp kho: " + r.missing.join(", ") : ""));
-            } catch (err) { console.error("Lỗi nghiệm thu sách:", err); alert(err.message || "Lỗi khi nghiệm thu sách!"); }
+                const count = r.items ? r.items.length : 0;
+                const slot = (r.pre && r.pre.so_hoc) ? r.pre.so_hoc : 'hộc tủ';
+
+                // Kiểm tra xem có cuốn sách nào bị lệch mã kho không
+                if (r.missing && r.missing.length > 0) {
+                    showToast.warning(
+                        "Nghiệm thu kèm lưu ý!",
+                        `Đã nghiệm thu ${count} cuốn và mở trống ${slot}, nhưng chưa khớp kho: ${r.missing.join(", ")}`
+                    );
+                } else {
+                    showToast.success(
+                        "Nghiệm thu thành công!",
+                        `Đã nghiệm thu ${count} cuốn sách, cộng lại tồn kho và giải phóng ${slot} thành công!`
+                    );
+                }
+            } catch (err) { 
+                console.error("Lỗi nghiệm thu sách:", err); 
+                showToast.error(
+                    "Lỗi nghiệm thu!", 
+                    err.message || "Đã xảy ra lỗi trong quá trình nghiệm thu sách."
+                ); 
+            }
         }
 
         async function openReportModal(returnId) {
