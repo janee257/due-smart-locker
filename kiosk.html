@@ -16,34 +16,8 @@
     <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
     <script src="https://unpkg.com/html5-qrcode"></script>
 
-    <script>
-        const firebaseConfig = {
-    apiKey: "AIzaSyB1qtSFNNFmVWAo0r0lqIU5cEfCGOKX59M",
-    authDomain: "due-smart-locker.firebaseapp.com",
-    projectId: "due-smart-locker",
-    storageBucket: "due-smart-locker.firebasestorage.app",
-    messagingSenderId: "639064006349",
-    appId: "1:639064006349:web:ea10677c76872b13989384",
-    measurementId: "G-078Z3QDM27"
-};
-
-if (!firebase.apps || !firebase.apps.length) {
-    firebase.initializeApp(firebaseConfig);
-}
-
-const auth = firebase.auth();
-const db = firebase.firestore();
-
-// Ép Firebase lưu thông tin đăng nhập vào LocalStorage vĩnh viễn
-auth.setPersistence(firebase.auth.Auth.Persistence.LOCAL)
-    .catch(err => console.error("Lỗi setPersistence:", err));
-
-async function loginWithFirebase(identifier, password) {
-    let email = identifier.trim();
-    if (!email.includes("@")) email += "@due.udn.vn";
-    return auth.signInWithEmailAndPassword(email, password);
-}
-    </script>
+    <script src="app-core.js"></script>
+    <script>const { auth, db } = App; const loginWithFirebase = App.login;</script>
 </head>
 <body class="bg-slate-900 text-white min-h-screen flex flex-col font-sans">
 
@@ -157,26 +131,18 @@ async function loginWithFirebase(identifier, password) {
         let openedTimer = null;
         const lockerRef = db.collection('lockers');
 
-        auth.onAuthStateChanged(user => {
-    if (user) {
-        const emailRaw = (user.email || '').toLowerCase().trim();
-        if (!emailRaw.includes('kiosk')) {
-            currentUser = null;
+        App.watchAuth(user => {
+            currentUser = user;
+            $('kioskLoginSection').classList.add('hidden');
+            $('kioskLogoutBtnContainer').classList.remove('hidden');
+            subscribeLockers();
+            startCamera();
+        }, msg => {
+            currentUser = null; App.stopAll();
             $('kioskLoginSection').classList.remove('hidden');
             $('kioskLogoutBtnContainer').classList.add('hidden');
-            return;
-        }
-        currentUser = user;
-        $('kioskLoginSection').classList.add('hidden');
-        $('kioskLogoutBtnContainer').classList.remove('hidden');
-        subscribeLockers();
-        startCamera();
-    } else {
-        currentUser = null;
-        $('kioskLoginSection').classList.remove('hidden');
-        $('kioskLogoutBtnContainer').classList.add('hidden');
-    }
-});
+            if (msg) { const eb = $('kioskLoginError'); eb.innerText = msg; eb.classList.remove('hidden'); }
+        });
         async function handleKioskLogin(e) {
             e.preventDefault();
             const errBox = $('kioskLoginError');
@@ -197,7 +163,7 @@ async function loginWithFirebase(identifier, password) {
         // LẮNG NGHE REALTIME 20 HỘC TỦ TỪ CLOUD FIRESTORE
         function subscribeLockers() {
             if (unsubscribeLockers) unsubscribeLockers();
-            unsubscribeLockers = lockerRef.onSnapshot(snapshot => {
+            App.listen('lockers', lockerRef, snapshot => {
                 const map = new Map();
                 snapshot.forEach(doc => {
                     const d = doc.data();
@@ -256,164 +222,74 @@ async function loginWithFirebase(identifier, password) {
             });
         }
 
-        // ================= XỬ LÝ NHẬN SÁCH TẠI KIOSK (CÓ CHECK THỦ THƯ NẠP SÁCH) =================
+        const FV = () => firebase.firestore.FieldValue.serverTimestamp();
+        const BLOCK = {
+            cho_soan: n => `⚠️ Thủ thư chưa nạp sách vào ${n}. Vui lòng quay lại sau khi nhận được thông báo!`,
+            da_nhan: n => `Đơn sách tại ${n} đã được nhận trước đó!`,
+            da_huy_do_qua_han: n => `Đơn sách tại ${n} đã bị thu hồi do quá hạn lấy!`
+        };
+        // Sau 5s: nhả hộc về trạng thái kế tiếp
+        function releaseLockerLater(name, state, token) {
+            clearTimeout(openedTimer);
+            openedTimer = setTimeout(async () => {
+                openedLockerName = null;
+                try { await App.lockerRef(name).set({ so_hoc: name, trang_thai: state, qr_token: token, cap_nhat_luc: FV() }, { merge: true }); } catch (e) { console.error(e); }
+            }, 5000);
+        }
+
+        // NHẬN SÁCH: chỉ mở khi đơn ở trạng thái 'da_soan_xong' (Thủ thư đã nạp hộc); mọi ghi nhận trong 1 transaction
         async function handlePickup() {
             const token = $('manualInput').value.trim().toUpperCase();
             if (!token) return showNotice("Vui lòng nhập hoặc quét mã QR Token nhận sách!", "error");
-
             try {
-                // 1. Tìm đơn trong collection 'orders'
-                const orderSnap = await db.collection('orders').where('qr_token', '==', token).limit(1).get();
-                if (orderSnap.empty) return showNotice("Mã Token không hợp lệ hoặc không tồn tại!", "error");
-
-                const orderDoc = orderSnap.docs[0];
-                const order = orderDoc.data();
-                const lockerName = order.so_hoc || "Hộc 01";
-
-                // --- KIỂM TRA TRẠNG THÁI SOẠN SÁCH CỦA THỦ THƯ ---
-                if (order.trang_thai_don === 'cho_soan') {
-                    return showNotice(`⚠️ Thủ thư chưa nạp sách vào ${lockerName}. Vui lòng quay lại sau khi nhận được thông báo!`, "error");
-                }
-
-                if (order.trang_thai_don === 'da_nhan') {
-                    return showNotice(`Đơn sách tại ${lockerName} đã được nhận trước đó!`, "error");
-                }
-
-                if (order.trang_thai_don === 'da_huy_do_qua_han') {
-                    return showNotice(`Đơn sách tại ${lockerName} đã bị thu hồi do quá hạn lấy!`, "error");
-                }
-
-                // 2. Chuyển hộc tủ sang "ĐANG MỞ"
-                const lSnap = await lockerRef.where('so_hoc', '==', lockerName).limit(1).get();
-                let lockerDocRef = null;
-                if (!lSnap.empty) {
-                    lockerDocRef = lSnap.docs[0].ref;
-                    await lockerDocRef.update({
-                        trang_thai: 'dang_mo',
-                        cap_nhat_luc: firebase.firestore.FieldValue.serverTimestamp()
-                    });
-                }
-
-                // 3. Cập nhật trạng thái đơn thành 'da_nhan'
-                await orderDoc.ref.update({
-                    trang_thai_don: 'da_nhan',
-                    thoi_gian_nhan: firebase.firestore.FieldValue.serverTimestamp()
+                const q = await db.collection('orders').where('qr_token', '==', token).limit(1).get();
+                if (q.empty) return showNotice("Mã Token không hợp lệ hoặc không tồn tại!", "error");
+                const oref = q.docs[0].ref;
+                const out = await db.runTransaction(async tx => {
+                    const s = await tx.get(oref), o = s.data(), name = o.so_hoc;
+                    if (o.trang_thai_don !== 'da_soan_xong') return { err: (BLOCK[o.trang_thai_don] || (() => 'Đơn không hợp lệ để nhận sách.'))(name) };
+                    const due = new Date(); due.setDate(due.getDate() + 14);
+                    const books = o.books || [];
+                    books.forEach((b, i) => tx.set(db.collection('borrowings').doc(`${s.id}_${i}`), {
+                        order_id: s.id, mssv: o.mssv, ho_ten: o.ho_ten || 'Sinh viên DUE', book_id: b.book_id || null,
+                        ten_sach: b.ten_sach, ma_vach: b.ma_vach || 'DUE-BOOK', vi_tri_ke: b.vi_tri_ke || 'Kệ chính',
+                        ngay_muon: App.today(), han_tra: due.toISOString().split('T')[0], trang_thai: 'dang_muon', ngay_tao: FV()
+                    }));
+                    tx.update(oref, { trang_thai_don: 'da_nhan', thoi_gian_nhan: FV() });
+                    tx.set(App.lockerRef(name), { so_hoc: name, trang_thai: 'dang_mo', cap_nhat_luc: FV() }, { merge: true });
+                    return { name, n: books.length };
                 });
-
-                // 4. Lưu từng cuốn vào collection 'borrowings' của sinh viên
-                const booksList = order.books || [];
-                const batch = db.batch();
-                const dueDate = new Date();
-                dueDate.setDate(dueDate.getDate() + 14);
-                const dueDateStr = dueDate.toISOString().split('T')[0];
-
-                booksList.forEach(b => {
-                    const borrowRef = db.collection('borrowings').doc();
-                    batch.set(borrowRef, {
-                        order_id: orderDoc.id,
-                        mssv: order.mssv || '251121514110',
-                        ho_ten: order.ho_ten || 'Sinh viên DUE',
-                        ten_sach: b.ten_sach,
-                        ma_vach: b.ma_vach || 'DUE-BOOK',
-                        vi_tri_ke: b.vi_tri_ke || 'Kệ chính',
-                        ngay_muon: new Date().toISOString().split('T')[0],
-                        han_tra: dueDateStr,
-                        trang_thai: 'dang_muon',
-                        ngay_tao: firebase.firestore.FieldValue.serverTimestamp()
-                    });
-                });
-                await batch.commit();
-
-                // Kích hoạt hiệu ứng mở tủ trên giao diện Kiosk
-                openedLockerName = lockerName;
-                showNotice(`🔓 ĐANG MỞ ${lockerName}! Sinh viên hãy lấy ${booksList.length} cuốn sách.`, "success");
+                if (out.err) return showNotice(out.err, "error");
+                openedLockerName = out.name;
+                showNotice(`🔓 ĐANG MỞ ${out.name}! Sinh viên hãy lấy ${out.n} cuốn sách.`, "success");
                 $('manualInput').value = '';
-
-                // Sau 5 giây tự động giải phóng hộc về 'trong'
-                clearTimeout(openedTimer);
-                openedTimer = setTimeout(async () => {
-                    openedLockerName = null;
-                    if (lockerDocRef) {
-                        await lockerDocRef.update({
-                            trang_thai: 'trong',
-                            qr_token: null,
-                            cap_nhat_luc: firebase.firestore.FieldValue.serverTimestamp()
-                        });
-                    }
-                }, 5000);
-
-            } catch (err) {
-                console.error(err);
-                showNotice("Lỗi nhận sách: " + err.message, "error");
-            }
+                releaseLockerLater(out.name, 'trong', null);
+            } catch (err) { console.error(err); showNotice("Lỗi nhận sách: " + err.message, "error"); }
         }
 
-        // ================= XỬ LÝ TRẢ SÁCH TẠI KIOSK =================
+        // TRẢ SÁCH: chỉ chấp nhận mã còn ở trạng thái 'cho_tra_tai_kiosk'
         async function handleReturn() {
             const code = $('manualInput').value.trim().toUpperCase();
             if (!code) return showNotice("Vui lòng nhập hoặc quét mã QR Trả sách (TRA-...)!", "error");
-
             try {
-                // 1. Tìm đơn trả sách trong collection 'returns'
-                const returnSnap = await db.collection('returns').where('qr_token', '==', code).limit(1).get();
-                if (returnSnap.empty) return showNotice("Mã trả sách không tồn tại hoặc đã xử lý!", "error");
-
-                const returnDoc = returnSnap.docs[0];
-                const rData = returnDoc.data();
-                const lockerName = rData.so_hoc;
-
-                // 2. Chuyển hộc tủ sang "ĐANG MỞ"
-                const lSnap = await lockerRef.where('so_hoc', '==', lockerName).limit(1).get();
-                let lockerDocRef = null;
-                if (!lSnap.empty) {
-                    lockerDocRef = lSnap.docs[0].ref;
-                    await lockerDocRef.update({
-                        trang_thai: 'dang_mo',
-                        cap_nhat_luc: firebase.firestore.FieldValue.serverTimestamp()
-                    });
-                }
-
-                // 3. Cập nhật đơn trả sang 'cho_kiem_tra'
-                await returnDoc.ref.update({
-                    trang_thai: 'cho_kiem_tra',
-                    thoi_gian_bo_tu: firebase.firestore.FieldValue.serverTimestamp()
+                const q = await db.collection('returns').where('qr_token', '==', code).limit(1).get();
+                if (q.empty) return showNotice("Mã trả sách không tồn tại!", "error");
+                const rref = q.docs[0].ref;
+                const out = await db.runTransaction(async tx => {
+                    const r = (await tx.get(rref)).data(), name = r.so_hoc;
+                    if (r.trang_thai !== 'cho_tra_tai_kiosk') return { err: "Mã trả sách này đã được sử dụng hoặc đã xử lý!" };
+                    tx.update(rref, { trang_thai: 'cho_kiem_tra', thoi_gian_bo_tu: FV() });
+                    tx.set(App.lockerRef(name), { so_hoc: name, trang_thai: 'dang_mo', cap_nhat_luc: FV() }, { merge: true });
+                    (r.items || []).forEach(it => it.borrow_id && tx.set(db.collection('borrowings').doc(it.borrow_id),
+                        { trang_thai: 'cho_kiem_tra', so_hoc_tra: name, ngay_tra_tai_tu: FV() }, { merge: true }));
+                    return { name, n: (r.items || []).length };
                 });
-
-                // 4. Đổi trạng thái các cuốn trong 'borrowings' sang 'cho_kiem_tra' (để sinh viên không còn bị báo đang mượn)
-                const items = rData.items || [];
-                const batch = db.batch();
-                items.forEach(it => {
-                    if (it.borrow_id) {
-                        batch.update(db.collection('borrowings').doc(it.borrow_id), {
-                            trang_thai: 'cho_kiem_tra',
-                            so_hoc_tra: lockerName,
-                            ngay_tra_tai_tu: firebase.firestore.FieldValue.serverTimestamp()
-                        });
-                    }
-                });
-                await batch.commit();
-
-                openedLockerName = lockerName;
-                showNotice(`🔓 ĐANG MỞ ${lockerName}! Hãy đặt ${items.length} cuốn sách vào hộc và đóng cửa tủ.`, "success");
+                if (out.err) return showNotice(out.err, "error");
+                openedLockerName = out.name;
+                showNotice(`🔓 ĐANG MỞ ${out.name}! Hãy đặt ${out.n} cuốn sách vào hộc và đóng cửa tủ.`, "success");
                 $('manualInput').value = '';
-
-                // Sau 5 giây tự động chuyển hộc sang 'chua_sach_tra'
-                clearTimeout(openedTimer);
-                openedTimer = setTimeout(async () => {
-                    openedLockerName = null;
-                    if (lockerDocRef) {
-                        await lockerDocRef.update({
-                            trang_thai: 'chua_sach_tra',
-                            qr_token: code,
-                            cap_nhat_luc: firebase.firestore.FieldValue.serverTimestamp()
-                        });
-                    }
-                }, 5000);
-
-            } catch (err) {
-                console.error(err);
-                showNotice("Lỗi trả sách: " + err.message, "error");
-            }
+                releaseLockerLater(out.name, 'chua_sach_tra', code);
+            } catch (err) { console.error(err); showNotice("Lỗi trả sách: " + err.message, "error"); }
         }
 
         function showNotice(msg, type) {

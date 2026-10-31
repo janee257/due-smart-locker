@@ -22,34 +22,8 @@
     <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
 
-    <script>
-        const firebaseConfig = {
-    apiKey: "AIzaSyB1qtSFNNFmVWAo0r0lqIU5cEfCGOKX59M",
-    authDomain: "due-smart-locker.firebaseapp.com",
-    projectId: "due-smart-locker",
-    storageBucket: "due-smart-locker.firebasestorage.app",
-    messagingSenderId: "639064006349",
-    appId: "1:639064006349:web:ea10677c76872b13989384",
-    measurementId: "G-078Z3QDM27"
-};
-
-if (!firebase.apps || !firebase.apps.length) {
-    firebase.initializeApp(firebaseConfig);
-}
-
-const auth = firebase.auth();
-const db = firebase.firestore();
-
-// Ép Firebase lưu thông tin đăng nhập vào LocalStorage vĩnh viễn
-auth.setPersistence(firebase.auth.Auth.Persistence.LOCAL)
-    .catch(err => console.error("Lỗi setPersistence:", err));
-
-async function loginWithFirebase(identifier, password) {
-    let email = identifier.trim();
-    if (!email.includes("@")) email += "@due.udn.vn";
-    return auth.signInWithEmailAndPassword(email, password);
-}
-    </script>
+    <script src="app-core.js"></script>
+    <script>const { auth, db } = App; const loginWithFirebase = App.login;</script>
 </head>
 <body class="bg-slate-100 min-h-screen text-slate-800 font-sans pb-16">
 
@@ -405,34 +379,21 @@ async function loginWithFirebase(identifier, password) {
         let allBorrowingsList = [];
         let currentLibCategory = 'all';
 
-        auth.onAuthStateChanged(async (user) => {
-    if (user) {
-        const emailRaw = (user.email || '').toLowerCase().trim();
-        if (!emailRaw.includes('thuthu')) {
+        let booksListening = false;
+        App.watchAuth(async () => {
+            document.getElementById('librarianLoginSection').classList.add('hidden');
+            document.getElementById('libLogoutBtnContainer').classList.remove('hidden');
+            booksListening = false;
+            try { initLibrarianListeners(); } catch (e) { console.error(e); }
+            try { await autoSeedDatabaseIfEmpty(false); } catch (e) { console.warn(e); }
+        }, msg => {
+            App.stopAll(); booksListening = false;
             document.getElementById('librarianLoginSection').classList.remove('hidden');
             document.getElementById('libLogoutBtnContainer').classList.add('hidden');
-            return;
-        }
-        document.getElementById('librarianLoginSection').classList.add('hidden');
-        document.getElementById('libLogoutBtnContainer').classList.remove('hidden');
-        
-        try {
-            initLibrarianListeners();
-        } catch (e) {
-            console.error(e);
-        }
-        try {
-            await autoSeedDatabaseIfEmpty(false);
-        } catch (e) {
-            console.warn(e);
-        }
-    } else {
-        document.getElementById('librarianLoginSection').classList.remove('hidden');
-        document.getElementById('libLogoutBtnContainer').classList.add('hidden');
-    }
-});
+            if (msg) { const eb = document.getElementById('libLoginError'); eb.innerText = msg; eb.classList.remove('hidden'); }
+        });
 
-         async function handleLibrarianLogin(e) {
+        async function handleLibrarianLogin(e) {
             e.preventDefault();
             const email = document.getElementById('libEmail').value.trim();
             const pass = document.getElementById('libPassword').value.trim();
@@ -448,7 +409,7 @@ async function loginWithFirebase(identifier, password) {
         }
 
         async function handleLibrarianLogout() {
-            try { await auth.signOut(); } finally { sessionStorage.clear(); location.reload(); }
+            try { App.stopAll(); await auth.signOut(); } finally { sessionStorage.clear(); location.reload(); }
         }
 
         function switchLibTab(tab) {
@@ -532,7 +493,7 @@ async function loginWithFirebase(identifier, password) {
         // ================= KẾT NỐI REALTIME VỚI CLOUD FIRESTORE =================
         function initLibrarianListeners() {
             // 1. Lắng nghe đơn đặt mượn
-            db.collection('orders').orderBy('ngay_tao', 'desc').onSnapshot(snapshot => {
+            App.listen('orders', db.collection('orders').orderBy('ngay_tao', 'desc'), snapshot => {
                 allOrders = [];
                 snapshot.forEach(doc => {
                     allOrders.push({ id: doc.id, ...doc.data() });
@@ -543,7 +504,7 @@ async function loginWithFirebase(identifier, password) {
             });
 
             // 2. Lắng nghe sách trả chờ kiểm tra
-            db.collection('returns').where('trang_thai', '==', 'cho_kiem_tra').onSnapshot(snapshot => {
+            App.listen('returns', db.collection('returns').where('trang_thai', '==', 'cho_kiem_tra'), snapshot => {
                 const returns = [];
                 snapshot.forEach(doc => {
                     returns.push({ id: doc.id, ...doc.data() });
@@ -554,7 +515,7 @@ async function loginWithFirebase(identifier, password) {
             });
 
             // 3. Lắng nghe toàn bộ danh sách mượn trả
-            db.collection('borrowings').orderBy('ngay_tao', 'desc').onSnapshot(snap => {
+            App.listen('borrowings', db.collection('borrowings').orderBy('ngay_tao', 'desc'), snap => {
                 allBorrowingsList = [];
                 snap.forEach(doc => allBorrowingsList.push({ id: doc.id, ...doc.data() }));
                 renderActiveBorrowsTable();
@@ -660,66 +621,23 @@ async function loginWithFirebase(identifier, password) {
             }
         }
 
+        // THU HỒI ĐƠN QUÁ HẠN: đổi trạng thái + nhả hộc + hoàn tồn kho trong 1 transaction (chống bấm 2 lần)
         async function cancelExpiredOrder(orderId) {
             if (!confirm("Xác nhận sinh viên không đến nhận sách, thu hồi sách về kệ và mở trống hộc tủ?")) return;
             try {
-                const orderDoc = await db.collection('orders').doc(orderId).get();
-                if (!orderDoc.exists) return;
-                const orderData = orderDoc.data();
-
-                // 1. Hoàn lại tồn kho cho từng cuốn sách
-                const booksList = orderData.books || [];
-                for (let b of booksList) {
-                    let bookRef = null;
-
-                    // Cách 1: Tìm theo ID trực tiếp nếu có
-                    if (b.book_id) {
-                        const directDoc = await db.collection('books').doc(b.book_id).get();
-                        if (directDoc.exists) bookRef = directDoc.ref;
-                    }
-
-                    // Cách 2: Tìm theo mã vạch nếu chưa thấy
-                    if (!bookRef && b.ma_vach) {
-                        const snap = await db.collection('books').where('ma_vach', '==', b.ma_vach).limit(1).get();
-                        if (!snap.empty) bookRef = snap.docs[0].ref;
-                    }
-
-                    // Cách 3: Tìm theo tên sách chuẩn hóa
-                    if (!bookRef && b.ten_sach) {
-                        const snap = await db.collection('books').where('ten_sach', '==', b.ten_sach.trim()).limit(1).get();
-                        if (!snap.empty) bookRef = snap.docs[0].ref;
-                    }
-
-                    // Thực hiện cộng lại số lượng có sẵn (+1)
-                    if (bookRef) {
-                        await bookRef.update({
-                            so_luong_con: firebase.firestore.FieldValue.increment(1)
-                        });
-                    }
-                }
-
-                // 2. Chuyển trạng thái đơn sang đã hủy do quá hạn
-                await db.collection('orders').doc(orderId).update({
-                    trang_thai_don: 'da_huy_do_qua_han',
-                    thoi_gian_huy: firebase.firestore.FieldValue.serverTimestamp()
+                const oref = db.collection('orders').doc(orderId);
+                const pre = (await oref.get()).data();
+                if (!pre) return;
+                const { refs, missing } = await App.stockRefs(pre.books || []);
+                await db.runTransaction(async tx => {
+                    const st = (await tx.get(oref)).data().trang_thai_don;
+                    if (st !== 'cho_soan' && st !== 'da_soan_xong') throw new Error("Đơn này đã được xử lý (đã nhận hoặc đã thu hồi).");
+                    tx.update(oref, { trang_thai_don: 'da_huy_do_qua_han', thoi_gian_huy: App.FV.serverTimestamp() });
+                    if (pre.so_hoc) tx.set(App.lockerRef(pre.so_hoc), { so_hoc: pre.so_hoc, trang_thai: 'trong', qr_token: null, cap_nhat_luc: App.FV.serverTimestamp() }, { merge: true });
+                    refs.forEach(r => r && tx.update(r, { so_luong_con: App.FV.increment(1) }));
                 });
-
-                // 3. Mở trống hộc tủ
-                if (orderData.so_hoc) {
-                    const lSnap = await db.collection('lockers').where('so_hoc', '==', orderData.so_hoc).get();
-                    lSnap.forEach(ldoc => ldoc.ref.update({
-                        trang_thai: 'trong',
-                        qr_token: null,
-                        cap_nhat_luc: firebase.firestore.FieldValue.serverTimestamp()
-                    }));
-                }
-
-                alert("Đã thu hồi sách về kho và giải phóng hộc tủ thành công!");
-                loadLibrarianBooks(); // Cập nhật lại số lượng trên tab Kho sách
-            } catch (err) {
-                console.error("Lỗi thu hồi:", err);
-                alert("Không thể thu hồi đơn!");
-            }
+                alert("Đã thu hồi sách về kho và giải phóng hộc tủ!" + (missing.length ? "\nChưa cộng được tồn kho cho: " + missing.join(", ") : ""));
+            } catch (err) { console.error("Lỗi thu hồi:", err); alert(err.message || "Không thể thu hồi đơn!"); }
         }
 
         // ================= BẢNG KIỂM TRA SÁCH TRẢ =================
@@ -761,66 +679,31 @@ async function loginWithFirebase(identifier, password) {
             });
         }
 
-       async function approveReturnOrder(returnId) {
+       // NGHIỆM THU / LẬP BIÊN BẢN PHẠT dùng chung 1 hàm: trạng thái đơn trả + hộc + borrowings + tồn kho (chỉ khi sách tốt) cùng 1 transaction
+        async function finishReturn(returnId, penalty) {
+            const rref = db.collection('returns').doc(returnId);
+            const pre = (await rref.get()).data();
+            if (!pre) throw new Error("Không tìm thấy đơn trả.");
+            const items = pre.items || [];
+            const { refs, missing } = await App.stockRefs(penalty ? [] : items);
+            const ts = App.FV.serverTimestamp();
+            await db.runTransaction(async tx => {
+                if ((await tx.get(rref)).data().trang_thai !== 'cho_kiem_tra') throw new Error("Đơn trả này đã được xử lý.");
+                tx.update(rref, penalty ? { trang_thai: 'hoan_tat_phat', tien_phat: penalty.fine, ly_do_phat: penalty.reason, ngay_xu_ly: ts } : { trang_thai: 'hoan_tat', thoi_gian_duyet: ts });
+                if (pre.so_hoc) tx.set(App.lockerRef(pre.so_hoc), { so_hoc: pre.so_hoc, trang_thai: 'trong', qr_token: null, cap_nhat_luc: ts }, { merge: true });
+                items.forEach(it => it.borrow_id && tx.set(db.collection('borrowings').doc(it.borrow_id),
+                    Object.assign({ trang_thai: 'hoan_tat', ngay_tra_thuc_te: App.today() }, penalty ? { tien_phat: penalty.fine, ghi_chu_phat: penalty.reason } : {}), { merge: true }));
+                refs.forEach(r => r && tx.update(r, { so_luong_con: App.FV.increment(1) }));
+                if (penalty) tx.set(db.collection('penalties').doc(), { mssv: penalty.mssv, ten_sach: penalty.tenSach, so_tien_phat: penalty.fine, ly_do: penalty.reason, ngay_lap: ts, nguoi_lap: "Thủ thư DUE" });
+            });
+            return { pre, items, missing };
+        }
+
+        async function approveReturnOrder(returnId) {
             try {
-                const returnDoc = await db.collection('returns').doc(returnId).get();
-                if (!returnDoc.exists) return;
-                const rData = returnDoc.data();
-
-                // 1. Chuyển trạng thái đơn trả sang hoàn tất
-                await db.collection('returns').doc(returnId).update({
-                    trang_thai: 'hoan_tat',
-                    thoi_gian_duyet: firebase.firestore.FieldValue.serverTimestamp()
-                });
-
-                // 2. Giải phóng hộc tủ về màu xanh Trống
-                if (rData.so_hoc) {
-                    const lSnap = await db.collection('lockers').where('so_hoc', '==', rData.so_hoc).get();
-                    lSnap.forEach(ldoc => ldoc.ref.update({
-                        trang_thai: 'trong',
-                        qr_token: null,
-                        cap_nhat_luc: firebase.firestore.FieldValue.serverTimestamp()
-                    }));
-                }
-
-                // 3. Hoàn tất mượn trong borrowings và CỘNG LẠI TỒN KHO SÁCH
-                const items = rData.items || [];
-                for (let it of items) {
-                    if (it.borrow_id) {
-                        await db.collection('borrowings').doc(it.borrow_id).update({
-                            trang_thai: 'hoan_tat',
-                            ngay_tra_thuc_te: new Date().toISOString().split('T')[0]
-                        });
-                    }
-
-                    let bookRef = null;
-
-                    // Tìm sách theo mã vạch trước
-                    if (it.ma_vach) {
-                        const snap = await db.collection('books').where('ma_vach', '==', it.ma_vach).limit(1).get();
-                        if (!snap.empty) bookRef = snap.docs[0].ref;
-                    }
-
-                    // Nếu không có, tìm theo tên sách
-                    if (!bookRef && it.ten_sach) {
-                        const snap = await db.collection('books').where('ten_sach', '==', it.ten_sach.trim()).limit(1).get();
-                        if (!snap.empty) bookRef = snap.docs[0].ref;
-                    }
-
-                    // Tăng số lượng có sẵn trong kho (+1)
-                    if (bookRef) {
-                        await bookRef.update({
-                            so_luong_con: firebase.firestore.FieldValue.increment(1)
-                        });
-                    }
-                }
-
-                alert(`Đã nghiệm thu xong ${items.length} cuốn sách, cộng lại tồn kho và giải phóng ${rData.so_hoc} thành công!`);
-                loadLibrarianBooks(); // Làm mới số lượng kho
-            } catch (err) {
-                console.error("Lỗi nghiệm thu sách:", err);
-                alert("Lỗi khi nghiệm thu sách!");
-            }
+                const r = await finishReturn(returnId);
+                alert(`Đã nghiệm thu ${r.items.length} cuốn, cộng lại tồn kho và giải phóng ${r.pre.so_hoc}!` + (r.missing.length ? "\nChưa khớp kho: " + r.missing.join(", ") : ""));
+            } catch (err) { console.error("Lỗi nghiệm thu sách:", err); alert(err.message || "Lỗi khi nghiệm thu sách!"); }
         }
 
         async function openReportModal(returnId) {
@@ -847,52 +730,12 @@ async function loginWithFirebase(identifier, password) {
             const mssv = document.getElementById('reportMssv').value;
             const fine = parseInt(document.getElementById('reportFineAmount').value) || 0;
             const reason = document.getElementById('reportReason').value.trim();
-
             if (!reason) return alert("Vui lòng nhập lý do lập biên bản phạt!");
-
             try {
-                const returnDoc = await db.collection('returns').doc(returnId).get();
-                const rData = returnDoc.data();
-
-                await db.collection('returns').doc(returnId).update({
-                    trang_thai: 'hoan_tat_phat',
-                    tien_phat: fine,
-                    ly_do_phat: reason,
-                    ngay_xu_ly: firebase.firestore.FieldValue.serverTimestamp()
-                });
-
-                if (rData && rData.so_hoc) {
-                    const lSnap = await db.collection('lockers').where('so_hoc', '==', rData.so_hoc).get();
-                    lSnap.forEach(ldoc => ldoc.ref.update({ trang_thai: 'trong', qr_token: null }));
-                }
-
-                const items = (rData && rData.items) ? rData.items : [];
-                for (let it of items) {
-                    if (it.borrow_id) {
-                        await db.collection('borrowings').doc(it.borrow_id).update({
-                            trang_thai: 'hoan_tat',
-                            tien_phat: fine,
-                            ghi_chu_phat: reason
-                        });
-                    }
-                }
-
-                await db.collection('penalties').add({
-                    mssv: mssv,
-                    ten_sach: tenSach,
-                    so_tien_phat: fine,
-                    ly_do: reason,
-                    ngay_lap: firebase.firestore.FieldValue.serverTimestamp(),
-                    nguoi_lap: "Thủ thư DUE"
-                });
-
-                alert(`Đã lập biên bản phạt ${fine.toLocaleString()} đ đối với sinh viên MSSV: ${mssv} và giải phóng hộc tủ!`);
+                await finishReturn(returnId, { fine, reason, mssv, tenSach });
+                alert(`Đã lập biên bản phạt ${fine.toLocaleString()} đ cho MSSV ${mssv} và giải phóng hộc tủ!`);
                 closeReportModal();
-                loadLibrarianBooks();
-            } catch (err) {
-                console.error("Lỗi lập biên bản:", err);
-                alert("Không thể lưu biên bản lên hệ thống!");
-            }
+            } catch (err) { console.error("Lỗi lập biên bản:", err); alert(err.message || "Không thể lưu biên bản!"); }
         }
 
         // ================= TAB 2: QUẢN LÝ SÁCH MƯỢN =================
@@ -1024,9 +867,13 @@ async function loginWithFirebase(identifier, password) {
             });
         }
         // ================= TAB 3: KHO SÁCH =================
-        async function loadLibrarianBooks() {
+        function loadLibrarianBooks() {
+            if (booksListening) return; booksListening = true;
+            App.listen('books', db.collection('books'), applyBooksSnapshot);
+        }
+        function applyBooksSnapshot(snapshot) {
             try {
-                const snapshot = await db.collection('books').get();
+                
                 const grouped = {};
                 snapshot.forEach(doc => {
                     const b = { id: doc.id, ...doc.data() };

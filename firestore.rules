@@ -1,18 +1,25 @@
 rules_version = '2';
 service cloud.firestore {
   match /databases/{database}/documents {
+    // Vai trò suy ra từ phần trước @ của email đăng nhập (kiosk* / thuthu* / còn lại = sinh viên = MSSV)
+    function signedIn() { return request.auth != null && request.auth.token.email != null; }
+    function who()      { return request.auth.token.email.split('@')[0]; }
+    function isLib()    { return signedIn() && who().matches('.*thuthu.*'); }
+    function isStaff()  { return signedIn() && (who().matches('.*thuthu.*') || who().matches('.*kiosk.*')); }
+    function isMine()   { return signedIn() && resource.data.mssv == who(); }
+    function newIsMine(){ return signedIn() && request.resource.data.mssv == who(); }
 
-    // Dữ liệu thật chỉ đi qua API trên Vercel (firebase-admin bỏ qua Rules).
-    // Client bị chặn hoàn toàn, trừ một tài liệu "tín hiệu" để kiosk và thủ thư
-    // biết lúc nào cần tải lại dữ liệu (không chứa thông tin cá nhân).
-    match /meta/sync {
-      allow read: if request.auth != null
-                  && request.auth.token.role in ['kiosk', 'thu_thu'];
-      allow write: if false;
+    match /books/{id} {
+      allow read: if signedIn();
+      allow create, delete: if isLib();
+      // Sinh viên chỉ được đổi đúng trường tồn kho khi đặt mượn
+      allow update: if isLib() || (signedIn() &&
+        request.resource.data.diff(resource.data).affectedKeys().hasOnly(['so_luong_con']));
     }
-
-    match /{document=**} {
-      allow read, write: if false;
-    }
+    match /lockers/{id}    { allow read, write: if signedIn(); }
+    match /orders/{id}     { allow read: if isStaff() || isMine(); allow create: if newIsMine(); allow update: if isStaff(); }
+    match /borrowings/{id} { allow read: if isStaff() || isMine(); allow create, update: if isStaff(); }
+    match /returns/{id}    { allow read: if isStaff() || isMine(); allow create: if newIsMine(); allow update: if isStaff(); }
+    match /penalties/{id}  { allow read, write: if isLib(); }
   }
 }
