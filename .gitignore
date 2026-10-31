@@ -10,3 +10,6 @@ node_modules/
 __pycache__/
 *.pyc
 cloudflared.exe
+
+seed_firebase_users.py
+cloudflared.exe
