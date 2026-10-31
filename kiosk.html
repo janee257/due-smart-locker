@@ -268,7 +268,7 @@
             } catch (err) { console.error(err); showNotice("Lỗi nhận sách: " + err.message, "error"); }
         }
 
-        // TRẢ SÁCH: chỉ chấp nhận mã còn ở trạng thái 'cho_tra_tai_kiosk'
+        // TRẢ SÁCH: chỉ chấp nhận mã còn ở trạng thái chờ bỏ sách (cho_bo_sach / cho_tra_tai_kiosk cũ)
         async function handleReturn() {
             const code = $('manualInput').value.trim().toUpperCase();
             if (!code) return showNotice("Vui lòng nhập hoặc quét mã QR Trả sách (TRA-...)!", "error");
@@ -278,7 +278,7 @@
                 const rref = q.docs[0].ref;
                 const out = await db.runTransaction(async tx => {
                     const r = (await tx.get(rref)).data(), name = r.so_hoc;
-                    if (r.trang_thai !== 'cho_tra_tai_kiosk') return { err: "Mã trả sách này đã được sử dụng hoặc đã xử lý!" };
+                    if (!['cho_bo_sach', 'cho_tra_tai_kiosk'].includes(r.trang_thai)) return { err: "Mã trả sách này đã được sử dụng hoặc đã xử lý!" };
                     tx.update(rref, { trang_thai: 'cho_kiem_tra', thoi_gian_bo_tu: FV() });
                     tx.set(App.lockerRef(name), { so_hoc: name, trang_thai: 'dang_mo', cap_nhat_luc: FV() }, { merge: true });
                     (r.items || []).forEach(it => it.borrow_id && tx.set(db.collection('borrowings').doc(it.borrow_id),

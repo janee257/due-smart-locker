@@ -19,7 +19,13 @@ service cloud.firestore {
     match /lockers/{id}    { allow read, write: if signedIn(); }
     match /orders/{id}     { allow read: if isStaff() || isMine(); allow create: if newIsMine(); allow update: if isStaff(); }
     match /borrowings/{id} { allow read: if isStaff() || isMine(); allow create, update: if isStaff(); }
-    match /returns/{id}    { allow read: if isStaff() || isMine(); allow create: if newIsMine(); allow update: if isStaff(); }
+    match /returns/{id} {
+      allow read: if isStaff() || isMine();
+      allow create: if newIsMine();
+      // Sinh viên chỉ được HỦY mã trả chưa dùng (chờ bỏ sách -> da_huy)
+      allow update: if isStaff() || (isMine() && resource.data.trang_thai in ['cho_bo_sach', 'cho_tra_tai_kiosk'] && request.resource.data.trang_thai == 'da_huy'
+        && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['trang_thai', 'thoi_gian_huy']));
+    }
     match /penalties/{id}  { allow read, write: if isLib(); }
   }
 }

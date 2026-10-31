@@ -96,7 +96,7 @@
             </div>
             <nav class="p-3 space-y-1.5 flex-1">
                 <button onclick="switchTab('borrow')" id="tabBtnBorrow" class="dash-nav"><span class="em">📖</span><span>Danh mục sách</span></button>
-                <button onclick="switchTab('orders')" id="tabBtnOrders" class="dash-nav"><span class="em">⏳</span><span>Đơn hẹn lấy sách</span><span id="ordersCount" class="badge zero">0</span></button>
+                <button onclick="switchTab('orders')" id="tabBtnOrders" class="dash-nav"><span class="em">📲</span><span>Mã QR</span><span id="ordersCount" class="badge zero">0</span></button>
                 <button onclick="switchTab('borrowed')" id="tabBtnBorrowed" class="dash-nav"><span class="em">📚</span><span>Đang mượn</span><span id="borrowedCount" class="badge zero">0</span></button>
                 <button onclick="switchTab('return')" id="tabBtnReturn" class="dash-nav"><span class="em">🔄</span><span>Trả sách</span><span id="returnCount" class="badge zero">0</span></button>
                 <button onclick="switchTab('history')" id="tabBtnHistory" class="dash-nav"><span class="em">🕒</span><span>Lịch sử mượn trả</span></button>
@@ -157,24 +157,6 @@
                 </div>
 
                 <!-- Thẻ chứa mã QR đơn chờ lấy -->
-                <div id="activeQrCard" class="hidden max-w-md mx-auto bg-white p-5 rounded-3xl border-2 border-orange-500 shadow-lg text-center space-y-3">
-                    <div class="inline-block bg-orange-100 text-orange-700 px-3 py-1 rounded-full text-[11px] font-bold">
-                        <i class="fa-solid fa-bell mr-1"></i> ĐƠN HẸN ĐÃ CẤP HỘC
-                    </div>
-                    <h3 class="font-bold text-slate-800 text-sm sm:text-base" id="qrBookTitle">--</h3>
-                    <p class="text-xs text-slate-500">Khung giờ: <span id="qrSlot" class="font-bold text-slate-700"></span></p>
-                    
-                    <div class="p-3 bg-slate-50 rounded-2xl inline-block border border-slate-200 shadow-inner">
-                        <div id="qrcode" class="flex justify-center"></div>
-                    </div>
-
-                    <div class="bg-amber-50 border border-amber-200 rounded-xl p-3 text-xs text-amber-900 space-y-1">
-                        <p>Hộc tủ nhận: <strong id="qrLockerNum" class="text-orange-600 text-sm font-black"></strong></p>
-                        <p>Mã Token: <strong id="qrTokenVal" class="font-mono text-slate-800"></strong></p>
-                    </div>
-                    <p class="text-[10px] text-slate-400">Đưa mã QR này trước camera trạm Kiosk Smart Locker để mở cửa tủ.</p>
-                </div>
-
                 <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4" id="booksList"></div>
             </div>
 
@@ -185,26 +167,15 @@
                         <p class="font-bold flex items-center gap-1.5"><i class="fa-solid fa-list-check text-blue-600"></i> Quy trình trả nhiều sách cùng lúc:</p>
                         <p class="text-slate-600 text-xs">Tick chọn những cuốn bạn muốn trả hôm nay, sau đó bấm Tạo mã QR để mở 1 ngăn tủ Smart Locker duy nhất.</p>
                     </div>
-                    <button onclick="toggleSelectAllReturn()" class="px-3 py-1.5 bg-white border border-blue-300 text-blue-700 font-bold rounded-xl text-xs hover:bg-blue-100 transition whitespace-nowrap">
+                    <button id="selectAllBtn" onclick="toggleSelectAllReturn()" class="px-3 py-1.5 bg-white border border-blue-300 text-blue-700 font-bold rounded-xl text-xs hover:bg-blue-100 transition whitespace-nowrap">
                         <i class="fa-solid fa-check-double mr-1"></i> Chọn tất cả
                     </button>
                 </div>
 
-                <div id="activeReturnQrCard" class="hidden bg-white p-5 rounded-3xl border-2 border-blue-500 shadow-xl text-center space-y-3">
-                    <div class="inline-block bg-blue-100 text-blue-700 px-3 py-1 rounded-full text-xs font-bold">
-                        <i class="fa-solid fa-qrcode mr-1"></i> MÃ QR TRẢ SÁCH (ĐÃ CẤP HỘC)
-                    </div>
-                    <h3 class="font-bold text-slate-800 text-sm sm:text-base">Số lượng trả: <span id="returnBookCount" class="text-blue-600 font-black">0</span> cuốn</h3>
-                    <div class="p-3 bg-slate-50 rounded-2xl inline-block border border-slate-200">
-                        <div id="returnQrcode" class="flex justify-center"></div>
-                    </div>
-                    <div class="bg-blue-50 border border-blue-200 rounded-xl p-3 text-xs text-blue-950 space-y-1">
-                        <p>Hộc tủ nhận trả: <strong id="returnLockerNum" class="text-blue-700 text-base font-black"></strong></p>
-                        <p>Mã PIN: <strong id="returnTokenVal" class="font-mono text-slate-800 text-sm"></strong></p>
-                    </div>
-                    <p class="text-xs text-slate-500">Đưa mã QR này trước camera Kiosk Smart Locker để mở cửa hộc tủ, bỏ toàn bộ số sách đã chọn vào và đóng cửa lại.</p>
+                <div id="returnLockBanner" class="hidden bg-amber-50 border-2 border-amber-300 rounded-2xl p-4 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+                    <p class="text-sm text-amber-900"><b>⚠️ Bạn đang có đơn trả sách tại <span id="lockHoc"></span> chưa hoàn tất.</b><br><span id="lockHint" class="text-xs"></span></p>
+                    <button id="lockBtn" onclick="switchTab('orders')" class="px-4 py-2 bg-amber-600 hover:bg-amber-700 text-white text-xs font-bold rounded-xl whitespace-nowrap transition">Xem mã QR trả sách</button>
                 </div>
-
                 <div id="returnTracker" class="space-y-3"></div>
 
                 <p class="text-xs font-bold text-slate-500 uppercase tracking-wide">Tạo đơn trả mới</p>
@@ -214,24 +185,24 @@
                     <div class="text-xs">
                         <span>Đã chọn: <b id="selectedReturnCount" class="text-orange-400 text-sm font-bold">0</b> cuốn</span>
                     </div>
-                    <button onclick="submitBatchReturn()" class="px-4 py-2 bg-blue-600 hover:bg-blue-500 font-bold rounded-xl text-xs sm:text-sm shadow-md transition flex items-center gap-1.5">
+                    <button id="submitReturnBtn" onclick="submitBatchReturn()" class="px-4 py-2 bg-blue-600 hover:bg-blue-500 font-bold rounded-xl text-xs sm:text-sm shadow-md transition flex items-center gap-1.5">
                         <i class="fa-solid fa-qrcode"></i> Tạo Mã QR Trả Sách
                     </button>
                 </div>
             </div>
 
-            <!-- ĐƠN HẸN LẤY SÁCH -->
+            <!-- MÃ QR: nơi duy nhất lưu mã nhận sách + mã trả sách còn hiệu lực -->
             <div id="tabContentOrders" class="hidden space-y-4">
                 <div class="bg-orange-50 border border-orange-200 rounded-2xl p-4 text-xs sm:text-sm text-orange-900">
-                    <p class="font-bold">⏳ Đơn hẹn lấy sách</p>
-                    <p class="text-slate-600 text-xs">Khi thủ thư nạp sách xong, trạng thái chuyển sang "Sẵn sàng": đưa mã QR tới Kiosk để mở hộc.</p>
+                    <p class="font-bold">📲 Mã QR của tôi</p>
+                    <p class="text-slate-600 text-xs">Mã QR nhận sách và trả sách đều nằm ở đây, tồn tại cho đến khi bạn quét mở tủ thành công tại Kiosk.</p>
                 </div>
-                <div id="ordersList" class="grid grid-cols-1 md:grid-cols-2 gap-4"></div>
+                <div id="qrList" class="grid grid-cols-1 lg:grid-cols-2 gap-5"></div>
             </div>
 
             <!-- ĐANG MƯỢN -->
             <div id="tabContentBorrowed" class="hidden space-y-4">
-                <div class="bg-slate-50 border border-slate-200 rounded-2xl p-3 text-xs sm:text-sm text-slate-600">📚 Những cuốn sách bạn đang giữ.</div>
+                <div class="bg-slate-50 border border-slate-200 rounded-2xl p-3 text-xs sm:text-sm text-slate-600">📚 Những cuốn sách bạn đang giữ. Muốn trả sách, vào mục <b>Trả sách</b>.</div>
                 <div id="borrowedOnlyList" class="grid grid-cols-1 md:grid-cols-2 gap-4"></div>
             </div>
 
@@ -399,7 +370,7 @@
             switchTab('borrow');
         }
 
-        const TABS = { borrow: 'Danh mục sách', orders: 'Đơn hẹn lấy sách', borrowed: 'Đang mượn', return: 'Trả sách', history: 'Lịch sử mượn trả', fines: 'Nợ phạt & Thông báo' };
+        const TABS = { borrow: 'Danh mục sách', orders: 'Mã QR của tôi', borrowed: 'Đang mượn', return: 'Trả sách', history: 'Lịch sử mượn trả', fines: 'Nợ phạt & Thông báo' };
         function switchTab(tab) {
             Object.keys(TABS).forEach(t => {
                 const C = t.charAt(0).toUpperCase() + t.slice(1);
@@ -413,38 +384,36 @@
         }
 
         // ---------- Dữ liệu realtime bổ sung: đơn hẹn & đơn trả của sinh viên ----------
-        let myOrders = [], myReturns = [];
-        const tms = o => (o.ngay_tao && o.ngay_tao.toMillis) ? o.ngay_tao.toMillis() : Date.now();
+        let myOrders = [], myReturns = [], orderStates = {}, returnStates = {};
+        const tms = o => (o.ngay_tao && o.ngay_tao.toMillis) ? o.ngay_tao.toMillis() : Date.now(); // đơn vừa tạo chưa có timestamp server
         function startExtraListeners() {
             const mssv = String(currentUser.mssv).trim();
             const pick = (snap) => { const a = []; snap.forEach(d => a.push({ id: d.id, ...d.data() })); return a.sort((x, y) => tms(y) - tms(x)); };
-            App.listen('myOrders', db.collection('orders').where('mssv', '==', mssv), snap => { myOrders = pick(snap); renderOrdersTab(); });
-            App.listen('myReturns', db.collection('returns').where('mssv', '==', mssv), snap => { myReturns = pick(snap); renderReturnTracker(); });
+            App.listen('myOrders', db.collection('orders').where('mssv', '==', mssv), snap => {
+                myOrders = pick(snap);
+                myOrders.forEach(o => {
+                    const prev = orderStates[o.id], now = o.trang_thai_don, was = prev === 'cho_soan' || prev === 'da_soan_xong';
+                    if (was && now === 'da_nhan') alert(`🎉 Bạn đã nhận sách thành công tại ${o.so_hoc}! Vui lòng kiểm tra sách trong mục "Đang mượn".`);
+                    if (was && now === 'da_huy_do_qua_han') alert(`⚠️ Đơn mượn sách tại ${o.so_hoc} đã bị Thủ thư thu hồi do quá hạn đến nhận! Hộc tủ đã được mở trống.`);
+                    orderStates[o.id] = now;
+                });
+                renderQrTab();
+            });
+            App.listen('myReturns', db.collection('returns').where('mssv', '==', mssv), snap => {
+                myReturns = pick(snap);
+                myReturns.forEach(r => {
+                    if (WAIT_DROP.includes(returnStates[r.id]) && r.trang_thai === 'cho_kiem_tra')
+                        alert(`🎉 Đã mở ${r.so_hoc}! Bạn đã gửi sách vào tủ thành công, vui lòng chờ Thủ thư kiểm tra.`);
+                    returnStates[r.id] = r.trang_thai;
+                });
+                renderQrTab(); renderReturnTracker(); refreshBorrowedList();
+            });
             const dn = String(currentUser.ho_ten || '').trim().split(/\s+/).pop() || '?';
             document.getElementById('userAvatar').innerText = dn.charAt(0).toUpperCase();
-            document.getElementById('tabContentOrders').prepend(document.getElementById('activeQrCard'));
-        }
-
-        function renderOrdersTab() {
-            const ST = { cho_soan: ['Chờ thủ thư nạp sách', 'bg-amber-100 text-amber-700'], da_soan_xong: ['Sẵn sàng · quét mã tại Kiosk', 'bg-emerald-100 text-emerald-700'], da_huy_do_qua_han: ['Đã thu hồi (quá hạn)', 'bg-rose-100 text-rose-700'] };
-            const list = myOrders.filter(o => ST[o.trang_thai_don]).filter((o, i, a) => o.trang_thai_don !== 'da_huy_do_qua_han' || a.filter(x => x.trang_thai_don === 'da_huy_do_qua_han').indexOf(o) < 2);
-            setBadge('ordersCount', myOrders.filter(o => o.trang_thai_don === 'cho_soan' || o.trang_thai_don === 'da_soan_xong').length);
-            document.getElementById('ordersList').innerHTML = list.length ? list.map(o => {
-                const [label, cls] = ST[o.trang_thai_don], live = o.trang_thai_don !== 'da_huy_do_qua_han';
-                return `<div class="bg-white rounded-2xl border border-slate-200 shadow-sm p-4 space-y-2">
-                    <div class="flex items-center justify-between gap-2"><span class="text-xs font-bold px-2.5 py-1 rounded-full ${cls}">${label}</span><span class="text-xs font-mono text-slate-400">${esc(o.so_hoc)}</span></div>
-                    <ul class="text-sm font-semibold text-slate-800 space-y-0.5">${(o.books || []).map(b => `<li>• ${esc(b.ten_sach)}</li>`).join('')}</ul>
-                    <p class="text-xs text-slate-500">Hẹn lấy: ${esc(o.ngay_hen)} (${esc(o.khung_gio)})</p>
-                    ${live ? `<button onclick="openOrderQr('${esc(o.id)}')" class="w-full py-2 bg-orange-600 hover:bg-orange-700 text-white text-xs font-bold rounded-xl transition">Xem mã QR nhận sách</button>` : ''}</div>`;
-            }).join('') : '<p class="col-span-full text-center text-sm text-slate-400 py-10">Bạn chưa có đơn hẹn nào.</p>';
-        }
-        function openOrderQr(id) {
-            const o = myOrders.find(x => x.id === id); if (!o) return;
-            showQr(`${(o.books || []).length} cuốn: ${(o.books || []).map(b => b.ten_sach).join(', ')}`, `${o.ngay_hen} (${o.khung_gio})`, o.so_hoc, o.qr_token);
         }
 
         const STEPS = ['Đã tạo mã trả', 'Đã gửi sách vào hộc Kiosk', 'Thủ thư đang nghiệm thu', 'Hoàn tất (nhập kho)'];
-        const DONE = { cho_tra_tai_kiosk: 1, cho_kiem_tra: 2, hoan_tat: 4, hoan_tat_phat: 4 };
+        const DONE = { cho_bo_sach: 1, cho_tra_tai_kiosk: 1, cho_kiem_tra: 2, hoan_tat: 4, hoan_tat_phat: 4 };
         function renderReturnTracker() {
             const active = myReturns.filter(r => DONE[r.trang_thai] < 4), recent = myReturns.filter(r => DONE[r.trang_thai] === 4).slice(0, 2);
             setBadge('returnCount', active.length);
@@ -647,7 +616,6 @@
                 const titles = cart.map(b => b.ten_sach).join(", "), n = cart.length;
                 alert(`Đặt hẹn thành công! Hộc nhận dự kiến: ${locker}`);
                 closeBookingCartModal(); cart = []; updateCartUI();
-                showQr(`${n} cuốn: ${titles}`, `${date} (${slot})`, locker, token);
                 switchTab('orders');
             } catch (err) {
                 console.error("Lỗi đặt mượn:", err);
@@ -655,74 +623,102 @@
             } finally { bookingBusy = false; }
         }
 
-        // ================= TỰ ĐỘNG ĐÓNG QR KHI KIOSK QUÉT THÀNH CÔNG =================
-        // QR LẤY SÁCH / TRẢ SÁCH được dựng từ Firestore, nên tải lại trang hay mở trên thiết bị khác vẫn thấy lại mã.
-        let shownPickupToken = null, shownReturnToken = null, orderStates = {}, returnStates = {}, activeWatchStarted = false;
+        // ================= MÃ QR TẬP TRUNG: nhận sách + trả sách =================
+        // Dựng từ Firestore (tải lại trang / đổi thiết bị vẫn thấy). Thẻ biến mất khi Kiosk quét mở tủ thành công.
+        const WAIT_DROP = ['cho_bo_sach', 'cho_tra_tai_kiosk']; // chờ bỏ sách (cho_tra_tai_kiosk = tên cũ trong dữ liệu)
+        const ACTIVE_RETURN = [...WAIT_DROP, 'cho_kiem_tra']; // cho_tra_tai_kiosk = "chờ bỏ sách" (tên cũ trong dữ liệu)
+        const activeReturn = () => myReturns.find(r => ACTIVE_RETURN.includes(r.trang_thai));
+        const fmtDT = ms => new Date(ms).toLocaleString('vi-VN', { hour: '2-digit', minute: '2-digit', day: '2-digit', month: '2-digit', year: 'numeric' });
+        let qrSig = '';
+        function showQr() { window.scrollTo({ top: 0, behavior: 'smooth' }); }       // giữ tên cũ cho các chỗ gọi sẵn có
+        function showReturnQr() { window.scrollTo({ top: 0, behavior: 'smooth' }); }
+        function hideQrCards() { orderStates = {}; returnStates = {}; myOrders = []; myReturns = []; qrSig = ''; ['ordersCount','borrowedCount','returnCount','finesCount'].forEach(i => setBadge(i, 0)); const b = document.getElementById('qrList'); if (b) b.innerHTML = ''; }
 
-        function renderQrCard(o) {
-            const card = document.getElementById('activeQrCard');
-            if (shownPickupToken === o.qr_token) return;
-            shownPickupToken = o.qr_token;
-            const books = o.books || [];
-            document.getElementById('qrBookTitle').innerText = `${books.length} cuốn: ${books.map(b => b.ten_sach).join(", ")}`;
-            document.getElementById('qrSlot').innerText = `${o.ngay_hen || ''} (${o.khung_gio || ''})`;
-            document.getElementById('qrLockerNum').innerText = o.so_hoc;
-            document.getElementById('qrTokenVal').innerText = o.qr_token;
-            const box = document.getElementById('qrcode'); box.innerHTML = '';
-            new QRCode(box, { text: o.qr_token, width: 140, height: 140 });
-            card.classList.remove('hidden');
+        function renderQrTab() {
+            const pick = myOrders.filter(o => o.trang_thai_don === 'cho_soan' || o.trang_thai_don === 'da_soan_xong');
+            const ret = myReturns.filter(r => WAIT_DROP.includes(r.trang_thai));
+            setBadge('ordersCount', pick.length + ret.length);
+            const sig = JSON.stringify([pick.map(o => [o.id, o.trang_thai_don]), ret.map(r => [r.id, r.trang_thai])]);
+            if (sig === qrSig) return; qrSig = sig;
+            const box = document.getElementById('qrList');
+            if (!pick.length && !ret.length) { box.innerHTML = '<p class="col-span-full text-center text-sm text-slate-400 py-10">Bạn chưa có mã QR nào đang hiệu lực.</p>'; return; }
+            const row = (k, v) => `<div class="flex justify-between gap-3"><span class="text-slate-500">${k}</span><b class="text-slate-800 text-right">${v}</b></div>`;
+            const card = (kind, x) => {
+                const isRet = kind === 'return', books = (isRet ? x.items : x.books) || [];
+                const status = isRet ? 'Chờ bỏ sách vào hộc tại Kiosk' : (x.trang_thai_don === 'da_soan_xong' ? 'Sách đã sẵn sàng, quét mã tại Kiosk' : 'Chờ thủ thư nạp sách vào hộc');
+                const due = isRet ? fmtDT(tms(x) + 864e5) : `${esc(x.ngay_hen)} (${esc(x.khung_gio)})`;
+                return `<div class="bg-white rounded-3xl border-2 ${isRet ? 'border-blue-400' : 'border-orange-400'} shadow-lg p-5 space-y-3 text-center">
+                    <span class="inline-block px-3 py-1 rounded-full text-xs font-bold ${isRet ? 'bg-blue-100 text-blue-700' : 'bg-orange-100 text-orange-700'}">${isRet ? '🔄 QR TRẢ SÁCH' : '📖 QR NHẬN SÁCH'}</span>
+                    <div class="p-3 bg-slate-50 rounded-2xl inline-block border border-slate-200"><div id="qr_${esc(x.id)}" class="qr-box flex justify-center"></div></div>
+                    <p class="font-mono font-black text-lg text-slate-800">${esc(x.qr_token)}</p>
+                    <div class="text-xs space-y-1 text-left bg-slate-50 rounded-xl p-3">
+                        ${row('Hộc tủ', esc(x.so_hoc))}${row(isRet ? 'Hạn mở tủ' : 'Hạn lấy', due)}${row('Trạng thái', status)}
+                    </div>
+                    <ul class="text-xs text-left text-slate-700 space-y-0.5">${books.map(b => `<li>• ${esc(b.ten_sach)}</li>`).join('')}</ul>
+                    <div class="flex gap-2">
+                        <button onclick="downloadQr('${kind}','${esc(x.id)}')" class="flex-1 py-2 bg-slate-900 hover:bg-slate-700 text-white text-xs font-bold rounded-xl transition">⬇ Tải mã QR</button>
+                        ${isRet ? `<button onclick="cancelReturnOrder('${esc(x.id)}')" class="px-3 py-2 bg-rose-50 hover:bg-rose-100 text-rose-600 text-xs font-bold rounded-xl transition">Hủy mã</button>` : ''}
+                    </div></div>`;
+            };
+            box.innerHTML = [...pick.map(o => card('pickup', o)), ...ret.map(r => card('return', r))].join('');
+            [...pick, ...ret].forEach(x => { const el = document.getElementById('qr_' + x.id); if (el) new QRCode(el, { text: x.qr_token, width: 240, height: 240 }); });
         }
-        function renderReturnCard(r) {
-            const card = document.getElementById('activeReturnQrCard');
-            if (shownReturnToken === r.qr_token) return;
-            shownReturnToken = r.qr_token;
-            document.getElementById('returnBookCount').innerText = r.so_luong || (r.items || []).length;
-            document.getElementById('returnLockerNum').innerText = r.so_hoc;
-            document.getElementById('returnTokenVal').innerText = r.qr_token;
-            const box = document.getElementById('returnQrcode'); box.innerHTML = '';
-            new QRCode(box, { text: r.qr_token, width: 140, height: 140 });
-            card.classList.remove('hidden');
-        }
-        function hideQrCards() {
-            shownPickupToken = shownReturnToken = null; orderStates = {}; returnStates = {};
-            document.getElementById('activeQrCard').classList.add('hidden');
-            document.getElementById('activeReturnQrCard').classList.add('hidden');
-        }
-        const tsMs = d => (d && d.toMillis) ? d.toMillis() : Date.now(); // đơn vừa tạo chưa có timestamp từ server
 
-        // Hai listener theo MSSV: dựng/ẩn thẻ QR và báo khi Kiosk quét thành công hay Thủ thư thu hồi
-        function watchActiveQr() {
-            if (!currentUser || activeWatchStarted) return; activeWatchStarted = true;
-            const mssv = String(currentUser.mssv).trim();
-            App.listen('myOrders', db.collection('orders').where('mssv', '==', mssv), snap => {
-                const list = []; snap.forEach(d => list.push({ id: d.id, ...d.data() }));
-                list.forEach(o => {
-                    const prev = orderStates[o.id], now = o.trang_thai_don, wasActive = prev === 'cho_soan' || prev === 'da_soan_xong';
-                    if (wasActive && now === 'da_nhan') alert(`🎉 Bạn đã nhận sách thành công tại ${o.so_hoc}! Vui lòng kiểm tra sách trong tab "Đang mượn".`);
-                    if (wasActive && now === 'da_huy_do_qua_han') alert(`⚠️ Đơn mượn sách tại ${o.so_hoc} đã bị Thủ thư thu hồi do quá hạn đến nhận! Hộc tủ đã được mở trống.`);
-                    orderStates[o.id] = now;
-                });
-                const active = list.filter(o => o.trang_thai_don === 'cho_soan' || o.trang_thai_don === 'da_soan_xong')
-                                   .sort((a, b) => tsMs(b.ngay_tao) - tsMs(a.ngay_tao))[0];
-                if (active) renderQrCard(active);
-                else { shownPickupToken = null; document.getElementById('activeQrCard').classList.add('hidden'); }
-            });
-            App.listen('myReturns', db.collection('returns').where('mssv', '==', mssv), snap => {
-                const list = []; snap.forEach(d => list.push({ id: d.id, ...d.data() }));
-                list.forEach(r => {
-                    if (returnStates[r.id] === 'cho_tra_tai_kiosk' && r.trang_thai === 'cho_kiem_tra')
-                        alert(`🎉 Đã mở ${r.so_hoc}! Bạn đã gửi sách vào tủ thành công, vui lòng chờ Thủ thư kiểm tra.`);
-                    returnStates[r.id] = r.trang_thai;
-                });
-                const active = list.filter(r => r.trang_thai === 'cho_tra_tai_kiosk')
-                                   .sort((a, b) => tsMs(b.ngay_tao) - tsMs(a.ngay_tao))[0];
-                if (active) renderReturnCard(active);
-                else { shownReturnToken = null; document.getElementById('activeReturnQrCard').classList.add('hidden'); }
+        // Tải ảnh PNG gồm mã QR + thông tin (hộc, hạn, danh sách sách)
+        function downloadQr(kind, id) {
+            const it = (kind === 'return' ? myReturns : myOrders).find(x => x.id === id), src = document.querySelector(`#qr_${id} canvas`);
+            if (!it || !src) return showToast.error('Không tải được', 'Chưa tạo được ảnh mã QR, vui lòng thử lại.');
+            const isRet = kind === 'return', W = 560, pad = 28;
+            const info = [`MSSV: ${currentUser.mssv}`, `Hộc tủ: ${it.so_hoc}`, isRet ? `Hạn mở tủ: ${fmtDT(tms(it) + 864e5)}` : `Hạn lấy: ${it.ngay_hen} (${it.khung_gio})`,
+                ...((isRet ? it.items : it.books) || []).map(b => '• ' + b.ten_sach)];
+            const c = document.createElement('canvas'), ctx = c.getContext('2d');
+            ctx.font = '16px sans-serif';
+            const lines = [];
+            info.forEach(t => { let cur = ''; t.split(' ').forEach(w => { const n = cur ? cur + ' ' + w : w; if (ctx.measureText(n).width > W - 2 * pad && cur) { lines.push(cur); cur = w; } else cur = n; }); lines.push(cur); });
+            c.width = W; c.height = 440 + lines.length * 24 + pad;
+            ctx.fillStyle = '#fff'; ctx.fillRect(0, 0, W, c.height);
+            ctx.fillStyle = '#c2410c'; ctx.font = 'bold 22px sans-serif'; ctx.fillText('Thư viện DUE · ' + (isRet ? 'Mã QR trả sách' : 'Mã QR nhận sách'), pad, 40);
+            ctx.imageSmoothingEnabled = false; ctx.drawImage(src, (W - 300) / 2, 60, 300, 300);
+            ctx.fillStyle = '#0f172a'; ctx.textAlign = 'center'; ctx.font = 'bold 28px monospace'; ctx.fillText(it.qr_token, W / 2, 395);
+            ctx.textAlign = 'left'; ctx.font = '16px sans-serif'; lines.forEach((t, i) => ctx.fillText(t, pad, 440 + i * 24));
+            c.toBlob(b => { const a = document.createElement('a'); a.href = URL.createObjectURL(b); a.download = `DUE-${it.qr_token}.png`; a.click(); setTimeout(() => URL.revokeObjectURL(a.href), 2000); });
+            showToast.success('Đã tải xuống', 'Ảnh mã QR kèm thông tin đã được lưu.');
+        }
+
+        // Hủy mã trả chưa dùng (tránh kẹt vì quy tắc 1 đơn trả đang hoạt động)
+        async function cancelReturnOrder(id) {
+            const r = myReturns.find(x => x.id === id); if (!r) return;
+            if (!(await App.confirm(`Hủy mã trả sách tại ${r.so_hoc}? Hộc tủ sẽ được giải phóng.`))) return;
+            return App.guard('cancelRet:' + id, async () => {
+                try {
+                    const rref = db.collection('returns').doc(id);
+                    await db.runTransaction(async tx => {
+                        const sn = await tx.get(rref);
+                        if (!sn.exists || !WAIT_DROP.includes(sn.data().trang_thai)) throw new Error('Đơn trả này đã được xử lý, không thể hủy.');
+                        tx.update(rref, { trang_thai: 'da_huy', thoi_gian_huy: App.FV.serverTimestamp() });
+                        tx.set(App.lockerRef(r.so_hoc), { so_hoc: r.so_hoc, trang_thai: 'trong', qr_token: null, cap_nhat_luc: App.FV.serverTimestamp() }, { merge: true });
+                    });
+                    showToast.success('Đã hủy mã trả', 'Hộc tủ đã được giải phóng, bạn có thể tạo đơn trả mới.');
+                } catch (e) { showToast.error('Không thể hủy', e.message || 'Vui lòng thử lại.'); }
             });
         }
-        // Giữ tên cũ để các chỗ gọi sẵn có vẫn chạy
-        function showQr(title, slot, locker, token) { window.scrollTo({ top: 0, behavior: 'smooth' }); }
-        function showReturnQr(count, lockerName, token) { window.scrollTo({ top: 0, behavior: 'smooth' }); }
+
+        // Khóa tab Trả sách khi đang có đơn trả hoạt động
+        function applyReturnLock() {
+            const act = activeReturn(), has = !!act;
+            document.getElementById('returnLockBanner').classList.toggle('hidden', !has);
+            if (has) {
+                document.getElementById('lockHoc').innerText = act.so_hoc;
+                document.getElementById('lockHint').innerText = act.trang_thai === 'cho_kiem_tra' ? 'Sách đã vào hộc, đang chờ Thủ thư nghiệm thu.' : 'Hãy mang mã QR ra Kiosk để bỏ sách vào hộc.';
+                document.getElementById('lockBtn').classList.toggle('hidden', act.trang_thai === 'cho_kiem_tra');
+            }
+            [['submitReturnBtn', 'opacity-40'], ['selectAllBtn', 'opacity-40']].forEach(([id, c]) => { const b = document.getElementById(id); if (b) { b.disabled = has; b.classList.toggle(c, has); b.classList.toggle('cursor-not-allowed', has); } });
+        }
+        function refreshBorrowedList() {
+            const keep = selectedReturnIds.slice();
+            renderBorrowedBooks();
+            keep.forEach(id => { const c = document.getElementById('chk_' + id); if (c && !c.disabled) { c.checked = true; onCheckboxClick(id); } });
+        }
 
         // MỘT listener duy nhất cho 'borrowings' của sinh viên: nuôi cả tab Đang mượn lẫn tab Lịch sử (realtime, mọi thiết bị)
         function fetchBorrowedBooks() {
@@ -733,9 +729,7 @@
                 snapshot.forEach(d => currentHistoryRawList.push({ id: d.id, ...d.data() }));
                 borrowedBooks = currentHistoryRawList.filter(b => b.trang_thai === 'dang_muon' || b.trang_thai === 'cho_kiem_tra').map(b => ({ ...b, res_id: b.id }));
                 document.getElementById('borrowedCount').innerText = borrowedBooks.filter(b => b.trang_thai === 'dang_muon').length;
-                const keep = selectedReturnIds.slice();
-                renderBorrowedBooks();
-                keep.forEach(id => { const c = document.getElementById('chk_' + id); if (c && !c.disabled) { c.checked = true; onCheckboxClick(id); } });
+                refreshBorrowedList();
                 renderHistoryAccordion();
                 afterBorrowings();
             });
@@ -743,7 +737,8 @@
 
         let selectedReturnIds = [];
 
-        function renderBorrowedBooks() {
+        function renderBorrowedBooks() { renderBorrowedBooksCore(); applyReturnLock(); }
+        function renderBorrowedBooksCore() {
             const list = document.getElementById('borrowedBooksList');
             list.innerHTML = '';
             selectedReturnIds = [];
@@ -758,8 +753,12 @@
             document.getElementById('confirmReturnBar').classList.remove('hidden');
 
             borrowedBooks.forEach(b => {
-                const isWaitingInspect = b.trang_thai === 'cho_kiem_tra';
-                let statusBadge = isWaitingInspect ?
+                const act = activeReturn(), inOrder = !!act && (act.items || []).some(it => it.borrow_id === b.res_id);
+                const isWaitingInspect = b.trang_thai === 'cho_kiem_tra' || !!act; // khóa: sách đã vào đơn trả, hoặc đang có đơn trả hoạt động
+                let statusBadge = inOrder ?
+                    `<span class="px-2.5 py-1 rounded-full text-[10px] font-bold bg-blue-100 text-blue-700">Đang trong đơn trả ${esc(act.so_hoc)} - ${act.trang_thai === 'cho_kiem_tra' ? 'Chờ nghiệm thu' : 'Chờ bỏ sách'}</span>` :
+                    isWaitingInspect && b.trang_thai !== 'cho_kiem_tra' ?
+                    `<span class="px-2.5 py-1 rounded-full text-[10px] font-bold bg-slate-100 text-slate-500">Tạm khóa (đang có đơn trả)</span>` : b.trang_thai === 'cho_kiem_tra' ?
                     `<span class="px-2.5 py-1 rounded-full text-[10px] font-bold bg-blue-100 text-blue-700"><i class="fa-solid fa-spinner animate-spin mr-1"></i>Đã gửi tủ (Chờ kiểm tra)</span>` :
                     `<span class="px-2.5 py-1 rounded-full text-[10px] font-bold bg-emerald-100 text-emerald-700">Đang giữ sách</span>`;
 
@@ -784,7 +783,7 @@
                             <h4 class="font-bold text-slate-800 text-xs sm:text-sm leading-snug">${b.ten_sach}</h4>
                             <p class="text-[11px] text-slate-400">Ngày mượn: <b>${b.ngay_muon || 'Hôm nay'}</b></p>
                             <p class="text-[11px] text-slate-600">Hạn trả: <b class="text-orange-600">${b.han_tra}</b></p>
-                            ${isWaitingInspect ? `<p class="text-[10px] text-blue-600 font-semibold mt-1">Đã đặt vào ${b.so_hoc_tra || 'hộc tủ'}, chờ Thủ thư nghiệm thu.</p>` : ''}
+                            ${b.trang_thai === 'cho_kiem_tra' ? `<p class="text-[10px] text-blue-600 font-semibold mt-1">Đã đặt vào ${b.so_hoc_tra || 'hộc tủ'}, chờ Thủ thư nghiệm thu.</p>` : ''}
                         </div>
                     </div>
                 `;
@@ -820,6 +819,7 @@
         }
 
         function toggleSelectAllReturn() {
+            if (activeReturn()) return;
             const selectable = borrowedBooks.filter(b => b.trang_thai === 'dang_muon');
             const allChecked = selectedReturnIds.length === selectable.length;
             selectedReturnIds = [];
@@ -854,23 +854,31 @@
         // TẠO MÃ QR TRẢ SÁCH (CẤP HỘC TUẦN TỰ & GOM ĐẦY ĐỦ ITEMS CHO THỦ THƯ)
         async function submitBatchReturn() {
             if (selectedReturnIds.length === 0) return alert("Vui lòng tick chọn ít nhất 1 cuốn sách để trả!");
-            try {
-                const token = "TRA-" + Math.random().toString(36).substring(2, 8).toUpperCase();
-                const items = borrowedBooks.filter(b => selectedReturnIds.includes(b.res_id) && b.trang_thai === 'dang_muon')
-                    .map(b => ({ borrow_id: b.res_id, book_id: b.book_id || null, ten_sach: b.ten_sach, ma_vach: b.ma_vach || 'DUE-BOOK' }));
-                if (!items.length) return alert("Các sách đã chọn không còn ở trạng thái đang mượn.");
-                const locker = await App.allocate({ state: 'cho_tra', token, build: (tx, hoc) => {
-                    tx.set(db.collection('returns').doc(), {
-                        mssv: currentUser.mssv, ho_ten: currentUser.ho_ten, so_hoc: hoc, qr_token: token,
-                        items, so_luong: items.length, trang_thai: 'cho_tra_tai_kiosk', ngay_tao: App.FV.serverTimestamp()
-                    });
-                    return hoc;
-                }});
-                showReturnQr(items.length, locker, token);
-            } catch (err) {
-                console.error("Lỗi tạo mã trả sách:", err);
-                alert(err.message || "Không thể tạo mã trả sách.");
-            }
+            return App.guard('submitReturn', async () => { // khóa nút + spinner ngay khi bấm, chặn bấm liên tục
+                try {
+                    // Đọc lại từ máy chủ để chắc chắn chưa có đơn trả nào đang hoạt động (kể cả từ thiết bị khác)
+                    const fresh = await db.collection('returns').where('mssv', '==', String(currentUser.mssv).trim()).get({ source: 'server' });
+                    const act = fresh.docs.map(d => d.data()).find(r => ACTIVE_RETURN.includes(r.trang_thai));
+                    if (act) return alert(`Bạn đang có đơn trả sách tại ${act.so_hoc} chưa hoàn tất.`);
+                    const items = borrowedBooks.filter(b => selectedReturnIds.includes(b.res_id) && b.trang_thai === 'dang_muon')
+                        .map(b => ({ borrow_id: b.res_id, book_id: b.book_id || null, ten_sach: b.ten_sach, ma_vach: b.ma_vach || 'DUE-BOOK' }));
+                    if (!items.length) return alert("Các sách đã chọn không còn ở trạng thái đang mượn.");
+                    const token = "TRA-" + Math.random().toString(36).substring(2, 8).toUpperCase();
+                    const locker = await App.allocate({ state: 'cho_tra', token, build: (tx, hoc) => {
+                        tx.set(db.collection('returns').doc(), {
+                            mssv: currentUser.mssv, ho_ten: currentUser.ho_ten, so_hoc: hoc, qr_token: token,
+                            items, so_luong: items.length, trang_thai: 'cho_bo_sach', ngay_tao: App.FV.serverTimestamp()
+                        });
+                        return hoc;
+                    }});
+                    selectedReturnIds = [];
+                    showToast.success('Đã tạo mã trả sách', `Hộc tủ được cấp: ${locker}. Mã QR nằm ở mục Mã QR.`);
+                    switchTab('orders');
+                } catch (err) {
+                    console.error("Lỗi tạo mã trả sách:", err);
+                    alert(err.message || "Không thể tạo mã trả sách.");
+                }
+            });
         }
 
         // ================= TAB 3: TỔNG HỢP TOÀN BỘ LỊCH SỬ TỪ SERVER =================
@@ -1140,7 +1148,6 @@
         function loadInitialData() {
             fetchBooks();
             fetchBorrowedBooks();
-            watchActiveQr();
         }
     </script>
 </body>
