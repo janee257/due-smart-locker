@@ -1,0 +1,21 @@
+/* Khung Dashboard dùng chung (student + librarian): sidebar cố định trái, mobile = drawer trượt */
+.dash-aside{position:fixed;inset:0 auto 0 0;width:280px;z-index:50;display:flex;flex-direction:column;background:#fff;border-right:1px solid #e2e8f0;
+  overflow-y:auto;transform:translateX(-100%);transition:transform .25s ease}
+.dash-aside.open{transform:none;box-shadow:0 0 40px rgba(15,23,42,.3)}
+.dash-aside.dark{background:#0f172a;border-color:#1e293b;color:#e2e8f0}
+.dash-overlay{position:fixed;inset:0;z-index:40;background:rgba(15,23,42,.5);opacity:0;pointer-events:none;transition:opacity .25s}
+.dash-overlay.open{opacity:1;pointer-events:auto}
+.dash-topbar{position:sticky;top:0;z-index:30;display:flex;align-items:center;gap:12px;padding:10px 16px;background:#fff;border-bottom:1px solid #e2e8f0}
+.dash-nav{display:flex;align-items:center;gap:12px;width:100%;padding:11px 14px;border-radius:14px;font-size:14px;font-weight:600;color:#475569;
+  text-align:left;transition:background .15s,color .15s,transform .15s,box-shadow .15s}
+.dash-nav:hover{background:#fff7ed;color:#c2410c;transform:translateX(2px)}
+.dash-nav.active{background:linear-gradient(90deg,#ea580c,#f59e0b);color:#fff;box-shadow:0 6px 14px rgba(234,88,12,.28);transform:none}
+.dark .dash-nav{color:#cbd5e1}.dark .dash-nav:hover{background:#1e293b;color:#fff}.dark .dash-nav.active{color:#fff}
+.dash-nav .em{font-size:18px;width:24px;text-align:center}
+.dash-nav .badge{margin-left:auto;min-width:22px;padding:1px 7px;border-radius:999px;background:#fee2e2;color:#b91c1c;font-size:11px;font-weight:800;text-align:center}
+.dash-nav .badge.zero{opacity:.4}
+.dash-nav.active .badge{background:#fff;color:#c2410c}
+@media (min-width:1024px){
+  .dash-aside{transform:none}.dash-overlay{display:none}
+  .dash-main{margin-left:280px}.dash-topbar .burger{display:none}
+}

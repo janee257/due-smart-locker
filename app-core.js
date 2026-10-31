@@ -147,5 +147,31 @@
   function confirmBox(msg) { return new Promise((res) => { queue.push({ msg, ask: true, done: res }); showNext(); }); }
   window.alert = notify;
 
-  window.App = { notify, confirm: confirmBox, auth, db, FV, PAGE, login, watchAuth, listen, stopAll, lockerName, lockerId, lockerRef, today, resolveBookRef, stockRefs, allocate };
+  // ---- Hoàn kho có TRẦN: so_luong_con không bao giờ vượt so_luong (tổng) ----
+  // Gọi sau khi đã tx.get() mọi tài liệu cần đọc, TRƯỚC khi ghi; trả về hàm apply() để ghi.
+  async function restockPlan(tx, refs) {
+    const need = new Map();
+    refs.forEach((r) => { if (r) need.set(r.path, { ref: r, n: (need.get(r.path)?.n || 0) + 1 }); });
+    const rows = await Promise.all([...need.values()].map(async (x) => ({ ...x, snap: await tx.get(x.ref) })));
+    return () => rows.forEach(({ ref, n, snap }) => {
+      if (!snap.exists) return;
+      const d = snap.data(), cur = Number(d.so_luong_con) || 0;
+      const cap = Number(d.so_luong ?? d.tong_so);
+      tx.update(ref, { so_luong_con: Number.isFinite(cap) ? Math.min(cur + n, cap) : cur + n });
+    });
+  }
+
+  // ---- Chống bấm đúp: khóa theo key, vô hiệu hóa nút + hiện loading cho tới khi xong ----
+  const locks = new Set();
+  async function guard(key, fn) {
+    if (locks.has(key)) return;
+    locks.add(key);
+    const btn = (window.event && window.event.target && window.event.target.closest) ? window.event.target.closest("button") : null;
+    const html = btn && btn.innerHTML;
+    if (btn) { btn.disabled = true; btn.style.opacity = ".6"; btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Đang xử lý...'; }
+    try { return await fn(); }
+    finally { locks.delete(key); if (btn && btn.isConnected) { btn.disabled = false; btn.style.opacity = ""; btn.innerHTML = html; } }
+  }
+
+  window.App = { restockPlan, guard, notify, confirm: confirmBox, auth, db, FV, PAGE, login, watchAuth, listen, stopAll, lockerName, lockerId, lockerRef, today, resolveBookRef, stockRefs, allocate };
 })();
