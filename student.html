@@ -40,14 +40,14 @@
 
     <!-- ================= KHUNG ĐĂNG NHẬP ================= -->
     <div id="loginSection" class="min-h-screen flex items-center justify-center p-4 bg-gradient-to-br from-slate-900 via-orange-950 to-slate-900">
-        <div class="bg-white w-full max-w-sm rounded-3xl p-6 shadow-2xl space-y-4 border border-slate-200">
+        <div class="bg-white w-full max-w-sm rounded-none p-6 shadow-md space-y-4 border border-slate-200">
             <div class="text-center space-y-1">
-                <img src="/logo_due.png" alt="DUE Logo" class="h-16 w-auto mx-auto object-contain bg-white p-1 rounded-2xl shadow-md" onerror="this.onerror=null; this.src='https://due.udn.vn/Portals/0/logo-due.png';">
+                <img src="/logo_due.png" alt="DUE Logo" class="h-16 w-auto mx-auto object-contain bg-white p-1 rounded-none shadow-md" onerror="this.onerror=null; this.src='https://due.udn.vn/Portals/0/logo-due.png';">
                 <h2 class="font-bold text-lg text-slate-800 pt-2">Cổng Dịch Vụ Sinh Viên</h2>
                 <p class="text-[11px] text-slate-500">Hệ thống mượn - trả sách Smart Locker</p>
             </div>
 
-            <div class="bg-amber-50 border border-amber-200 p-2.5 rounded-xl text-[11px] text-amber-800 flex items-center gap-2">
+            <div class="bg-amber-50 border border-amber-200 p-2.5 rounded-none text-[11px] text-amber-800 flex items-center gap-2">
                 <i class="fa-solid fa-shield-halved text-amber-600"></i>
                 <span>Chỉ áp dụng cho tài khoản sinh viên nội bộ trường DUE.</span>
             </div>
@@ -56,16 +56,16 @@
                 <div>
                     <label class="block font-bold text-slate-700 mb-1">Mã số sinh viên (MSSV):</label>
                     <input type="text" id="loginMssv" value="251121514110" required autocomplete="username" placeholder="Nhập MSSV" 
-                           class="w-full px-3.5 py-2.5 bg-slate-50 border border-slate-200 rounded-xl font-mono text-sm outline-none focus:ring-2 focus:ring-orange-500">
+                           class="w-full px-3.5 py-2.5 bg-slate-50 border border-slate-200 rounded-none font-mono text-sm outline-none focus:ring-2 focus:ring-orange-500">
                 </div>
                 <div>
                     <label class="block font-bold text-slate-700 mb-1">Mật khẩu:</label>
                     <input type="password" id="loginPassword" value="123456" required autocomplete="current-password" placeholder="Nhập mật khẩu" 
-                           class="w-full px-3.5 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm outline-none focus:ring-2 focus:ring-orange-500">
+                           class="w-full px-3.5 py-2.5 bg-slate-50 border border-slate-200 rounded-none text-sm outline-none focus:ring-2 focus:ring-orange-500">
                     <p class="text-[10px] text-slate-400 mt-1">* Mật khẩu mặc định: <b>123456</b></p>
                 </div>
-                <div id="loginError" class="hidden p-2.5 rounded-xl bg-rose-50 border border-rose-200 text-rose-600 font-semibold text-xs"></div>
-                <button type="submit" class="w-full py-3 bg-orange-600 hover:bg-orange-700 text-white font-bold rounded-xl text-xs shadow-lg shadow-orange-600/30 transition">
+                <div id="loginError" class="hidden p-2.5 rounded-none bg-rose-50 border border-rose-200 text-rose-600 font-semibold text-xs"></div>
+                <button type="submit" class="w-full py-3 bg-orange-600 hover:bg-orange-700 text-white font-bold rounded-none text-xs shadow-sm shadow-orange-600/30 transition">
                     Đăng Nhập Tài Khoản
                 </button>
             </form>
@@ -79,7 +79,7 @@
         <aside class="dash-aside" id="dashAside">
             <div class="p-5 bg-gradient-to-br from-orange-600 to-amber-500 text-white">
                 <div class="flex items-center gap-2 mb-4">
-                    <img src="/logo_due.png" alt="DUE" class="h-8 w-auto bg-white p-1 rounded-lg object-contain" onerror="this.onerror=null; this.src='https://due.udn.vn/Portals/0/logo-due.png';">
+                    <img src="/logo_due.png" alt="DUE" class="h-8 w-auto bg-white p-1 rounded-sm object-contain" onerror="this.onerror=null; this.src='https://due.udn.vn/Portals/0/logo-due.png';">
                     <div class="leading-tight"><p class="font-bold text-sm">Thư viện DUE</p><p class="text-[10px] text-orange-100">Smart Locker Tự Phục Vụ</p></div>
                 </div>
                 <div class="flex items-center gap-3">
@@ -90,7 +90,7 @@
                     </div>
                 </div>
                 <div class="mt-3 flex items-center justify-between text-xs">
-                    <span class="bg-white/20 px-2.5 py-1 rounded-full font-bold">✔ Thẻ hợp lệ</span>
+                    <span class="bg-white/20 px-2.5 py-1 rounded-sm font-bold">✔ Thẻ hợp lệ</span>
                     <span>Nợ phạt: <b id="userDisplayDebt">0 đ</b></span>
                 </div>
             </div>
@@ -109,21 +109,21 @@
 
         <div class="dash-main">
         <div class="dash-topbar">
-            <button class="burger w-10 h-10 rounded-xl bg-orange-50 text-orange-700 text-lg" onclick="toggleSidebar()" aria-label="Mở menu">☰</button>
+            <button class="burger w-10 h-10 rounded-none bg-orange-50 text-orange-700 text-lg" onclick="toggleSidebar()" aria-label="Mở menu">☰</button>
             <p class="font-bold text-slate-800 text-sm" id="pageTitle">Danh mục sách</p>
         </div>
         <main class="max-w-5xl mx-auto p-4 sm:p-6 space-y-6">
             <!-- TAB 1: MƯỢN SÁCH -->
             <div id="tabContentBorrow" class="space-y-4">
-                <div class="bg-white p-4 rounded-2xl border border-slate-200 shadow-sm space-y-3">
+                <div class="bg-white p-4 rounded-none border border-slate-200 shadow-sm space-y-3">
                     <div class="flex flex-col sm:flex-row gap-3 items-stretch sm:items-center justify-between">
                         <div class="relative flex-1">
                             <i class="fa-solid fa-magnifying-glass absolute left-3.5 top-3.5 text-slate-400 text-sm"></i>
-                            <input type="search" id="searchInput" oninput="renderBooks()" placeholder="Tìm giáo trình, mã sách, tác giả..." class="w-full pl-10 pr-4 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs sm:text-sm outline-none focus:ring-2 focus:ring-orange-500">
+                            <input type="search" id="searchInput" oninput="renderBooks()" placeholder="Tìm giáo trình, mã sách, tác giả..." class="w-full pl-10 pr-4 py-2 bg-slate-50 border border-slate-200 rounded-none text-xs sm:text-sm outline-none focus:ring-2 focus:ring-orange-500">
                         </div>
 
                         <div class="flex items-center gap-2">
-                            <div class="flex items-center gap-1.5 bg-slate-50 border border-slate-200 px-2.5 py-1.5 rounded-xl text-xs">
+                            <div class="flex items-center gap-1.5 bg-slate-50 border border-slate-200 px-2.5 py-1.5 rounded-none text-xs">
                                 <i class="fa-solid fa-arrow-down-a-z text-orange-600"></i>
                                 <select id="sortSelect" onchange="renderBooks()" class="bg-transparent font-semibold outline-none cursor-pointer">
                                     <option value="az">Tên sách: A → Z</option>
@@ -132,7 +132,7 @@
                                 </select>
                             </div>
 
-                            <label class="flex items-center gap-1.5 bg-slate-50 border border-slate-200 px-2.5 py-2 rounded-xl text-xs font-semibold cursor-pointer select-none hover:bg-slate-100 transition">
+                            <label class="flex items-center gap-1.5 bg-slate-50 border border-slate-200 px-2.5 py-2 rounded-none text-xs font-semibold cursor-pointer select-none hover:bg-slate-100 transition">
                                 <input type="checkbox" id="onlyAvailableCheck" onchange="renderBooks()" class="accent-orange-600 rounded">
                                 <span class="hidden sm:inline">Chỉ sách</span> còn
                             </label>
@@ -142,12 +142,12 @@
                     <div class="pt-2 border-t flex items-center gap-2 overflow-x-auto text-xs">
                         <span class="text-slate-400 font-bold whitespace-nowrap text-[11px]"><i class="fa-solid fa-tags mr-1"></i>Chuyên ngành:</span>
                         <div class="flex gap-1.5" id="categoryChips">
-                            <button onclick="selectCategory('all', this)" class="filter-chip active px-3 py-1.5 rounded-xl border border-slate-200 font-semibold whitespace-nowrap transition bg-white">Tất cả</button>
-                            <button onclick="selectCategory('httt', this)" class="filter-chip px-3 py-1.5 rounded-xl border border-slate-200 font-semibold whitespace-nowrap transition bg-white">Hệ thống thông tin</button>
-                            <button onclick="selectCategory('kinhte', this)" class="filter-chip px-3 py-1.5 rounded-xl border border-slate-200 font-semibold whitespace-nowrap transition bg-white">Kinh tế</button>
-                            <button onclick="selectCategory('ketoan', this)" class="filter-chip px-3 py-1.5 rounded-xl border border-slate-200 font-semibold whitespace-nowrap transition bg-white">Kế toán</button>
-                            <button onclick="selectCategory('marketing', this)" class="filter-chip px-3 py-1.5 rounded-xl border border-slate-200 font-semibold whitespace-nowrap transition bg-white">Marketing</button>
-                            <button onclick="selectCategory('taichinh', this)" class="filter-chip px-3 py-1.5 rounded-xl border border-slate-200 font-semibold whitespace-nowrap transition bg-white">Tài chính - Ngân hàng</button>
+                            <button onclick="selectCategory('all', this)" class="filter-chip active px-3 py-1.5 rounded-none border border-slate-200 font-semibold whitespace-nowrap transition bg-white">Tất cả</button>
+                            <button onclick="selectCategory('httt', this)" class="filter-chip px-3 py-1.5 rounded-none border border-slate-200 font-semibold whitespace-nowrap transition bg-white">Hệ thống thông tin</button>
+                            <button onclick="selectCategory('kinhte', this)" class="filter-chip px-3 py-1.5 rounded-none border border-slate-200 font-semibold whitespace-nowrap transition bg-white">Kinh tế</button>
+                            <button onclick="selectCategory('ketoan', this)" class="filter-chip px-3 py-1.5 rounded-none border border-slate-200 font-semibold whitespace-nowrap transition bg-white">Kế toán</button>
+                            <button onclick="selectCategory('marketing', this)" class="filter-chip px-3 py-1.5 rounded-none border border-slate-200 font-semibold whitespace-nowrap transition bg-white">Marketing</button>
+                            <button onclick="selectCategory('taichinh', this)" class="filter-chip px-3 py-1.5 rounded-none border border-slate-200 font-semibold whitespace-nowrap transition bg-white">Tài chính - Ngân hàng</button>
                         </div>
                     </div>
                 </div>
@@ -162,30 +162,30 @@
 
             <!-- TAB 2: ĐANG MƯỢN (TRẢ NHIỀU SÁCH CÙNG LÚC) -->
             <div id="tabContentReturn" class="hidden space-y-4">
-                <div class="bg-blue-50 border border-blue-200 rounded-2xl p-4 text-xs sm:text-sm text-blue-900 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3">
+                <div class="bg-blue-50 border border-blue-200 rounded-none p-4 text-xs sm:text-sm text-blue-900 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3">
                     <div>
                         <p class="font-bold flex items-center gap-1.5"><i class="fa-solid fa-list-check text-blue-600"></i> Quy trình trả nhiều sách cùng lúc:</p>
                         <p class="text-slate-600 text-xs">Tick chọn những cuốn bạn muốn trả hôm nay, sau đó bấm Tạo mã QR để mở 1 ngăn tủ Smart Locker duy nhất.</p>
                     </div>
-                    <button id="selectAllBtn" onclick="toggleSelectAllReturn()" class="px-3 py-1.5 bg-white border border-blue-300 text-blue-700 font-bold rounded-xl text-xs hover:bg-blue-100 transition whitespace-nowrap">
+                    <button id="selectAllBtn" onclick="toggleSelectAllReturn()" class="px-3 py-1.5 bg-white border border-blue-300 text-blue-700 font-bold rounded-none text-xs hover:bg-blue-100 transition whitespace-nowrap">
                         <i class="fa-solid fa-check-double mr-1"></i> Chọn tất cả
                     </button>
                 </div>
 
-                <div id="returnLockBanner" class="hidden bg-amber-50 border-2 border-amber-300 rounded-2xl p-4 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+                <div id="returnLockBanner" class="hidden bg-amber-50 border-2 border-amber-300 rounded-none p-4 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
                     <p class="text-sm text-amber-900"><b>⚠️ Bạn đang có đơn trả sách tại <span id="lockHoc"></span> chưa hoàn tất.</b><br><span id="lockHint" class="text-xs"></span></p>
-                    <button id="lockBtn" onclick="switchTab('orders')" class="px-4 py-2 bg-amber-600 hover:bg-amber-700 text-white text-xs font-bold rounded-xl whitespace-nowrap transition">Xem mã QR trả sách</button>
+                    <button id="lockBtn" onclick="switchTab('orders')" class="px-4 py-2 bg-amber-600 hover:bg-amber-700 text-white text-xs font-bold rounded-none whitespace-nowrap transition">Xem mã QR trả sách</button>
                 </div>
                 <div id="returnTracker" class="space-y-3"></div>
 
                 <p class="text-xs font-bold text-slate-500 uppercase tracking-wide">Tạo đơn trả mới</p>
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-4" id="borrowedBooksList"></div>
 
-                <div id="confirmReturnBar" class="sticky bottom-4 bg-slate-900 text-white p-3.5 rounded-2xl shadow-xl flex items-center justify-between border border-slate-700">
+                <div id="confirmReturnBar" class="sticky bottom-4 bg-slate-900 text-white p-3.5 rounded-none shadow-md flex items-center justify-between border border-slate-700">
                     <div class="text-xs">
                         <span>Đã chọn: <b id="selectedReturnCount" class="text-orange-400 text-sm font-bold">0</b> cuốn</span>
                     </div>
-                    <button id="submitReturnBtn" onclick="submitBatchReturn()" class="px-4 py-2 bg-blue-600 hover:bg-blue-500 font-bold rounded-xl text-xs sm:text-sm shadow-md transition flex items-center gap-1.5">
+                    <button id="submitReturnBtn" onclick="submitBatchReturn()" class="px-4 py-2 bg-blue-600 hover:bg-blue-500 font-bold rounded-none text-xs sm:text-sm shadow-md transition flex items-center gap-1.5">
                         <i class="fa-solid fa-qrcode"></i> Tạo Mã QR Trả Sách
                     </button>
                 </div>
@@ -193,7 +193,7 @@
 
             <!-- MÃ QR: nơi duy nhất lưu mã nhận sách + mã trả sách còn hiệu lực -->
             <div id="tabContentOrders" class="hidden space-y-4">
-                <div class="bg-orange-50 border border-orange-200 rounded-2xl p-4 text-xs sm:text-sm text-orange-900">
+                <div class="bg-orange-50 border border-orange-200 rounded-none p-4 text-xs sm:text-sm text-orange-900">
                     <p class="font-bold">📲 Mã QR của tôi</p>
                     <p class="text-slate-600 text-xs">Mã QR nhận sách và trả sách đều nằm ở đây, tồn tại cho đến khi bạn quét mở tủ thành công tại Kiosk.</p>
                 </div>
@@ -202,13 +202,13 @@
 
             <!-- ĐANG MƯỢN -->
             <div id="tabContentBorrowed" class="hidden space-y-4">
-                <div class="bg-slate-50 border border-slate-200 rounded-2xl p-3 text-xs sm:text-sm text-slate-600">📚 Những cuốn sách bạn đang giữ. Muốn trả sách, vào mục <b>Trả sách</b>.</div>
+                <div class="bg-slate-50 border border-slate-200 rounded-none p-3 text-xs sm:text-sm text-slate-600">📚 Những cuốn sách bạn đang giữ. Muốn trả sách, vào mục <b>Trả sách</b>.</div>
                 <div id="borrowedOnlyList" class="grid grid-cols-1 md:grid-cols-2 gap-4"></div>
             </div>
 
             <!-- NỢ PHẠT & THÔNG BÁO -->
             <div id="tabContentFines" class="hidden space-y-4">
-                <div class="bg-rose-50 border border-rose-200 rounded-2xl p-4 flex items-center justify-between">
+                <div class="bg-rose-50 border border-rose-200 rounded-none p-4 flex items-center justify-between">
                     <div><p class="text-xs text-rose-700 font-bold">Tổng nợ phạt chưa thu</p><p class="text-2xl font-black text-rose-700" id="finesTotal">0 đ</p></div>
                     <span class="text-3xl">⚖️</span>
                 </div>
@@ -218,7 +218,7 @@
 
             <!-- TAB 3: LỊCH SỬ -->
             <div id="tabContentHistory" class="hidden space-y-4">
-                <div class="bg-slate-50 border border-slate-200 rounded-2xl p-3 text-xs sm:text-sm text-slate-600 flex items-center gap-2">
+                <div class="bg-slate-50 border border-slate-200 rounded-none p-3 text-xs sm:text-sm text-slate-600 flex items-center gap-2">
                     <i class="fa-solid fa-clock-rotate-left text-orange-600"></i>
                     <span>Toàn bộ nhật ký mượn & trả sách tại Smart Locker của bạn:</span>
                 </div>
@@ -229,9 +229,9 @@
     </div>
 
     <!-- THANH GIỎ HÀNG NỔI -->
-    <div id="cartBar" class="hidden fixed bottom-4 left-4 right-4 max-w-lg mx-auto bg-slate-900/95 backdrop-blur-md text-white p-3.5 rounded-2xl shadow-2xl flex items-center justify-between z-40 border border-slate-700">
+    <div id="cartBar" class="hidden fixed bottom-4 left-4 right-4 max-w-lg mx-auto bg-slate-900/95 backdrop-blur-md text-white p-3.5 rounded-none shadow-md flex items-center justify-between z-40 border border-slate-700">
         <div class="flex items-center gap-3">
-            <div class="w-10 h-10 rounded-xl bg-orange-600 flex items-center justify-center font-bold text-sm shadow-md">
+            <div class="w-10 h-10 rounded-none bg-orange-600 flex items-center justify-center font-bold text-sm shadow-md">
                 <i class="fa-solid fa-cart-shopping"></i>
             </div>
             <div>
@@ -239,14 +239,14 @@
                 <p class="text-[10px] text-slate-400">Bấm để kiểm tra & chọn khung giờ</p>
             </div>
         </div>
-        <button onclick="openBookingCartModal()" class="px-4 py-2 bg-orange-600 hover:bg-orange-500 text-white rounded-xl text-xs sm:text-sm font-bold shadow-md transition flex items-center gap-1.5">
+        <button onclick="openBookingCartModal()" class="px-4 py-2 bg-orange-600 hover:bg-orange-500 text-white rounded-none text-xs sm:text-sm font-bold shadow-md transition flex items-center gap-1.5">
             Xem giỏ & Đặt <i class="fa-solid fa-arrow-right"></i>
         </button>
     </div>
 
     <!-- MODAL GIỎ HÀNG & CHỌN LỊCH HẸN -->
     <div id="cartModal" class="hidden fixed inset-0 bg-black/60 z-50 flex items-end sm:items-center justify-center p-0 sm:p-4 backdrop-blur-sm">
-        <div class="bg-white w-full max-w-lg rounded-t-3xl sm:rounded-3xl p-6 space-y-4 max-h-[90vh] flex flex-col">
+        <div class="bg-white w-full max-w-lg rounded-t-none sm:rounded-none p-6 space-y-4 max-h-[90vh] flex flex-col">
             <div class="flex justify-between items-center border-b pb-3">
                 <h3 class="font-bold text-slate-800 text-sm sm:text-base flex items-center gap-2">
                     <i class="fa-solid fa-bag-shopping text-orange-600"></i> Giỏ Mượn Sách (<span id="cartModalCount">0</span>)
@@ -264,18 +264,18 @@
                             <i class="fa-regular fa-calendar-days text-orange-600 mr-1"></i> Chọn ngày nhận sách:
                         </label>
                         
-                        <div class="flex items-center gap-1.5 bg-orange-50 px-2 py-1 rounded-xl border border-orange-200">
-                            <button type="button" onclick="changeCalendarMonth(-1)" id="prevMonthBtn" title="Tháng trước" class="w-6 h-6 rounded-md hover:bg-orange-200/70 text-orange-700 flex items-center justify-center font-bold text-xs transition disabled:opacity-30 disabled:cursor-not-allowed">
+                        <div class="flex items-center gap-1.5 bg-orange-50 px-2 py-1 rounded-none border border-orange-200">
+                            <button type="button" onclick="changeCalendarMonth(-1)" id="prevMonthBtn" title="Tháng trước" class="w-6 h-6 rounded-sm hover:bg-orange-200/70 text-orange-700 flex items-center justify-center font-bold text-xs transition disabled:opacity-30 disabled:cursor-not-allowed">
                                 <i class="fa-solid fa-chevron-left text-[11px]"></i>
                             </button>
                             <span id="calendarMonthYear" class="text-xs font-bold text-orange-700 min-w-[95px] text-center select-none"></span>
-                            <button type="button" onclick="changeCalendarMonth(1)" id="nextMonthBtn" title="Tháng sau" class="w-6 h-6 rounded-md hover:bg-orange-200/70 text-orange-700 flex items-center justify-center font-bold text-xs transition disabled:opacity-30 disabled:cursor-not-allowed">
+                            <button type="button" onclick="changeCalendarMonth(1)" id="nextMonthBtn" title="Tháng sau" class="w-6 h-6 rounded-sm hover:bg-orange-200/70 text-orange-700 flex items-center justify-center font-bold text-xs transition disabled:opacity-30 disabled:cursor-not-allowed">
                                 <i class="fa-solid fa-chevron-right text-[11px]"></i>
                             </button>
                         </div>
                     </div>
 
-                    <div class="bg-slate-50 border border-slate-200 rounded-2xl p-2.5">
+                    <div class="bg-slate-50 border border-slate-200 rounded-none p-2.5">
                         <div class="grid grid-cols-7 text-center text-[10px] font-bold text-slate-400 mb-1.5 pb-1 border-b border-slate-200">
                             <span>T2</span><span>T3</span><span>T4</span><span>T5</span><span>T6</span><span class="text-rose-400">T7</span><span class="text-rose-400">CN</span>
                         </div>
@@ -292,7 +292,7 @@
 
                 <div>
                     <label class="block text-xs font-bold text-slate-700 mb-1">Khung giờ nhận sách (8h - 17h):</label>
-                    <select id="bookSlot" class="w-full p-2.5 border border-slate-200 rounded-xl text-xs sm:text-sm bg-slate-50 outline-none">
+                    <select id="bookSlot" class="w-full p-2.5 border border-slate-200 rounded-none text-xs sm:text-sm bg-slate-50 outline-none">
                         <option value="08:00 - 09:30">08:00 - 09:30</option>
                         <option value="09:30 - 11:30">09:30 - 11:30</option>
                         <option value="13:30 - 15:30">13:30 - 15:30</option>                            
@@ -300,7 +300,7 @@
                     </select>
                 </div>
 
-                <button onclick="confirmCartBooking()" class="w-full py-3 bg-orange-600 hover:bg-orange-700 text-white font-bold rounded-xl text-xs sm:text-sm shadow-lg shadow-orange-600/30 transition">
+                <button onclick="confirmCartBooking()" class="w-full py-3 bg-orange-600 hover:bg-orange-700 text-white font-bold rounded-none text-xs sm:text-sm shadow-sm shadow-orange-600/30 transition">
                     Xác Nhận Đặt Mượn Tất Cả
                 </button>
             </div>
@@ -320,7 +320,7 @@
 
         let booksStarted = false, borrowStarted = false;
         App.watchAuth(user => {
-            const mssv = (user.email || '').toLowerCase().replace('@due.udn.vn', '').trim();
+            const mssv = App.mssvOf(user.email);
             currentUser = { mssv, ho_ten: user.displayName || `Sinh viên (${mssv})`, email: user.email, tien_no_phat: 0 };
             booksStarted = false; borrowStarted = false; activeWatchStarted = false; hideQrCards();
             showApp();
@@ -427,7 +427,7 @@
                     return `<div class="flex-1 min-w-0 text-center"><div class="mx-auto w-7 h-7 rounded-full flex items-center justify-center text-xs font-black ${dot}">${st === 'done' ? '✓' : i + 1}</div>
                         <p class="mt-1 text-[10px] sm:text-xs leading-tight ${st === 'todo' ? 'text-slate-400' : 'text-slate-700 font-semibold'}">${t}</p></div>`;
                 }).join('<div class="h-0.5 bg-slate-200 mt-3.5 flex-none w-3 sm:w-6"></div>');
-                return `<div class="bg-white rounded-2xl border border-slate-200 shadow-sm p-4 space-y-3">
+                return `<div class="bg-white rounded-none border border-slate-200 shadow-sm p-4 space-y-3">
                     <div class="flex justify-between text-xs"><b class="font-mono text-slate-700">${esc(r.qr_token)}</b><span class="text-slate-500">${Number(r.so_luong) || (r.items || []).length} cuốn · ${esc(r.so_hoc)}</span></div>
                     <div class="flex items-start">${steps}</div>
                     ${r.trang_thai === 'hoan_tat_phat' ? '<p class="text-xs text-rose-600 font-semibold">Có biên bản phạt, xem mục Nợ phạt & Thông báo.</p>' : ''}</div>`;
@@ -435,24 +435,56 @@
         }
 
         // Gọi mỗi khi 'borrowings' của sinh viên thay đổi
+        // ---------- Gia hạn: trong 10 ngày cuối của thời hạn mượn, chưa quá hạn, tối đa 1 lần ----------
+        const dmy = s => String(s).split('-').reverse().join('/');
+        function extendState(b) {
+            const L = App.LOAN, t = App.today(), used = Number(b.so_lan_gia_han) || 0, from = App.addDays(b.han_tra, -L.extendWindowDays);
+            if (used >= L.maxExtensions) return { ok: false, msg: `Đã gia hạn ${used}/${L.maxExtensions} lần` };
+            if (t > b.han_tra) return { ok: false, msg: 'Đã quá hạn, không thể gia hạn' };
+            if (t < from) return { ok: false, msg: `Được gia hạn từ ${dmy(from)} (trước hạn ${L.extendWindowDays} ngày)` };
+            return { ok: true };
+        }
+        function extendHtml(b) {
+            if (!b.han_tra) return '';
+            const e = extendState(b);
+            return e.ok ? `<button onclick="extendLoan('${esc(b.id)}')" class="mt-2 w-full py-2 bg-orange-600 hover:bg-orange-700 text-white text-xs font-bold rounded-none transition">Gia hạn thêm ${App.LOAN.extendMonths} tháng</button>`
+                : `<p class="mt-2 text-[11px] text-slate-400">${esc(e.msg)}</p>`;
+        }
+        async function extendLoan(id) {
+            return App.guard('extend:' + id, async () => {
+                try {
+                    const ref = db.collection('borrowings').doc(id);
+                    const newDue = await db.runTransaction(async tx => {
+                        const b = (await tx.get(ref)).data();
+                        if (!b || b.trang_thai !== 'dang_muon') throw new Error('Cuốn sách này không còn ở trạng thái đang mượn.');
+                        const e = extendState(b); if (!e.ok) throw new Error(e.msg + '.');
+                        const nd = App.addMonths(b.han_tra, App.LOAN.extendMonths);
+                        tx.update(ref, { han_tra: nd, so_lan_gia_han: (Number(b.so_lan_gia_han) || 0) + 1, ngay_gia_han: App.today() });
+                        return nd;
+                    });
+                    showToast.success('Gia hạn thành công', `Hạn trả mới: ${dmy(newDue)}.`);
+                } catch (err) { showToast.error('Không thể gia hạn', err.message || 'Vui lòng thử lại.'); }
+            });
+        }
+
         function afterBorrowings() {
-            const hold = borrowedBooks.filter(b => b.trang_thai === 'dang_muon'), today = new Date().toISOString().split('T')[0];
+            const hold = borrowedBooks.filter(b => b.trang_thai === 'dang_muon'), today = App.today();
             setBadge('borrowedCount', hold.length);
             document.getElementById('borrowedOnlyList').innerHTML = hold.length ? hold.map(b => {
                 const late = b.han_tra && b.han_tra < today;
-                return `<div class="bg-white rounded-2xl border ${late ? 'border-rose-300' : 'border-slate-200'} shadow-sm p-4 space-y-1">
+                return `<div class="bg-white rounded-none border ${late ? 'border-rose-300' : 'border-slate-200'} shadow-sm p-4 space-y-1">
                     <p class="font-bold text-sm text-slate-800">${esc(b.ten_sach)}</p>
                     <p class="text-xs text-slate-500">Mượn: ${esc(b.ngay_muon)} · Hạn trả: <b class="${late ? 'text-rose-600' : 'text-slate-700'}">${esc(b.han_tra)}</b></p>
-                    <p class="text-[11px] text-slate-400">${esc(b.vi_tri_ke)}</p></div>`;
+                    <p class="text-[11px] text-slate-400">${esc(b.vi_tri_ke)}</p>${extendHtml(b)}</div>`;
             }).join('') : '<p class="col-span-full text-center text-sm text-slate-400 py-10">Hiện bạn không giữ cuốn sách nào.</p>';
             const fines = currentHistoryRawList.filter(b => Number(b.tien_phat) > 0), unpaid = fines.filter(b => !b.da_thu_phi);
             const owed = unpaid.reduce((t, b) => t + Number(b.tien_phat), 0);
             document.getElementById('userDisplayDebt').innerText = money(owed);
             document.getElementById('finesTotal').innerText = money(owed);
-            const notes = hold.filter(b => b.han_tra && b.han_tra <= today).map(b => `<div class="p-3 rounded-xl text-xs ${b.han_tra < today ? 'bg-rose-50 text-rose-700 border border-rose-200' : 'bg-amber-50 text-amber-800 border border-amber-200'}">${b.han_tra < today ? '⚠️ Quá hạn trả' : '🔔 Hôm nay là hạn trả'}: <b>${esc(b.ten_sach)}</b></div>`);
+            const notes = hold.filter(b => b.han_tra && b.han_tra <= today).map(b => `<div class="p-3 rounded-none text-xs ${b.han_tra < today ? 'bg-rose-50 text-rose-700 border border-rose-200' : 'bg-amber-50 text-amber-800 border border-amber-200'}">${b.han_tra < today ? '⚠️ Quá hạn trả' : '🔔 Hôm nay là hạn trả'}: <b>${esc(b.ten_sach)}</b></div>`);
             document.getElementById('noticeList').innerHTML = notes.join('');
             setBadge('finesCount', unpaid.length + notes.length);
-            document.getElementById('finesList').innerHTML = fines.length ? fines.map(b => `<div class="bg-white rounded-2xl border border-slate-200 p-4 flex items-center justify-between gap-3">
+            document.getElementById('finesList').innerHTML = fines.length ? fines.map(b => `<div class="bg-white rounded-none border border-slate-200 p-4 flex items-center justify-between gap-3">
                 <div class="min-w-0"><p class="font-bold text-sm text-slate-800 truncate">${esc(b.ten_sach)}</p><p class="text-xs text-slate-500">${esc(b.ghi_chu_phat || 'Biên bản phạt')}</p></div>
                 <div class="text-right shrink-0"><p class="font-black text-rose-600 text-sm">${money(b.tien_phat)}</p><span class="text-[11px] font-bold ${b.da_thu_phi ? 'text-emerald-600' : 'text-amber-600'}">${b.da_thu_phi ? 'Đã thu' : 'Chưa thu'}</span></div></div>`).join('')
                 : '<p class="text-center text-sm text-slate-400 py-6">Bạn không có khoản phạt nào. 🎉</p>';
@@ -532,11 +564,11 @@
                 const isInCart = cart.some(item => item.id === b.id);
 
                 list.innerHTML += `
-                    <div class="bg-white p-4 sm:p-5 rounded-2xl border border-slate-200 shadow-sm flex flex-col justify-between gap-3 hover:border-orange-300 transition">
+                    <div class="bg-white p-4 sm:p-5 rounded-none border border-slate-200 shadow-sm flex flex-col justify-between gap-3 hover:border-orange-300 transition">
                         <div class="space-y-1.5">
                             <div class="flex items-center justify-between gap-2">
                                 <span class="text-[10px] font-mono bg-slate-100 text-slate-600 px-2 py-0.5 rounded font-bold">${b.ma_vach}</span>
-                                <span class="text-[10px] font-bold px-2 py-0.5 rounded-full ${isAvailable ? 'bg-emerald-100 text-emerald-700' : 'bg-rose-100 text-rose-700'}">
+                                <span class="text-[10px] font-bold px-2 py-0.5 rounded-sm ${isAvailable ? 'bg-emerald-100 text-emerald-700' : 'bg-rose-100 text-rose-700'}">
                                     ${isAvailable ? `Còn: ${b.so_luong_con} cuốn` : 'Tạm hết'}
                                 </span>
                             </div>
@@ -547,20 +579,35 @@
                         <div class="pt-2 border-t flex justify-end">
                             ${isAvailable ? (
                                 isInCart ? 
-                                `<button onclick="removeFromCart('${b.id}')" class="px-3.5 py-1.5 bg-rose-50 border border-rose-200 text-rose-600 rounded-xl text-xs font-bold transition flex items-center gap-1.5">
+                                `<button onclick="removeFromCart('${b.id}')" class="px-3.5 py-1.5 bg-rose-50 border border-rose-200 text-rose-600 rounded-none text-xs font-bold transition flex items-center gap-1.5">
                                     <i class="fa-solid fa-check"></i> Đã chọn
                                 </button>` :
-                                `<button onclick="addToCart('${b.id}')" class="px-3.5 py-1.5 bg-orange-600 hover:bg-orange-700 text-white rounded-xl text-xs font-bold shadow-md transition flex items-center gap-1.5">
+                                `<button onclick="addToCart('${b.id}')" class="px-3.5 py-1.5 bg-orange-600 hover:bg-orange-700 text-white rounded-none text-xs font-bold shadow-md transition flex items-center gap-1.5">
                                     <i class="fa-solid fa-plus"></i> Chọn mượn
                                 </button>`
-                            ) : `<span class="px-3 py-1.5 bg-slate-100 text-slate-400 rounded-xl text-xs font-semibold">Tạm hết</span>`}
+                            ) : `<span class="px-3 py-1.5 bg-slate-100 text-slate-400 rounded-none text-xs font-semibold">Tạm hết</span>`}
                         </div>
                     </div>
                 `;
             });
         }
 
+        // ---------- Gate 1 (BPMN): thẻ còn hạn, nợ phạt = 0 đ, số sách đang giữ ≤ 3 cuốn. Sai => Task T1.Ex ----------
+        const NOT_ELIGIBLE = 'Tài khoản của bạn hiện không đủ điều kiện mượn sách mới do đang có nợ phạt / đạt giới hạn 3 cuốn. Vui lòng thanh toán hoặc hoàn tất trả sách trước.';
+        let eligToast = null;
+        function ensureEligible(extra = 1) {
+            const raw = currentHistoryRawList || [];
+            const debt = raw.filter(b => Number(b.tien_phat) > 0 && !b.da_thu_phi).length;
+            const held = raw.filter(b => b.trang_thai === 'dang_muon' || b.trang_thai === 'cho_kiem_tra').length
+                + myOrders.filter(o => o.trang_thai_don === 'cho_soan' || o.trang_thai_don === 'da_soan_xong').reduce((t, o) => t + (o.books || []).length, 0);
+            if (debt === 0 && held + cart.length + extra <= 3) return true;
+            if (eligToast) eligToast.close();
+            eligToast = showToast({ type: 'error', title: 'Không đủ điều kiện mượn sách', message: NOT_ELIGIBLE, duration: 0, lines: 5 }); // T1.Ex: thông báo mẫu tĩnh, không tự tắt
+            return false;
+        }
+
         function addToCart(bookId) {
+            if (!ensureEligible(1)) return;
             const book = allBooks.find(b => String(b.id) === String(bookId));
             if (!book) return;
             if (!cart.some(item => String(item.id) === String(bookId))) {
@@ -592,6 +639,7 @@
         let bookingBusy = false;
         async function confirmCartBooking() {
             if (bookingBusy) return;
+            if (!ensureEligible(0)) return;
             if (cart.length === 0) return alert("Giỏ mượn đang trống!");
             const date = document.getElementById('bookDate').value;
             const slot = document.getElementById('bookSlot').value;
@@ -647,17 +695,17 @@
                 const isRet = kind === 'return', books = (isRet ? x.items : x.books) || [];
                 const status = isRet ? 'Chờ bỏ sách vào hộc tại Kiosk' : (x.trang_thai_don === 'da_soan_xong' ? 'Sách đã sẵn sàng, quét mã tại Kiosk' : 'Chờ thủ thư nạp sách vào hộc');
                 const due = isRet ? fmtDT(tms(x) + 864e5) : `${esc(x.ngay_hen)} (${esc(x.khung_gio)})`;
-                return `<div class="bg-white rounded-3xl border-2 ${isRet ? 'border-blue-400' : 'border-orange-400'} shadow-lg p-5 space-y-3 text-center">
-                    <span class="inline-block px-3 py-1 rounded-full text-xs font-bold ${isRet ? 'bg-blue-100 text-blue-700' : 'bg-orange-100 text-orange-700'}">${isRet ? '🔄 QR TRẢ SÁCH' : '📖 QR NHẬN SÁCH'}</span>
-                    <div class="p-3 bg-slate-50 rounded-2xl inline-block border border-slate-200"><div id="qr_${esc(x.id)}" class="qr-box flex justify-center"></div></div>
+                return `<div class="bg-white rounded-none border-2 ${isRet ? 'border-blue-400' : 'border-orange-400'} shadow-sm p-5 space-y-3 text-center">
+                    <span class="inline-block px-3 py-1 rounded-sm text-xs font-bold ${isRet ? 'bg-blue-100 text-blue-700' : 'bg-orange-100 text-orange-700'}">${isRet ? '🔄 QR TRẢ SÁCH' : '📖 QR NHẬN SÁCH'}</span>
+                    <div class="p-3 bg-slate-50 rounded-none inline-block border border-slate-200"><div id="qr_${esc(x.id)}" class="qr-box flex justify-center"></div></div>
                     <p class="font-mono font-black text-lg text-slate-800">${esc(x.qr_token)}</p>
-                    <div class="text-xs space-y-1 text-left bg-slate-50 rounded-xl p-3">
+                    <div class="text-xs space-y-1 text-left bg-slate-50 rounded-none p-3">
                         ${row('Hộc tủ', esc(x.so_hoc))}${row(isRet ? 'Hạn mở tủ' : 'Hạn lấy', due)}${row('Trạng thái', status)}
                     </div>
                     <ul class="text-xs text-left text-slate-700 space-y-0.5">${books.map(b => `<li>• ${esc(b.ten_sach)}</li>`).join('')}</ul>
                     <div class="flex gap-2">
-                        <button onclick="downloadQr('${kind}','${esc(x.id)}')" class="flex-1 py-2 bg-slate-900 hover:bg-slate-700 text-white text-xs font-bold rounded-xl transition">⬇ Tải mã QR</button>
-                        ${isRet ? `<button onclick="cancelReturnOrder('${esc(x.id)}')" class="px-3 py-2 bg-rose-50 hover:bg-rose-100 text-rose-600 text-xs font-bold rounded-xl transition">Hủy mã</button>` : ''}
+                        <button onclick="downloadQr('${kind}','${esc(x.id)}')" class="flex-1 py-2 bg-slate-900 hover:bg-slate-700 text-white text-xs font-bold rounded-none transition">⬇ Tải mã QR</button>
+                        ${isRet ? `<button onclick="cancelReturnOrder('${esc(x.id)}')" class="px-3 py-2 bg-rose-50 hover:bg-rose-100 text-rose-600 text-xs font-bold rounded-none transition">Hủy mã</button>` : ''}
                     </div></div>`;
             };
             box.innerHTML = [...pick.map(o => card('pickup', o)), ...ret.map(r => card('return', r))].join('');
@@ -756,16 +804,16 @@
                 const act = activeReturn(), inOrder = !!act && (act.items || []).some(it => it.borrow_id === b.res_id);
                 const isWaitingInspect = b.trang_thai === 'cho_kiem_tra' || !!act; // khóa: sách đã vào đơn trả, hoặc đang có đơn trả hoạt động
                 let statusBadge = inOrder ?
-                    `<span class="px-2.5 py-1 rounded-full text-[10px] font-bold bg-blue-100 text-blue-700">Đang trong đơn trả ${esc(act.so_hoc)} - ${act.trang_thai === 'cho_kiem_tra' ? 'Chờ nghiệm thu' : 'Chờ bỏ sách'}</span>` :
+                    `<span class="px-2.5 py-1 rounded-sm text-[10px] font-bold bg-blue-100 text-blue-700">Đang trong đơn trả ${esc(act.so_hoc)} - ${act.trang_thai === 'cho_kiem_tra' ? 'Chờ nghiệm thu' : 'Chờ bỏ sách'}</span>` :
                     isWaitingInspect && b.trang_thai !== 'cho_kiem_tra' ?
-                    `<span class="px-2.5 py-1 rounded-full text-[10px] font-bold bg-slate-100 text-slate-500">Tạm khóa (đang có đơn trả)</span>` : b.trang_thai === 'cho_kiem_tra' ?
-                    `<span class="px-2.5 py-1 rounded-full text-[10px] font-bold bg-blue-100 text-blue-700"><i class="fa-solid fa-spinner animate-spin mr-1"></i>Đã gửi tủ (Chờ kiểm tra)</span>` :
-                    `<span class="px-2.5 py-1 rounded-full text-[10px] font-bold bg-emerald-100 text-emerald-700">Đang giữ sách</span>`;
+                    `<span class="px-2.5 py-1 rounded-sm text-[10px] font-bold bg-slate-100 text-slate-500">Tạm khóa (đang có đơn trả)</span>` : b.trang_thai === 'cho_kiem_tra' ?
+                    `<span class="px-2.5 py-1 rounded-sm text-[10px] font-bold bg-blue-100 text-blue-700"><i class="fa-solid fa-spinner animate-spin mr-1"></i>Đã gửi tủ (Chờ kiểm tra)</span>` :
+                    `<span class="px-2.5 py-1 rounded-sm text-[10px] font-bold bg-emerald-100 text-emerald-700">Đang giữ sách</span>`;
 
                 list.innerHTML += `
                     <div id="card_book_${b.res_id}" 
                          onclick="${isWaitingInspect ? '' : `toggleBookCard(event, '${b.res_id}')`}" 
-                         class="bg-white p-4 rounded-2xl border-2 ${isWaitingInspect ? 'border-dashed border-slate-300 opacity-80' : 'border-slate-200 cursor-pointer hover:border-blue-300'} shadow-sm flex items-start gap-3 transition select-none">
+                         class="bg-white p-4 rounded-none border-2 ${isWaitingInspect ? 'border-dashed border-slate-300 opacity-80' : 'border-slate-200 cursor-pointer hover:border-blue-300'} shadow-sm flex items-start gap-3 transition select-none">
                         <div class="pt-1">
                             <input type="checkbox" 
                                    id="chk_${b.res_id}" 
@@ -909,7 +957,7 @@
 
             if (currentHistoryRawList.length === 0) {
                 list.innerHTML = `
-                    <div class="col-span-full text-center py-12 space-y-2 bg-white rounded-3xl border border-dashed border-slate-200">
+                    <div class="col-span-full text-center py-12 space-y-2 bg-white rounded-none border border-dashed border-slate-200">
                         <i class="fa-solid fa-clock-rotate-left text-3xl text-slate-300"></i>
                         <p class="text-xs sm:text-sm text-slate-500 font-medium">Bạn chưa có lịch sử mượn trả sách nào.</p>
                     </div>
@@ -958,9 +1006,9 @@
                     }
 
                     booksHtml += `
-                        <div class="flex flex-col sm:flex-row sm:items-center justify-between p-3 bg-white rounded-xl border border-slate-200 text-xs gap-2 shadow-2xs hover:border-orange-200 transition">
+                        <div class="flex flex-col sm:flex-row sm:items-center justify-between p-3 bg-white rounded-none border border-slate-200 text-xs gap-2 shadow-2xs hover:border-orange-200 transition">
                             <div class="flex items-center gap-2.5">
-                                <span class="w-5 h-5 rounded-full bg-orange-50 text-orange-700 font-bold flex items-center justify-center text-[10px] shrink-0">${idx + 1}</span>
+                                <span class="w-5 h-5 rounded-sm bg-orange-50 text-orange-700 font-bold flex items-center justify-center text-[10px] shrink-0">${idx + 1}</span>
                                 <div>
                                     <div class="font-bold text-slate-800 text-xs sm:text-sm leading-snug">${b.ten_sach}</div>
                                     <div class="text-[10px] font-mono text-slate-400 mt-0.5">
@@ -979,11 +1027,11 @@
 
                 // Khung cha đại diện cho ngày mượn
                 list.innerHTML += `
-                    <div class="bg-white rounded-2xl border border-slate-200 shadow-xs overflow-hidden transition">
+                    <div class="bg-white rounded-none border border-slate-200 shadow-xs overflow-hidden transition">
                         <!-- HEADER NGÀY MƯỢN (BẤM VÀO ĐỂ THẢ XUỐNG / THU GỌN) -->
                         <div onclick="toggleHistoryDate('${group.date}')" class="p-4 bg-slate-50 hover:bg-orange-50/50 cursor-pointer flex items-center justify-between select-none transition border-b ${isExpanded ? 'border-slate-200' : 'border-transparent'}">
                             <div class="flex items-center gap-3">
-                                <div class="w-8 h-8 rounded-xl bg-orange-100 text-orange-700 flex items-center justify-center font-bold text-xs shadow-2xs">
+                                <div class="w-8 h-8 rounded-none bg-orange-100 text-orange-700 flex items-center justify-center font-bold text-xs shadow-2xs">
                                     <i class="fa-regular fa-calendar-days"></i>
                                 </div>
                                 <div>
@@ -1031,7 +1079,7 @@
             container.innerHTML = '';
             cart.forEach((b, index) => {
                 container.innerHTML += `
-                    <div class="p-2.5 rounded-xl bg-slate-50 border border-slate-200 flex justify-between items-center text-xs sm:text-sm">
+                    <div class="p-2.5 rounded-none bg-slate-50 border border-slate-200 flex justify-between items-center text-xs sm:text-sm">
                         <div class="space-y-0.5">
                             <span class="font-bold text-slate-800">${index + 1}. ${b.ten_sach}</span>
                             <p class="text-[10px] text-slate-400 font-mono">${b.vi_tri_ke} • ${b.tac_gia}</p>
@@ -1111,7 +1159,7 @@
 
                 if (isDisabled) {
                     grid.innerHTML += `
-                        <div class="h-9 flex items-center justify-center text-xs text-slate-300 font-medium rounded-xl select-none cursor-not-allowed ${isWeekend ? 'bg-slate-100/50 text-rose-300' : ''}">
+                        <div class="h-9 flex items-center justify-center text-xs text-slate-300 font-medium rounded-none select-none cursor-not-allowed ${isWeekend ? 'bg-slate-100/50 text-rose-300' : ''}">
                             ${day}
                         </div>
                     `;
@@ -1119,7 +1167,7 @@
                     grid.innerHTML += `
                         <button type="button" 
                                 onclick="selectCalendarDate('${dateStr}')" 
-                                class="cal-day-btn h-9 flex items-center justify-center text-xs font-bold rounded-xl transition ${isSelected ? 'bg-orange-700 text-white font-black shadow-lg scale-105' : 'bg-white hover:bg-orange-100 text-slate-700 border border-slate-200'}">
+                                class="cal-day-btn h-9 flex items-center justify-center text-xs font-bold rounded-none transition ${isSelected ? 'bg-orange-700 text-white font-black shadow-sm scale-105' : 'bg-white hover:bg-orange-100 text-slate-700 border border-slate-200'}">
                             ${day}
                         </button>
                     `;

@@ -6,8 +6,10 @@ service cloud.firestore {
     function who()      { return request.auth.token.email.split('@')[0]; }
     function isLib()    { return signedIn() && who().matches('.*thuthu.*'); }
     function isStaff()  { return signedIn() && (who().matches('.*thuthu.*') || who().matches('.*kiosk.*')); }
-    function isMine()   { return signedIn() && resource.data.mssv == who(); }
-    function newIsMine(){ return signedIn() && request.resource.data.mssv == who(); }
+    // MSSV của người đăng nhập (tài khoản test sinhvien.vipham ánh xạ về 251121599999)
+    function sid()      { return who() == 'sinhvien.vipham' ? '251121599999' : who(); }
+    function isMine()   { return signedIn() && resource.data.mssv == sid(); }
+    function newIsMine(){ return signedIn() && request.resource.data.mssv == sid(); }
 
     match /books/{id} {
       allow read: if signedIn();
@@ -18,7 +20,13 @@ service cloud.firestore {
     }
     match /lockers/{id}    { allow read, write: if signedIn(); }
     match /orders/{id}     { allow read: if isStaff() || isMine(); allow create: if newIsMine(); allow update: if isStaff(); }
-    match /borrowings/{id} { allow read: if isStaff() || isMine(); allow create, update: if isStaff(); }
+    match /borrowings/{id} {
+      allow read: if isStaff() || isMine();
+      allow create: if isStaff();
+      // Sinh viên chỉ được GIA HẠN: đổi đúng các trường hạn trả của cuốn đang mượn của chính mình
+      allow update: if isStaff() || (isMine() && resource.data.trang_thai == 'dang_muon'
+        && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['han_tra', 'so_lan_gia_han', 'ngay_gia_han']));
+    }
     match /returns/{id} {
       allow read: if isStaff() || isMine();
       allow create: if newIsMine();

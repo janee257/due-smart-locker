@@ -52,10 +52,24 @@
   function stopAll() { Object.keys(subs).forEach((k) => { subs[k](); delete subs[k]; }); }
 
   // ---- Chuẩn hóa ID ----
+  // Tài khoản test có email không phải MSSV: ánh xạ về MSSV thật (firestore.rules dùng cùng bảng này)
+  const ALIAS = { "sinhvien.vipham": "251121599999" };
+  const mssvOf = (email) => { const l = String(email || "").toLowerCase().split("@")[0].trim(); return ALIAS[l] || l; };
   const lockerName = (i) => "Hộc " + (i < 10 ? "0" + i : i);
   const lockerId = (name) => "hoc_" + String(name).replace(/\D/g, "").padStart(2, "0");
   const lockerRef = (name) => db.collection("lockers").doc(lockerId(name));
-  const today = () => new Date().toISOString().split("T")[0];
+  // Ngày theo GIỜ ĐỊA PHƯƠNG (toISOString là UTC nên lệch 1 ngày trong khoảng 0h–7h sáng ở Việt Nam)
+  const pad2 = (n) => String(n).padStart(2, "0");
+  const fmtD = (d) => d.getFullYear() + "-" + pad2(d.getMonth() + 1) + "-" + pad2(d.getDate());
+  const parseD = (s) => { const [y, m, d] = String(s).split("-").map(Number); return new Date(y, m - 1, d); };
+  const today = () => fmtD(new Date());
+  const addDays = (s, n) => { const d = parseD(s); d.setDate(d.getDate() + n); return fmtD(d); };
+  const addMonths = (s, n) => { // cộng tháng theo lịch, kẹp về cuối tháng (31/12 + 2 tháng = 28/02)
+    const d = parseD(s), day = d.getDate(); d.setDate(1); d.setMonth(d.getMonth() + n);
+    d.setDate(Math.min(day, new Date(d.getFullYear(), d.getMonth() + 1, 0).getDate())); return fmtD(d);
+  };
+  // Quy định mượn: 2 tháng; được gia hạn trong 10 ngày cuối của thời hạn (mỗi lần thêm 2 tháng, tối đa 1 lần)
+  const LOAN = { months: 2, extendWindowDays: 10, extendMonths: 2, maxExtensions: 1 };
 
   // Tìm doc sách: book_id -> ma_vach (doc id) -> where ma_vach -> where ten_sach
   async function resolveBookRef(b) {
@@ -110,8 +124,8 @@
     const ov = document.createElement("div");
     ov.style.cssText = "position:fixed;inset:0;z-index:99999;background:rgba(15,23,42,.55);display:flex;align-items:center;justify-content:center;padding:16px;font-family:inherit";
     ov.innerHTML =
-      '<div role="dialog" aria-modal="true" style="background:#fff;color:#0f172a;width:100%;max-width:380px;border-radius:20px;padding:24px;box-shadow:0 20px 50px rgba(0,0,0,.3);text-align:center">' +
-      '<div style="width:48px;height:48px;border-radius:50%;margin:0 auto 12px;display:flex;align-items:center;justify-content:center;font-weight:800;font-size:22px;background:' + k.bg + ';color:' + k.fg + '">' + k.icon + '</div>' +
+      '<div role="dialog" aria-modal="true" style="background:#fff;color:#0f172a;width:100%;max-width:380px;border-radius:2px;padding:24px;box-shadow:0 20px 50px rgba(0,0,0,.3);text-align:center">' +
+      '<div style="width:48px;height:48px;border-radius:2px;margin:0 auto 12px;display:flex;align-items:center;justify-content:center;font-weight:800;font-size:22px;background:' + k.bg + ';color:' + k.fg + '">' + k.icon + '</div>' +
       '<div style="font-weight:800;font-size:16px;margin-bottom:6px">' + 'Xác nhận' + '</div>' +
       '<div class="dlg-msg" style="font-size:14px;line-height:1.5;color:#475569;white-space:pre-line"></div>' +
       '<div style="display:flex;gap:8px;margin-top:20px"></div></div>';
@@ -121,7 +135,7 @@
     const mk = (label, primary, val) => {
       const b = document.createElement("button");
       b.textContent = label;
-      b.style.cssText = "flex:1;padding:10px 14px;border-radius:12px;font-weight:700;font-size:14px;cursor:pointer;border:0;" +
+      b.style.cssText = "flex:1;padding:10px 14px;border-radius:2px;font-weight:700;font-size:14px;cursor:pointer;border:0;" +
         (primary ? "background:#ea580c;color:#fff" : "background:#f1f5f9;color:#334155");
       b.onclick = () => close(val);
       row.appendChild(b);
@@ -173,5 +187,5 @@
     finally { locks.delete(key); if (btn && btn.isConnected) { btn.disabled = false; btn.style.opacity = ""; btn.innerHTML = html; } }
   }
 
-  window.App = { restockPlan, guard, notify, confirm: confirmBox, auth, db, FV, PAGE, login, watchAuth, listen, stopAll, lockerName, lockerId, lockerRef, today, resolveBookRef, stockRefs, allocate };
+  window.App = { addDays, addMonths, LOAN, mssvOf, restockPlan, guard, notify, confirm: confirmBox, auth, db, FV, PAGE, login, watchAuth, listen, stopAll, lockerName, lockerId, lockerRef, today, resolveBookRef, stockRefs, allocate };
 })();

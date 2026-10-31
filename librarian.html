@@ -32,9 +32,9 @@
 
     <!-- ================= MÀN HÌNH ĐĂNG NHẬP THỦ THƯ ================= -->
     <div id="librarianLoginSection" style="z-index:100" class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950">
-        <div class="bg-white w-full max-w-sm rounded-3xl p-6 shadow-2xl space-y-4 border border-slate-200">
+        <div class="bg-white w-full max-w-sm rounded-none p-6 shadow-md space-y-4 border border-slate-200">
             <div class="text-center space-y-1">
-                <img src="/logo_due.png" alt="DUE Logo" class="h-14 w-auto mx-auto object-contain bg-white p-1 rounded-2xl shadow-md" onerror="this.onerror=null; this.src='https://due.udn.vn/Portals/0/logo-due.png';">
+                <img src="/logo_due.png" alt="DUE Logo" class="h-14 w-auto mx-auto object-contain bg-white p-1 rounded-none shadow-md" onerror="this.onerror=null; this.src='https://due.udn.vn/Portals/0/logo-due.png';">
                 <h2 class="font-bold text-base text-slate-800 pt-2">Cổng Quản Trị Thủ Thư</h2>
                 <p class="text-[11px] text-slate-500">Xác thực tài khoản cán bộ thư viện DUE</p>
             </div>
@@ -43,15 +43,15 @@
                 <div>
                     <label class="block font-bold text-slate-700 mb-1">Email Thủ thư:</label>
                     <input type="email" id="libEmail" value="thuthu@due.udn.vn" required placeholder="thuthu@due.udn.vn" 
-                           class="w-full px-3.5 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm outline-none focus:ring-2 focus:ring-orange-500">
+                           class="w-full px-3.5 py-2.5 bg-slate-50 border border-slate-200 rounded-none text-sm outline-none focus:ring-2 focus:ring-orange-500">
                 </div>
                 <div>
                     <label class="block font-bold text-slate-700 mb-1">Mật khẩu:</label>
                     <input type="password" id="libPassword" required placeholder="Nhập mật khẩu (tối thiểu 8 ký tự)" 
-                           class="w-full px-3.5 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm outline-none focus:ring-2 focus:ring-orange-500">
+                           class="w-full px-3.5 py-2.5 bg-slate-50 border border-slate-200 rounded-none text-sm outline-none focus:ring-2 focus:ring-orange-500">
                 </div>
-                <div id="libLoginError" class="hidden p-2.5 rounded-xl bg-rose-50 border border-rose-200 text-rose-600 font-semibold text-xs"></div>
-                <button type="submit" class="w-full py-3 bg-slate-900 hover:bg-slate-800 text-white font-bold rounded-xl text-xs shadow-md transition">
+                <div id="libLoginError" class="hidden p-2.5 rounded-none bg-rose-50 border border-rose-200 text-rose-600 font-semibold text-xs"></div>
+                <button type="submit" class="w-full py-3 bg-slate-900 hover:bg-slate-800 text-white font-bold rounded-none text-xs shadow-md transition">
                     Đăng Nhập Cán Bộ
                 </button>
             </form>
@@ -60,7 +60,7 @@
 
     <!-- NÚT ĐĂNG XUẤT THỦ THƯ -->
     <div id="libLogoutBtnContainer" style="display:none!important" class="hidden fixed bottom-4 left-4 z-40">
-        <button onclick="handleLibrarianLogout()" class="px-3.5 py-2 bg-slate-900/90 hover:bg-rose-600 text-white text-xs font-bold rounded-xl shadow-lg backdrop-blur-sm transition flex items-center gap-1.5 border border-slate-700">
+        <button onclick="handleLibrarianLogout()" class="px-3.5 py-2 bg-slate-900/90 hover:bg-rose-600 text-white text-xs font-bold rounded-none shadow-sm backdrop-blur-sm transition flex items-center gap-1.5 border border-slate-700">
             <i class="fa-solid fa-right-from-bracket"></i> Đăng xuất Thủ thư
         </button>
     </div>
@@ -69,12 +69,12 @@
     <aside class="dash-aside dark" id="dashAside">
         <div class="p-5 border-b border-slate-800">
             <div class="flex items-center gap-2 mb-4">
-                <img src="/logo_due.png" alt="DUE" class="h-8 w-auto bg-white p-1 rounded-lg object-contain" onerror="this.onerror=null; this.src='https://due.udn.vn/Portals/0/logo-due.png';">
+                <img src="/logo_due.png" alt="DUE" class="h-8 w-auto bg-white p-1 rounded-sm object-contain" onerror="this.onerror=null; this.src='https://due.udn.vn/Portals/0/logo-due.png';">
                 <div class="leading-tight"><p class="font-bold text-sm text-white">Thư viện DUE</p><p class="text-[10px] text-slate-400">Smart Locker · Quản trị</p></div>
             </div>
-            <span class="inline-block bg-gradient-to-r from-orange-600 to-amber-500 text-white text-[11px] font-bold px-3 py-1 rounded-full">Cán bộ Thư viện DUE</span>
+            <span class="inline-block bg-gradient-to-r from-orange-600 to-amber-500 text-white text-[11px] font-bold px-3 py-1 rounded-sm">Cán bộ Thư viện DUE</span>
             <p id="libAdminEmail" class="mt-2 text-xs text-slate-300 truncate">thuthu@due.udn.vn</p>
-            <button onclick="handleLibrarianLogout()" class="mt-3 w-full py-2 rounded-xl bg-slate-800 hover:bg-rose-600 text-white text-xs font-bold transition">🚪 Đăng xuất</button>
+            <button onclick="handleLibrarianLogout()" class="mt-3 w-full py-2 rounded-none bg-slate-800 hover:bg-rose-600 text-white text-xs font-bold transition">🚪 Đăng xuất</button>
         </div>
         <nav class="p-3 space-y-1.5 flex-1">
             <button onclick="switchLibTab('orders')" id="libTabBtnOrders" class="dash-nav"><span class="em">📥</span><span>Chờ soạn sách / Nạp hộc</span><span id="navOrders" class="badge zero">0</span></button>
@@ -89,24 +89,24 @@
 
     <div class="dash-main">
     <div class="dash-topbar">
-        <button class="burger w-10 h-10 rounded-xl bg-orange-50 text-orange-700 text-lg" onclick="toggleSidebar()" aria-label="Mở menu">☰</button>
+        <button class="burger w-10 h-10 rounded-none bg-orange-50 text-orange-700 text-lg" onclick="toggleSidebar()" aria-label="Mở menu">☰</button>
         <p class="font-bold text-slate-800 text-sm">Bàn làm việc Thủ thư</p>
     </div>
     <main class="max-w-6xl mx-auto p-4 sm:p-6 space-y-6">
         <div class="grid grid-cols-2 xl:grid-cols-4 gap-3">
-            <div class="bg-white rounded-2xl border border-slate-200 shadow-sm p-4 flex items-center gap-3"><div class="w-11 h-11 rounded-xl bg-amber-100 flex items-center justify-center text-xl">📥</div><div class="min-w-0"><p class="text-[11px] text-slate-500 font-semibold">Đơn cần soạn</p><p id="kpiOrders" class="text-xl font-black text-slate-800 truncate">0</p></div></div><div class="bg-white rounded-2xl border border-slate-200 shadow-sm p-4 flex items-center gap-3"><div class="w-11 h-11 rounded-xl bg-blue-100 flex items-center justify-center text-xl">📚</div><div class="min-w-0"><p class="text-[11px] text-slate-500 font-semibold">Sách đang mượn ngoài</p><p id="kpiBorrow" class="text-xl font-black text-slate-800 truncate">0</p></div></div><div class="bg-white rounded-2xl border border-slate-200 shadow-sm p-4 flex items-center gap-3"><div class="w-11 h-11 rounded-xl bg-emerald-100 flex items-center justify-center text-xl">🗄️</div><div class="min-w-0"><p class="text-[11px] text-slate-500 font-semibold">Hộc tủ đang trống</p><p id="kpiLockers" class="text-xl font-black text-slate-800 truncate">0</p></div></div><div class="bg-white rounded-2xl border border-slate-200 shadow-sm p-4 flex items-center gap-3"><div class="w-11 h-11 rounded-xl bg-rose-100 flex items-center justify-center text-xl">⚖️</div><div class="min-w-0"><p class="text-[11px] text-slate-500 font-semibold">Tiền phạt chưa thu</p><p id="kpiFines" class="text-xl font-black text-slate-800 truncate">0</p></div></div>
+            <div class="bg-white rounded-none border border-slate-200 shadow-sm p-4 flex items-center gap-3"><div class="w-11 h-11 rounded-none bg-amber-100 flex items-center justify-center text-xl">📥</div><div class="min-w-0"><p class="text-[11px] text-slate-500 font-semibold">Đơn cần soạn</p><p id="kpiOrders" class="text-xl font-black text-slate-800 truncate">0</p></div></div><div class="bg-white rounded-none border border-slate-200 shadow-sm p-4 flex items-center gap-3"><div class="w-11 h-11 rounded-none bg-blue-100 flex items-center justify-center text-xl">📚</div><div class="min-w-0"><p class="text-[11px] text-slate-500 font-semibold">Sách đang mượn ngoài</p><p id="kpiBorrow" class="text-xl font-black text-slate-800 truncate">0</p></div></div><div class="bg-white rounded-none border border-slate-200 shadow-sm p-4 flex items-center gap-3"><div class="w-11 h-11 rounded-none bg-emerald-100 flex items-center justify-center text-xl">🗄️</div><div class="min-w-0"><p class="text-[11px] text-slate-500 font-semibold">Hộc tủ đang trống</p><p id="kpiLockers" class="text-xl font-black text-slate-800 truncate">0</p></div></div><div class="bg-white rounded-none border border-slate-200 shadow-sm p-4 flex items-center gap-3"><div class="w-11 h-11 rounded-none bg-rose-100 flex items-center justify-center text-xl">⚖️</div><div class="min-w-0"><p class="text-[11px] text-slate-500 font-semibold">Tiền phạt chưa thu</p><p id="kpiFines" class="text-xl font-black text-slate-800 truncate">0</p></div></div>
         </div>
         <div class="flex flex-wrap items-center justify-between gap-2">
             <h2 id="libPageTitle" class="text-lg font-black text-slate-800">Chờ soạn sách / Nạp hộc</h2>
             <div id="libToolbar" class="hidden"><div class="flex gap-2">
-                <button onclick="openAddBookModal()" class="px-3.5 py-2 bg-emerald-600 hover:bg-emerald-700 text-white font-semibold rounded-xl text-xs shadow-sm transition">＋ Thêm sách</button>
-                <button onclick="autoSeedDatabaseIfEmpty(true)" class="px-3.5 py-2 bg-purple-600 hover:bg-purple-700 text-white font-semibold rounded-xl text-xs shadow-sm transition">Khởi tạo dữ liệu sạch</button>
+                <button onclick="openAddBookModal()" class="px-3.5 py-2 bg-emerald-600 hover:bg-emerald-700 text-white font-semibold rounded-none text-xs shadow-sm transition">＋ Thêm sách</button>
+                <button onclick="autoSeedDatabaseIfEmpty(true)" class="px-3.5 py-2 bg-purple-600 hover:bg-purple-700 text-white font-semibold rounded-none text-xs shadow-sm transition">Khởi tạo dữ liệu sạch</button>
             </div></div>
         </div>
 
         <!-- ================= TAB 1: THÔNG TIN TỦ & SOẠN ĐƠN ================= -->
         <div id="libTabContentOrders" class="space-y-6">
-            <section class="bg-white p-5 rounded-2xl border border-slate-200 shadow-sm space-y-4">
+            <section class="bg-white p-5 rounded-none border border-slate-200 shadow-sm space-y-4">
                 <div class="flex justify-between items-center border-b pb-3">
                     <div>
                         <h2 class="text-base font-bold flex items-center gap-2 text-slate-800">
@@ -114,7 +114,7 @@
                         </h2>
                         <p class="text-xs text-slate-400 mt-0.5">Xác nhận nạp sách vào hộc hoặc Thu hồi sách khi sinh viên không đến nhận</p>
                     </div>
-                    <span id="orderCount" class="bg-orange-100 text-orange-700 px-3 py-1 rounded-full text-xs font-bold">0 đơn</span>
+                    <span id="orderCount" class="bg-orange-100 text-orange-700 px-3 py-1 rounded-sm text-xs font-bold">0 đơn</span>
                 </div>
 
                 <div class="overflow-x-auto">
@@ -138,7 +138,7 @@
 
         <div id="libTabContentInspect" class="hidden space-y-6">
             <!-- BẢNG SÁCH CHỜ KIỂM TRA -->
-            <section class="bg-white p-5 rounded-2xl border border-blue-200 shadow-sm space-y-4">
+            <section class="bg-white p-5 rounded-none border border-blue-200 shadow-sm space-y-4">
                 <div class="flex justify-between items-center border-b pb-3">
                     <div>
                         <h2 class="text-base font-bold flex items-center gap-2 text-blue-900">
@@ -146,7 +146,7 @@
                         </h2>
                         <p class="text-xs text-slate-400 mt-0.5">Thủ thư kiểm tra tình trạng vật lý khi lấy sách ra khỏi hộc tủ để nhập kho</p>
                     </div>
-                    <span id="inspectCount" class="bg-blue-100 text-blue-700 px-3 py-1 rounded-full text-xs font-bold">0 đơn</span>
+                    <span id="inspectCount" class="bg-blue-100 text-blue-700 px-3 py-1 rounded-sm text-xs font-bold">0 đơn</span>
                 </div>
 
                 <div class="overflow-x-auto">
@@ -169,7 +169,7 @@
 
         <!-- ================= TAB 2: QUẢN LÝ SÁCH MƯỢN ================= -->
         <div id="libTabContentBorrows" class="hidden space-y-4">
-            <section class="bg-white p-5 rounded-2xl border border-slate-200 shadow-sm space-y-4">
+            <section class="bg-white p-5 rounded-none border border-slate-200 shadow-sm space-y-4">
                 <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-2 border-b pb-3">
                     <div>
                         <h2 class="text-base font-bold flex items-center gap-2 text-slate-800">
@@ -177,18 +177,18 @@
                         </h2>
                         <p class="text-xs text-slate-400 mt-0.5">Lọc nhanh theo MSSV, Họ tên hoặc Trạng thái mượn</p>
                     </div>
-                    <span id="activeBorrowFilterCount" class="bg-orange-100 text-orange-700 px-3 py-1 rounded-full text-xs font-bold">0 bản ghi</span>
+                    <span id="activeBorrowFilterCount" class="bg-orange-100 text-orange-700 px-3 py-1 rounded-sm text-xs font-bold">0 bản ghi</span>
                 </div>
 
-                <div class="bg-slate-50 p-4 rounded-2xl border border-slate-200 flex flex-col sm:flex-row gap-3 items-stretch sm:items-center justify-between">
+                <div class="bg-slate-50 p-4 rounded-none border border-slate-200 flex flex-col sm:flex-row gap-3 items-stretch sm:items-center justify-between">
                     <div class="relative flex-1">
                         <i class="fa-solid fa-magnifying-glass absolute left-3.5 top-3.5 text-slate-400 text-sm"></i>
                         <input type="search" id="borrowSearchInput" oninput="renderActiveBorrowsTable()" placeholder="Nhập MSSV, Họ tên hoặc Tên sách để tìm..." 
-                               class="w-full pl-10 pr-4 py-2 bg-white border border-slate-200 rounded-xl text-xs sm:text-sm outline-none focus:ring-2 focus:ring-orange-500">
+                               class="w-full pl-10 pr-4 py-2 bg-white border border-slate-200 rounded-none text-xs sm:text-sm outline-none focus:ring-2 focus:ring-orange-500">
                     </div>
 
                     <div class="flex items-center gap-2">
-                        <div class="flex items-center gap-1.5 bg-white border border-slate-200 px-3 py-2 rounded-xl text-xs">
+                        <div class="flex items-center gap-1.5 bg-white border border-slate-200 px-3 py-2 rounded-none text-xs">
                             <i class="fa-solid fa-filter text-orange-600"></i>
                             <select id="borrowStatusFilter" onchange="renderActiveBorrowsTable()" class="bg-transparent font-semibold outline-none cursor-pointer">
                                 <option value="all">Tất cả trạng thái</option>
@@ -220,15 +220,15 @@
         <!-- ================= GIÁM SÁT HỘC TỦ ================= -->
         <div id="libTabContentLockers" class="hidden space-y-4">
             <div class="flex flex-wrap gap-2 text-[11px] font-semibold">
-                <span class="px-2.5 py-1 rounded-full bg-emerald-100 text-emerald-700">Trống</span><span class="px-2.5 py-1 rounded-full bg-amber-100 text-amber-700">Sách chờ lấy</span>
-                <span class="px-2.5 py-1 rounded-full bg-blue-100 text-blue-700">Sách trả chờ kiểm</span><span class="px-2.5 py-1 rounded-full bg-rose-100 text-rose-700">Đang mở</span>
+                <span class="px-2.5 py-1 rounded-sm bg-emerald-100 text-emerald-700">Trống</span><span class="px-2.5 py-1 rounded-sm bg-amber-100 text-amber-700">Sách chờ lấy</span>
+                <span class="px-2.5 py-1 rounded-sm bg-blue-100 text-blue-700">Sách trả chờ kiểm</span><span class="px-2.5 py-1 rounded-sm bg-rose-100 text-rose-700">Đang mở</span>
             </div>
             <div id="lockerGrid" class="grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-5 gap-3"></div>
         </div>
 
         <!-- ================= XỬ LÝ PHẠT & THU PHÍ ================= -->
         <div id="libTabContentFines" class="hidden space-y-4">
-            <section class="bg-white p-5 rounded-2xl border border-slate-200 shadow-sm overflow-x-auto">
+            <section class="bg-white p-5 rounded-none border border-slate-200 shadow-sm overflow-x-auto">
                 <table class="w-full text-left text-sm">
                     <thead><tr class="text-xs text-slate-500 font-bold border-b bg-slate-50"><th class="p-3">MSSV</th><th class="p-3">Sách</th><th class="p-3">Lý do</th><th class="p-3">Số tiền</th><th class="p-3 text-right">Thu phí</th></tr></thead>
                     <tbody id="finesTableBody" class="divide-y divide-slate-100"></tbody>
@@ -238,7 +238,7 @@
 
         <!-- ================= TAB 3: KHO SÁCH ================= -->
         <div id="libTabContentWarehouse" class="hidden space-y-6">
-            <section class="bg-white p-5 rounded-2xl border border-slate-200 shadow-sm space-y-4">
+            <section class="bg-white p-5 rounded-none border border-slate-200 shadow-sm space-y-4">
                 <div class="flex justify-between items-center border-b pb-3">
                     <div>
                         <h2 class="text-base font-bold flex items-center gap-2 text-slate-800">
@@ -246,18 +246,18 @@
                         </h2>
                         <p class="text-xs text-slate-400 mt-0.5">Quản lý thêm, chỉnh sửa thông tin hoặc xóa sách cũ khỏi hệ thống</p>
                     </div>
-                    <span id="bookCountBadge" class="bg-slate-100 text-slate-700 px-3 py-1 rounded-full text-xs font-bold">0 đầu sách</span>
+                    <span id="bookCountBadge" class="bg-slate-100 text-slate-700 px-3 py-1 rounded-sm text-xs font-bold">0 đầu sách</span>
                 </div>
 
-                <div class="bg-slate-50 p-4 rounded-2xl border border-slate-200 space-y-3">
+                <div class="bg-slate-50 p-4 rounded-none border border-slate-200 space-y-3">
                     <div class="flex flex-col sm:flex-row gap-3 items-stretch sm:items-center justify-between">
                         <div class="relative flex-1">
                             <i class="fa-solid fa-magnifying-glass absolute left-3.5 top-3.5 text-slate-400 text-sm"></i>
-                            <input type="search" id="libSearchInput" oninput="renderFilteredLibrarianBooks()" placeholder="Tìm tên sách, mã vạch, tác giả hoặc vị trí kệ..." class="w-full pl-10 pr-4 py-2 bg-white border border-slate-200 rounded-xl text-xs sm:text-sm outline-none focus:ring-2 focus:ring-orange-500">
+                            <input type="search" id="libSearchInput" oninput="renderFilteredLibrarianBooks()" placeholder="Tìm tên sách, mã vạch, tác giả hoặc vị trí kệ..." class="w-full pl-10 pr-4 py-2 bg-white border border-slate-200 rounded-none text-xs sm:text-sm outline-none focus:ring-2 focus:ring-orange-500">
                         </div>
 
                         <div class="flex items-center gap-2">
-                            <div class="flex items-center gap-1.5 bg-white border border-slate-200 px-2.5 py-1.5 rounded-xl text-xs">
+                            <div class="flex items-center gap-1.5 bg-white border border-slate-200 px-2.5 py-1.5 rounded-none text-xs">
                                 <i class="fa-solid fa-arrow-down-a-z text-orange-600"></i>
                                 <select id="libSortSelect" onchange="renderFilteredLibrarianBooks()" class="bg-transparent font-semibold outline-none cursor-pointer">
                                     <option value="az">Sắp xếp: Tên A → Z</option>
@@ -267,7 +267,7 @@
                                 </select>
                             </div>
 
-                            <label class="flex items-center gap-1.5 bg-white border border-slate-200 px-2.5 py-2 rounded-xl text-xs font-semibold cursor-pointer select-none hover:bg-slate-100 transition">
+                            <label class="flex items-center gap-1.5 bg-white border border-slate-200 px-2.5 py-2 rounded-none text-xs font-semibold cursor-pointer select-none hover:bg-slate-100 transition">
                                 <input type="checkbox" id="libOnlyAvailableCheck" onchange="renderFilteredLibrarianBooks()" class="accent-orange-600 rounded">
                                 <span class="hidden sm:inline">Chỉ sách</span> còn
                             </label>
@@ -277,13 +277,13 @@
                     <div class="pt-2 border-t border-slate-200 flex items-center gap-2 overflow-x-auto text-xs">
                         <span class="text-slate-400 font-bold whitespace-nowrap text-[11px]"><i class="fa-solid fa-tags mr-1"></i>Khoa/Ngành:</span>
                         <div class="flex gap-1.5" id="libCategoryChips">
-                            <button onclick="selectLibCategory('all', this)" class="filter-chip active px-3 py-1.5 rounded-xl border border-slate-200 font-semibold whitespace-nowrap transition bg-white">Tất cả</button>
-                            <button onclick="selectLibCategory('httt', this)" class="filter-chip px-3 py-1.5 rounded-xl border border-slate-200 font-semibold whitespace-nowrap transition bg-white">Hệ thống thông tin</button>
-                            <button onclick="selectLibCategory('kinhte', this)" class="filter-chip px-3 py-1.5 rounded-xl border border-slate-200 font-semibold whitespace-nowrap transition bg-white">Kinh tế</button>
-                            <button onclick="selectLibCategory('ketoan', this)" class="filter-chip px-3 py-1.5 rounded-xl border border-slate-200 font-semibold whitespace-nowrap transition bg-white">Kế toán</button>
-                            <button onclick="selectLibCategory('marketing', this)" class="filter-chip px-3 py-1.5 rounded-xl border border-slate-200 font-semibold whitespace-nowrap transition bg-white">Marketing</button>
-                            <button onclick="selectLibCategory('taichinh', this)" class="filter-chip px-3 py-1.5 rounded-xl border border-slate-200 font-semibold whitespace-nowrap transition bg-white">Tài chính - Ngân hàng</button>
-                            <button onclick="selectLibCategory('khac', this)" class="filter-chip px-3 py-1.5 rounded-xl border border-slate-200 font-semibold whitespace-nowrap transition bg-white">Khác</button>
+                            <button onclick="selectLibCategory('all', this)" class="filter-chip active px-3 py-1.5 rounded-none border border-slate-200 font-semibold whitespace-nowrap transition bg-white">Tất cả</button>
+                            <button onclick="selectLibCategory('httt', this)" class="filter-chip px-3 py-1.5 rounded-none border border-slate-200 font-semibold whitespace-nowrap transition bg-white">Hệ thống thông tin</button>
+                            <button onclick="selectLibCategory('kinhte', this)" class="filter-chip px-3 py-1.5 rounded-none border border-slate-200 font-semibold whitespace-nowrap transition bg-white">Kinh tế</button>
+                            <button onclick="selectLibCategory('ketoan', this)" class="filter-chip px-3 py-1.5 rounded-none border border-slate-200 font-semibold whitespace-nowrap transition bg-white">Kế toán</button>
+                            <button onclick="selectLibCategory('marketing', this)" class="filter-chip px-3 py-1.5 rounded-none border border-slate-200 font-semibold whitespace-nowrap transition bg-white">Marketing</button>
+                            <button onclick="selectLibCategory('taichinh', this)" class="filter-chip px-3 py-1.5 rounded-none border border-slate-200 font-semibold whitespace-nowrap transition bg-white">Tài chính - Ngân hàng</button>
+                            <button onclick="selectLibCategory('khac', this)" class="filter-chip px-3 py-1.5 rounded-none border border-slate-200 font-semibold whitespace-nowrap transition bg-white">Khác</button>
                         </div>
                     </div>
                 </div>
@@ -296,7 +296,7 @@
 
     <!-- Modal 1: Thêm Sách Mới -->
     <div id="addBookModal" class="hidden fixed inset-0 bg-black/60 z-50 flex items-center justify-center p-4 backdrop-blur-sm">
-        <div class="bg-white w-full max-w-md rounded-3xl p-6 space-y-4 shadow-2xl">
+        <div class="bg-white w-full max-w-md rounded-none p-6 space-y-4 shadow-md">
             <div class="flex justify-between items-center border-b pb-3">
                 <h3 class="font-bold text-slate-800 text-sm flex items-center gap-2">
                     <i class="fa-solid fa-book-medical text-emerald-600"></i> Thêm Sách Mới Vào Kho
@@ -306,29 +306,29 @@
             <form onsubmit="submitAddBook(event)" class="space-y-3 text-xs">
                 <div>
                     <label class="block font-bold text-slate-700 mb-1">Mã vạch tiền tố:</label>
-                    <input type="text" id="newBookBarcode" required placeholder="Ví dụ: DUE-MIS-10" class="w-full p-2.5 bg-slate-50 border rounded-xl font-mono uppercase outline-none focus:ring-2 focus:ring-emerald-500">
+                    <input type="text" id="newBookBarcode" required placeholder="Ví dụ: DUE-MIS-10" class="w-full p-2.5 bg-slate-50 border rounded-none font-mono uppercase outline-none focus:ring-2 focus:ring-emerald-500">
                 </div>
                 <div>
                     <label class="block font-bold text-slate-700 mb-1">Tên sách / Tài liệu:</label>
-                    <input type="text" id="newBookTitle" required placeholder="Ví dụ: Quản trị Quan hệ Khách hàng (CRM)" class="w-full p-2.5 bg-slate-50 border rounded-xl outline-none focus:ring-2 focus:ring-emerald-500">
+                    <input type="text" id="newBookTitle" required placeholder="Ví dụ: Quản trị Quan hệ Khách hàng (CRM)" class="w-full p-2.5 bg-slate-50 border rounded-none outline-none focus:ring-2 focus:ring-emerald-500">
                 </div>
                 <div class="grid grid-cols-2 gap-2">
                     <div>
                         <label class="block font-bold text-slate-700 mb-1">Số lượng nhập:</label>
-                        <input type="number" id="newBookQty" value="5" min="1" max="100" required class="w-full p-2.5 bg-slate-50 border rounded-xl font-bold text-emerald-700 outline-none focus:ring-2 focus:ring-emerald-500">
+                        <input type="number" id="newBookQty" value="5" min="1" max="100" required class="w-full p-2.5 bg-slate-50 border rounded-none font-bold text-emerald-700 outline-none focus:ring-2 focus:ring-emerald-500">
                     </div>
                     <div>
                         <label class="block font-bold text-slate-700 mb-1">Tác giả / Khoa:</label>
-                        <input type="text" id="newBookAuthor" required placeholder="Khoa Marketing" class="w-full p-2.5 bg-slate-50 border rounded-xl outline-none focus:ring-2 focus:ring-emerald-500">
+                        <input type="text" id="newBookAuthor" required placeholder="Khoa Marketing" class="w-full p-2.5 bg-slate-50 border rounded-none outline-none focus:ring-2 focus:ring-emerald-500">
                     </div>
                 </div>
                 <div>
                     <label class="block font-bold text-slate-700 mb-1">Vị trí kệ kho:</label>
-                    <input type="text" id="newBookShelf" required placeholder="Ví dụ: Tầng 2 - Kệ D3" class="w-full p-2.5 bg-slate-50 border rounded-xl outline-none focus:ring-2 focus:ring-emerald-500">
+                    <input type="text" id="newBookShelf" required placeholder="Ví dụ: Tầng 2 - Kệ D3" class="w-full p-2.5 bg-slate-50 border rounded-none outline-none focus:ring-2 focus:ring-emerald-500">
                 </div>
                 <div class="pt-2 flex justify-end gap-2">
-                    <button type="button" onclick="closeAddBookModal()" class="px-4 py-2.5 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-xl font-bold">Hủy</button>
-                    <button type="submit" class="px-4 py-2.5 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl font-bold shadow-md">Thêm Vào Kho</button>
+                    <button type="button" onclick="closeAddBookModal()" class="px-4 py-2.5 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-none font-bold">Hủy</button>
+                    <button type="submit" class="px-4 py-2.5 bg-emerald-600 hover:bg-emerald-700 text-white rounded-none font-bold shadow-md">Thêm Vào Kho</button>
                 </div>
             </form>
         </div>
@@ -336,7 +336,7 @@
 
     <!-- Modal 2: Chỉnh Sửa Thông Tin Sách -->
     <div id="editBookModal" class="hidden fixed inset-0 bg-black/60 z-50 flex items-center justify-center p-4 backdrop-blur-sm">
-        <div class="bg-white w-full max-w-md rounded-3xl p-6 space-y-4 shadow-2xl">
+        <div class="bg-white w-full max-w-md rounded-none p-6 space-y-4 shadow-md">
             <div class="flex justify-between items-center border-b pb-3">
                 <h3 class="font-bold text-slate-800 text-sm flex items-center gap-2">
                     <i class="fa-solid fa-pen-to-square text-orange-600"></i> Sửa Thông Tin Sách
@@ -347,19 +347,19 @@
                 <input type="hidden" id="editOldTitle">
                 <div>
                     <label class="block font-bold text-slate-700 mb-1">Tên sách:</label>
-                    <input type="text" id="editNewTitle" required class="w-full p-2.5 bg-slate-50 border rounded-xl outline-none focus:ring-2 focus:ring-orange-500 font-semibold text-slate-800">
+                    <input type="text" id="editNewTitle" required class="w-full p-2.5 bg-slate-50 border rounded-none outline-none focus:ring-2 focus:ring-orange-500 font-semibold text-slate-800">
                 </div>
                 <div>
                     <label class="block font-bold text-slate-700 mb-1">Tác giả / Khoa bộ môn:</label>
-                    <input type="text" id="editAuthor" required class="w-full p-2.5 bg-slate-50 border rounded-xl outline-none focus:ring-2 focus:ring-orange-500">
+                    <input type="text" id="editAuthor" required class="w-full p-2.5 bg-slate-50 border rounded-none outline-none focus:ring-2 focus:ring-orange-500">
                 </div>
                 <div>
                     <label class="block font-bold text-slate-700 mb-1">Vị trí kệ kho:</label>
-                    <input type="text" id="editShelf" required class="w-full p-2.5 bg-slate-50 border rounded-xl outline-none focus:ring-2 focus:ring-orange-500">
+                    <input type="text" id="editShelf" required class="w-full p-2.5 bg-slate-50 border rounded-none outline-none focus:ring-2 focus:ring-orange-500">
                 </div>
                 <div class="pt-2 flex justify-end gap-2">
-                    <button type="button" onclick="closeEditBookModal()" class="px-4 py-2.5 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-xl font-bold">Hủy</button>
-                    <button type="submit" class="px-4 py-2.5 bg-orange-600 hover:bg-orange-700 text-white rounded-xl font-bold shadow-md">Lưu Thay Đổi</button>
+                    <button type="button" onclick="closeEditBookModal()" class="px-4 py-2.5 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-none font-bold">Hủy</button>
+                    <button type="submit" class="px-4 py-2.5 bg-orange-600 hover:bg-orange-700 text-white rounded-none font-bold shadow-md">Lưu Thay Đổi</button>
                 </div>
             </form>
         </div>
@@ -367,7 +367,7 @@
 
     <!-- Modal 3: Viết Biên Bản Phạt / Báo Hỏng Sách -->
     <div id="reportModal" class="hidden fixed inset-0 bg-black/60 z-50 flex items-center justify-center p-4 backdrop-blur-sm">
-        <div class="bg-white w-full max-w-md rounded-3xl p-6 space-y-4 shadow-2xl">
+        <div class="bg-white w-full max-w-md rounded-none p-6 space-y-4 shadow-md">
             <div class="flex justify-between items-center border-b pb-3">
                 <h3 class="font-bold text-slate-800 text-sm flex items-center gap-2">
                     <i class="fa-solid fa-file-invoice-dollar text-rose-600"></i> Lập Biên Bản Vi Phạm & Phạt Sách
@@ -378,23 +378,23 @@
                 <input type="hidden" id="reportReturnId">
                 <div>
                     <label class="block font-bold text-slate-700 mb-1">Tài liệu vi phạm:</label>
-                    <input type="text" id="reportBookTitle" readonly class="w-full p-2.5 bg-slate-100 border rounded-xl font-semibold text-slate-800">
+                    <input type="text" id="reportBookTitle" readonly class="w-full p-2.5 bg-slate-100 border rounded-none font-semibold text-slate-800">
                 </div>
                 <div>
                     <label class="block font-bold text-slate-700 mb-1">Mã số sinh viên (MSSV):</label>
-                    <input type="text" id="reportMssv" readonly class="w-full p-2.5 bg-slate-100 border rounded-xl font-mono text-slate-800">
+                    <input type="text" id="reportMssv" readonly class="w-full p-2.5 bg-slate-100 border rounded-none font-mono text-slate-800">
                 </div>
                 <div>
                     <label class="block font-bold text-slate-700 mb-1">Số tiền phạt (VNĐ):</label>
-                    <input type="number" id="reportFineAmount" value="50000" step="10000" min="0" class="w-full p-2.5 bg-slate-50 border rounded-xl font-bold text-rose-600 outline-none focus:ring-2 focus:ring-rose-500">
+                    <input type="number" id="reportFineAmount" value="50000" step="10000" min="0" class="w-full p-2.5 bg-slate-50 border rounded-none font-bold text-rose-600 outline-none focus:ring-2 focus:ring-rose-500">
                 </div>
                 <div>
                     <label class="block font-bold text-slate-700 mb-1">Lý do / Nội dung biên bản:</label>
-                    <textarea id="reportReason" rows="3" placeholder="Ví dụ: Sách bị rách trang 15, mất mã vạch, thấm nước..." class="w-full p-2.5 bg-slate-50 border rounded-xl outline-none focus:ring-2 focus:ring-rose-500"></textarea>
+                    <textarea id="reportReason" rows="3" placeholder="Ví dụ: Sách bị rách trang 15, mất mã vạch, thấm nước..." class="w-full p-2.5 bg-slate-50 border rounded-none outline-none focus:ring-2 focus:ring-rose-500"></textarea>
                 </div>
                 <div class="pt-2 flex justify-end gap-2">
-                    <button type="button" onclick="closeReportModal()" class="px-4 py-2.5 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-xl font-bold">Hủy</button>
-                    <button type="button" onclick="submitReportPenalty()" class="px-4 py-2.5 bg-rose-600 hover:bg-rose-700 text-white rounded-xl font-bold shadow-md">Lưu Biên Bản & Phạt</button>
+                    <button type="button" onclick="closeReportModal()" class="px-4 py-2.5 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-none font-bold">Hủy</button>
+                    <button type="button" onclick="submitReportPenalty()" class="px-4 py-2.5 bg-rose-600 hover:bg-rose-700 text-white rounded-none font-bold shadow-md">Lưu Biên Bản & Phạt</button>
                 </div>
             </div>
         </div>
@@ -478,7 +478,7 @@
             const by = {}; dashLockers.forEach(x => { by[x.so_hoc] = x; });
             document.getElementById('lockerGrid').innerHTML = Array.from({ length: 20 }, (_, i) => {
                 const name = App.lockerName(i + 1), x = by[name], [lb, cls] = ST[(x && x.trang_thai) || 'trong'] || ['Không rõ', 'bg-slate-50 border-slate-200 text-slate-600'];
-                return `<div class="rounded-2xl border-2 p-3 text-center ${cls}"><p class="text-xl">🗄️</p><p class="font-black text-sm">${name}</p><p class="text-[11px] font-semibold">${lb}</p></div>`;
+                return `<div class="rounded-none border-2 p-3 text-center ${cls}"><p class="text-xl">🗄️</p><p class="font-black text-sm">${name}</p><p class="text-[11px] font-semibold">${lb}</p></div>`;
             }).join('');
         }
         function renderFines() {
@@ -488,7 +488,7 @@
                 <td class="p-3 font-mono text-xs">${esc(b.mssv)}</td><td class="p-3 font-semibold">${esc(b.ten_sach)}</td><td class="p-3 text-xs text-slate-500">${esc(b.ghi_chu_phat || '')}</td>
                 <td class="p-3 font-black text-rose-600">${money(b.tien_phat)}</td>
                 <td class="p-3 text-right">${b.da_thu_phi ? '<span class="text-xs font-bold text-emerald-600">Đã thu</span>'
-                    : `<button onclick="collectFine('${esc(b.id)}')" class="px-3 py-1.5 bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold rounded-lg transition">Xác nhận đã thu</button>`}</td></tr>`).join('')
+                    : `<button onclick="collectFine('${esc(b.id)}')" class="px-3 py-1.5 bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold rounded-sm transition">Xác nhận đã thu</button>`}</td></tr>`).join('')
                 : '<tr><td colspan="5" class="p-8 text-center text-sm text-slate-400">Không có khoản phạt nào.</td></tr>';
         }
         async function collectFine(id) {
@@ -614,7 +614,7 @@
                 return;
             }
 
-            const todayStr = new Date().toISOString().split('T')[0];
+            const todayStr = App.today();
 
             activeOrders.forEach(o => {
                 const isReady = o.trang_thai_don === 'da_soan_xong';
@@ -627,7 +627,7 @@
                 booksList.forEach((b, idx) => {
                     booksHtml += `
                         <div class="flex items-center gap-2 text-xs">
-                            <span class="w-4 h-4 rounded-full bg-orange-100 text-orange-700 font-bold flex items-center justify-center text-[10px] shrink-0">${idx + 1}</span>
+                            <span class="w-4 h-4 rounded-sm bg-orange-100 text-orange-700 font-bold flex items-center justify-center text-[10px] shrink-0">${idx + 1}</span>
                             <span class="font-bold text-slate-800">${b.ten_sach}</span>
                             <span class="bg-slate-100 text-slate-700 px-2 py-0.5 rounded text-[11px] font-mono border border-slate-200 shrink-0">
                                 <i class="fa-solid fa-location-dot text-orange-600 mr-1"></i>${b.vi_tri_ke || 'Kệ chính'}
@@ -640,7 +640,7 @@
                 tbody.innerHTML += `
                     <tr class="hover:bg-slate-50 transition border-b border-slate-100 ${isExpired ? 'bg-rose-50/40' : ''}">
                         <td class="p-3.5 align-middle whitespace-nowrap">
-                            <div class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-orange-50 border border-orange-200 text-orange-700 font-black text-xs sm:text-sm shadow-sm">
+                            <div class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-none bg-orange-50 border border-orange-200 text-orange-700 font-black text-xs sm:text-sm shadow-sm">
                                 <i class="fa-solid fa-box text-orange-500 text-[11px]"></i>
                                 <span>${o.so_hoc || 'Hộc 01'}</span>
                             </div>
@@ -648,7 +648,7 @@
                         <td class="p-3.5 align-middle">
                             <div class="font-bold text-slate-900 text-xs sm:text-sm">${o.ho_ten || 'Sinh viên DUE'}</div>
                             <div class="text-[11px] font-mono text-slate-400">MSSV: ${o.mssv}</div>
-                            <span class="inline-block mt-0.5 text-[10px] font-bold bg-blue-50 text-blue-700 px-2 py-0.5 rounded-md">
+                            <span class="inline-block mt-0.5 text-[10px] font-bold bg-blue-50 text-blue-700 px-2 py-0.5 rounded-sm">
                                 ${booksList.length} cuốn
                             </span>
                         </td>
@@ -661,19 +661,19 @@
                             ${isExpired ? '<span class="inline-block mt-1 px-2 py-0.5 rounded bg-rose-100 text-rose-700 font-bold text-[10px]">Đã quá hạn nhận</span>' : ''}
                         </td>
                         <td class="p-3.5 align-middle whitespace-nowrap">
-                            <span class="px-2.5 py-1 rounded-full text-[11px] font-bold ${isReady ? 'bg-emerald-100 text-emerald-700' : 'bg-amber-100 text-amber-700'}">
+                            <span class="px-2.5 py-1 rounded-sm text-[11px] font-bold ${isReady ? 'bg-emerald-100 text-emerald-700' : 'bg-amber-100 text-amber-700'}">
                                 ${isReady ? 'Đã trong hộc' : 'Chờ nạp hộc'}
                             </span>
                         </td>
                         <td class="p-3.5 align-middle text-right space-x-1.5 whitespace-nowrap">
                             ${!isReady ? `
-                                <button onclick="markOrderReady('${o.id}')" class="px-3 py-1.5 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl text-xs font-bold shadow-sm transition">
+                                <button onclick="markOrderReady('${o.id}')" class="px-3 py-1.5 bg-emerald-600 hover:bg-emerald-700 text-white rounded-none text-xs font-bold shadow-sm transition">
                                     <i class="fa-solid fa-check mr-1"></i> Đã nạp hộc
                                 </button>
                             ` : `
                                 <span class="text-xs text-emerald-600 font-bold mr-2"><i class="fa-solid fa-circle-check"></i> Sẵn sàng</span>
                             `}
-                            <button onclick="cancelExpiredOrder('${o.id}')" class="px-2.5 py-1.5 ${isExpired ? 'bg-rose-600 text-white hover:bg-rose-700' : 'bg-rose-50 hover:bg-rose-100 text-rose-600'} rounded-xl text-xs font-bold transition shadow-xs" title="Sinh viên không đến nhận -> Thu hồi cả đơn">
+                            <button onclick="cancelExpiredOrder('${o.id}')" class="px-2.5 py-1.5 ${isExpired ? 'bg-rose-600 text-white hover:bg-rose-700' : 'bg-rose-50 hover:bg-rose-100 text-rose-600'} rounded-none text-xs font-bold transition shadow-xs" title="Sinh viên không đến nhận -> Thu hồi cả đơn">
                                 <i class="fa-solid fa-arrow-rotate-left mr-1"></i> Thu hồi
                             </button>
                         </td>
@@ -738,14 +738,14 @@
                     <tr class="hover:bg-slate-50 transition border-b border-slate-100">
                         <td class="p-3 font-bold text-blue-600 align-top">${r.so_hoc || 'Hộc 01'}</td>
                         <td class="p-3 font-semibold text-slate-800 text-xs leading-relaxed align-top">${bookNames}</td>
-                        <td class="p-3 align-top"><span class="bg-slate-100 text-slate-700 px-2 py-1 rounded-md text-xs font-mono font-bold">${barcodes}</span></td>
+                        <td class="p-3 align-top"><span class="bg-slate-100 text-slate-700 px-2 py-1 rounded-sm text-xs font-mono font-bold">${barcodes}</span></td>
                         <td class="p-3 text-xs align-top font-bold text-slate-700">${r.ho_ten || ''}<br><span class="font-normal text-slate-400">MSSV: ${r.mssv}</span></td>
                         <td class="p-3 text-xs text-slate-500 align-top">Hôm nay</td>
                         <td class="p-3 text-right space-x-1.5 whitespace-nowrap align-top">
-                            <button onclick="approveReturnOrder('${r.id}')" class="px-3 py-1.5 bg-emerald-600 hover:bg-emerald-700 text-white rounded-lg text-xs font-bold shadow-sm transition">
+                            <button onclick="approveReturnOrder('${r.id}')" class="px-3 py-1.5 bg-emerald-600 hover:bg-emerald-700 text-white rounded-sm text-xs font-bold shadow-sm transition">
                                 <i class="fa-solid fa-check mr-1"></i> Tốt (Nhập kho)
                             </button>
-                            <button onclick="openReportModal('${r.id}')" class="px-2.5 py-1.5 bg-rose-50 hover:bg-rose-100 text-rose-600 rounded-lg text-xs font-bold transition">
+                            <button onclick="openReportModal('${r.id}')" class="px-2.5 py-1.5 bg-rose-50 hover:bg-rose-100 text-rose-600 rounded-sm text-xs font-bold transition">
                                 <i class="fa-solid fa-triangle-exclamation mr-1"></i> Viết biên bản phạt
                             </button>
                         </td>
@@ -884,9 +884,9 @@
                     else badge = '<span class="px-2 py-0.5 rounded text-[10px] font-bold bg-emerald-100 text-emerald-700">Đã hoàn tất</span>';
 
                     subItemsHtml += `
-                        <div class="flex flex-col sm:flex-row sm:items-center justify-between p-3 bg-white rounded-xl border border-slate-200 text-xs gap-2 shadow-xs">
+                        <div class="flex flex-col sm:flex-row sm:items-center justify-between p-3 bg-white rounded-none border border-slate-200 text-xs gap-2 shadow-xs">
                             <div class="flex items-center gap-2.5">
-                                <span class="w-5 h-5 rounded-full bg-slate-100 text-slate-600 font-bold flex items-center justify-center text-[10px]">${idx + 1}</span>
+                                <span class="w-5 h-5 rounded-sm bg-slate-100 text-slate-600 font-bold flex items-center justify-center text-[10px]">${idx + 1}</span>
                                 <div>
                                     <div class="font-bold text-slate-800">${b.ten_sach}</div>
                                     <div class="text-[10px] font-mono text-slate-400">Mã vạch: <b class="text-slate-600">${b.ma_vach || 'DUE'}</b> • Vị trí: ${b.vi_tri_ke || 'Kệ chính'}</div>
@@ -912,7 +912,7 @@
                             <div class="text-[11px] font-mono text-orange-600 font-bold ml-4">MSSV: ${u.mssv}</div>
                         </td>
                         <td class="p-3.5 align-middle">
-                            <span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-xl text-xs font-bold bg-blue-50 text-blue-700 border border-blue-200">
+                            <span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-none text-xs font-bold bg-blue-50 text-blue-700 border border-blue-200">
                                 <i class="fa-solid fa-book text-[10px]"></i> Tổng: ${u.books.length} cuốn
                             </span>
                             ${activeCount > 0 ? `<span class="ml-1 text-[10px] font-semibold text-amber-700">(${activeCount} đang giữ)</span>` : ''}
@@ -1013,11 +1013,11 @@
                 const isOutOfStock = b.so_luong_co_san <= 0;
                 const inputId = `stock_input_${index}`;
                 grid.innerHTML += `
-                    <div class="p-4 border rounded-2xl bg-white shadow-sm flex flex-col justify-between gap-3 hover:border-slate-300 transition">
+                    <div class="p-4 border rounded-none bg-white shadow-sm flex flex-col justify-between gap-3 hover:border-slate-300 transition">
                         <div>
                             <div class="flex items-center justify-between gap-2">
                                 <span class="text-[10px] font-mono bg-slate-100 text-slate-600 px-2 py-0.5 rounded font-bold">${b.ma_vach_dai_dien}</span>
-                                <span class="text-[10px] font-bold px-2 py-0.5 rounded-full ${!isOutOfStock ? 'bg-emerald-100 text-emerald-700' : 'bg-rose-100 text-rose-700'}">
+                                <span class="text-[10px] font-bold px-2 py-0.5 rounded-sm ${!isOutOfStock ? 'bg-emerald-100 text-emerald-700' : 'bg-rose-100 text-rose-700'}">
                                     ${!isOutOfStock ? `Có sẵn: ${b.so_luong_co_san} cuốn` : 'Tạm hết'}
                                 </span>
                             </div>
@@ -1027,15 +1027,15 @@
 
                         <div class="pt-2 border-t flex items-center justify-between text-xs gap-1">
                             <span class="text-[11px] text-slate-500 whitespace-nowrap">Tổng: <b>${b.tong_so_luong}</b></span>
-                            <div class="flex items-center gap-1 bg-slate-50 p-1 rounded-xl border border-slate-200">
-                                <button onclick="decreaseStock('${b.ten_sach.replace(/'/g, "\\'")}')" class="w-6 h-6 rounded-lg bg-white border text-slate-700 hover:text-rose-600 flex items-center justify-center font-bold">
+                            <div class="flex items-center gap-1 bg-slate-50 p-1 rounded-none border border-slate-200">
+                                <button onclick="decreaseStock('${b.ten_sach.replace(/'/g, "\\'")}')" class="w-6 h-6 rounded-sm bg-white border text-slate-700 hover:text-rose-600 flex items-center justify-center font-bold">
                                     <i class="fa-solid fa-minus text-[9px]"></i>
                                 </button>
-                                <input type="number" id="${inputId}" min="0" value="${b.so_luong_co_san}" class="w-10 text-center font-black text-slate-800 bg-white border border-slate-200 rounded-lg py-0.5 text-xs outline-none">
-                                <button onclick="increaseStock('${b.ten_sach.replace(/'/g, "\\'")}')" class="w-6 h-6 rounded-lg bg-emerald-600 text-white hover:bg-emerald-700 flex items-center justify-center font-bold">
+                                <input type="number" id="${inputId}" min="0" value="${b.so_luong_co_san}" class="w-10 text-center font-black text-slate-800 bg-white border border-slate-200 rounded-sm py-0.5 text-xs outline-none">
+                                <button onclick="increaseStock('${b.ten_sach.replace(/'/g, "\\'")}')" class="w-6 h-6 rounded-sm bg-emerald-600 text-white hover:bg-emerald-700 flex items-center justify-center font-bold">
                                     <i class="fa-solid fa-plus text-[9px]"></i>
                                 </button>
-                                <button onclick="saveStock('${b.ten_sach.replace(/'/g, "\\'")}', '${inputId}')" class="px-2 py-1 rounded-lg bg-slate-800 hover:bg-slate-900 text-white font-bold text-[10px] ml-0.5">
+                                <button onclick="saveStock('${b.ten_sach.replace(/'/g, "\\'")}', '${inputId}')" class="px-2 py-1 rounded-sm bg-slate-800 hover:bg-slate-900 text-white font-bold text-[10px] ml-0.5">
                                     Lưu
                                 </button>
                             </div>

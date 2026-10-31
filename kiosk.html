@@ -24,9 +24,9 @@
 
     <!-- ================= MÀN HÌNH ĐĂNG NHẬP KIOSK QUA FIREBASE ================= -->
     <div id="kioskLoginSection" class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950">
-        <div class="bg-slate-900 border border-slate-700 w-full max-w-sm rounded-3xl p-6 shadow-2xl space-y-4 text-white">
+        <div class="bg-slate-900 border border-slate-700 w-full max-w-sm rounded-none p-6 shadow-md space-y-4 text-white">
             <div class="text-center space-y-1">
-                <img src="/logo_due.png" alt="DUE Logo" class="h-14 w-auto mx-auto object-contain bg-white p-1 rounded-2xl shadow-md" onerror="this.onerror=null; this.src='https://due.udn.vn/Portals/0/logo-due.png';">
+                <img src="/logo_due.png" alt="DUE Logo" class="h-14 w-auto mx-auto object-contain bg-white p-1 rounded-none shadow-md" onerror="this.onerror=null; this.src='https://due.udn.vn/Portals/0/logo-due.png';">
                 <h2 class="font-bold text-base pt-2 text-orange-400">Khởi Động Trạm Kiosk</h2>
                 <p class="text-[11px] text-slate-400">Đăng nhập tài khoản thiết bị để kích hoạt tủ Smart Locker</p>
             </div>
@@ -35,15 +35,15 @@
                 <div>
                     <label class="block font-bold text-slate-300 mb-1">Email Thiết bị:</label>
                     <input type="text" id="kioskEmail" value="kiosk@due.udn.vn" required autocomplete="username" placeholder="kiosk@due.udn.vn" 
-                           class="w-full px-3.5 py-2.5 bg-slate-800 border border-slate-700 rounded-xl text-sm outline-none focus:border-orange-500 text-white">
+                           class="w-full px-3.5 py-2.5 bg-slate-800 border border-slate-700 rounded-none text-sm outline-none focus:border-orange-500 text-white">
                 </div>
                 <div>
                     <label class="block font-bold text-slate-300 mb-1">Mật khẩu trạm:</label>
                     <input type="password" id="kioskPassword" value="123456" required placeholder="Nhập mật khẩu" 
-                           class="w-full px-3.5 py-2.5 bg-slate-800 border border-slate-700 rounded-xl text-sm outline-none focus:border-orange-500 text-white">
+                           class="w-full px-3.5 py-2.5 bg-slate-800 border border-slate-700 rounded-none text-sm outline-none focus:border-orange-500 text-white">
                 </div>
-                <div id="kioskLoginError" class="hidden p-2.5 rounded-xl bg-rose-900/50 border border-rose-500 text-rose-200 font-semibold text-xs"></div>
-                <button type="submit" class="w-full py-3 bg-orange-600 hover:bg-orange-500 text-white font-bold rounded-xl text-xs shadow-lg transition">
+                <div id="kioskLoginError" class="hidden p-2.5 rounded-none bg-rose-900/50 border border-rose-500 text-rose-200 font-semibold text-xs"></div>
+                <button type="submit" class="w-full py-3 bg-orange-600 hover:bg-orange-500 text-white font-bold rounded-none text-xs shadow-sm transition">
                     Kích Hoạt Trạm Tủ
                 </button>
             </form>
@@ -52,7 +52,7 @@
 
     <!-- NÚT KHÓA KIOSK Ở GÓC DƯỚI BÊN TRÁI -->
     <div id="kioskLogoutBtnContainer" class="hidden fixed bottom-4 left-4 z-40">
-        <button onclick="handleKioskLogout()" class="px-3.5 py-2 bg-slate-800 hover:bg-rose-600 text-white text-xs font-bold rounded-xl shadow-lg transition flex items-center gap-1.5 border border-slate-700">
+        <button onclick="handleKioskLogout()" class="px-3.5 py-2 bg-slate-800 hover:bg-rose-600 text-white text-xs font-bold rounded-none shadow-sm transition flex items-center gap-1.5 border border-slate-700">
             <i class="fa-solid fa-power-off"></i> Khóa Kiosk
         </button>
     </div>
@@ -60,10 +60,10 @@
     <!-- Thanh header -->
     <header class="bg-slate-800 border-b border-slate-700 p-3.5 flex justify-between items-center shadow-md">
         <div class="flex items-center gap-3">
-            <img src="/logo_due.png" alt="DUE Logo" class="h-11 w-auto bg-white p-1 rounded-xl shadow-sm object-contain" onerror="this.onerror=null; this.src='https://due.udn.vn/Portals/0/logo-due.png';">
+            <img src="/logo_due.png" alt="DUE Logo" class="h-11 w-auto bg-white p-1 rounded-none shadow-sm object-contain" onerror="this.onerror=null; this.src='https://due.udn.vn/Portals/0/logo-due.png';">
             <div>
                 <h1 class="text-base sm:text-lg font-bold leading-tight flex items-center gap-2">
-                    TRẠM TỦ THÔNG MINH <span class="bg-orange-600 text-white text-[10px] px-2 py-0.5 rounded-full uppercase tracking-wider font-bold">Kiosk</span>
+                    TRẠM TỦ THÔNG MINH <span class="bg-orange-600 text-white text-[10px] px-2 py-0.5 rounded-sm uppercase tracking-wider font-bold">Kiosk</span>
                 </h1>
                 <p class="text-xs text-slate-400">Thư viện DUE • Tủ 20 ngăn • Đồng bộ Firestore Realtime</p>
             </div>
@@ -79,13 +79,13 @@
     <div class="flex-1 grid grid-cols-1 lg:grid-cols-12 gap-6 p-4 sm:p-6 max-w-7xl mx-auto w-full">
         <!-- Khung quét mã & Thao tác (Cột trái) -->
         <div class="lg:col-span-5 space-y-5">
-            <div class="bg-slate-800 p-5 rounded-2xl border border-slate-700 shadow-xl space-y-4">
+            <div class="bg-slate-800 p-5 rounded-none border border-slate-700 shadow-md space-y-4">
                 <h2 class="text-base font-bold flex items-center gap-2 text-orange-400">
                     <i class="fa-solid fa-qrcode"></i> QUÉT MÃ NHẬN / TRẢ SÁCH
                 </h2>
                 
                 <!-- Khung camera -->
-                <div class="relative bg-black rounded-xl overflow-hidden aspect-video border border-slate-600 flex items-center justify-center">
+                <div class="relative bg-black rounded-none overflow-hidden aspect-video border border-slate-600 flex items-center justify-center">
                     <div id="reader" class="w-full h-full"></div>
                 </div>
 
@@ -93,25 +93,54 @@
                     <label class="text-xs font-semibold text-slate-300">Hoặc nhập mã Token / Barcode thủ công:</label>
                     <div class="flex gap-2">
                         <input type="text" id="manualInput" placeholder="Ví dụ: QR-A1B2C3 hoặc TRA-X9Y8Z7" 
-                               class="flex-1 bg-slate-900 border border-slate-600 rounded-xl px-4 py-3 text-sm font-mono text-white outline-none focus:border-orange-500 uppercase">
+                               class="flex-1 bg-slate-900 border border-slate-600 rounded-none px-4 py-3 text-sm font-mono text-white outline-none focus:border-orange-500 uppercase">
                     </div>
                     <div class="grid grid-cols-2 gap-3 pt-2">
-                        <button onclick="handlePickup()" class="py-3 bg-orange-600 hover:bg-orange-500 font-bold text-sm rounded-xl transition flex items-center justify-center gap-2 shadow-lg">
+                        <button onclick="handlePickup()" class="py-3 bg-orange-600 hover:bg-orange-500 font-bold text-sm rounded-none transition flex items-center justify-center gap-2 shadow-sm">
                             <i class="fa-solid fa-box-open"></i> Nhận Sách (Mở Hộc)
                         </button>
-                        <button onclick="handleReturn()" class="py-3 bg-blue-600 hover:bg-blue-500 font-bold text-sm rounded-xl transition flex items-center justify-center gap-2 shadow-lg">
+                        <button onclick="handleReturn()" class="py-3 bg-blue-600 hover:bg-blue-500 font-bold text-sm rounded-none transition flex items-center justify-center gap-2 shadow-sm">
                             <i class="fa-solid fa-rotate-left"></i> Trả Sách (Mở Hộc)
                         </button>
                     </div>
                 </div>
             </div>
 
+        <!-- ĐỐI SOÁT MÃ VẠCH SÁCH TRẢ (R1 → Gate 2 → R2a → R2b) -->
+        <div id="returnSession" class="hidden bg-slate-800 p-5 border border-slate-700 space-y-4">
+            <div class="flex items-center justify-between">
+                <h2 class="text-base font-bold text-blue-400 flex items-center gap-2"><i class="fa-solid fa-barcode"></i> ĐỐI SOÁT MÃ VẠCH SÁCH TRẢ</h2>
+                <button onclick="closeReturnSession()" class="px-3 py-1 text-xs bg-slate-700 hover:bg-rose-600 font-bold transition">Hủy</button>
+            </div>
+            <p class="text-xs text-slate-300">Vui lòng đưa mã vạch (Barcode) sau sách vào camera bên dưới để đối soát.</p>
+            <div class="relative bg-black overflow-hidden aspect-video border border-slate-600 flex items-center justify-center">
+                <div id="readerBottom" class="w-full h-full"></div>
+                <span id="bottomCamNote" class="hidden absolute inset-x-0 text-center px-4 text-[11px] text-slate-400"></span>
+            </div>
+            <div id="retRows" class="space-y-2"></div>
+            <div class="space-y-2">
+                <p class="text-[11px] font-semibold text-slate-400">Giả lập quét mã vạch (mã có sẵn trong kho):</p>
+                <div id="simChips" class="flex flex-wrap gap-1.5"></div>
+                <div class="flex gap-2">
+                    <input id="barcodeInput" placeholder="Nhập mã vạch, vd: DUE-MIS-05" class="flex-1 bg-slate-900 border border-slate-600 px-3 py-2 text-xs font-mono text-white outline-none focus:border-orange-500 uppercase">
+                    <button onclick="submitBarcode()" class="px-4 bg-blue-600 hover:bg-blue-500 font-bold text-xs transition">Quét</button>
+                </div>
+            </div>
+            <div id="finePanel" class="hidden border border-rose-500 bg-rose-900/30 p-4 space-y-3 text-center">
+                <p class="text-xs font-bold text-rose-300 uppercase tracking-wide">Sách trả trễ hạn · Nộp phạt qua VietQR</p>
+                <img id="fineQr" alt="VietQR nộp phạt" class="mx-auto w-52 h-52 bg-white p-2 object-contain">
+                <p class="text-2xl font-black text-white" id="fineAmount">0 đ</p>
+                <div id="fineInfo" class="text-[11px] text-left text-slate-300 space-y-0.5 bg-slate-900/60 p-3"></div>
+                <button id="payBtn" onclick="confirmPayment()" class="w-full py-3 bg-emerald-600 hover:bg-emerald-500 font-bold text-sm transition">Đã nhận thanh toán thành công (giả lập webhook)</button>
+            </div>
+        </div>
+
             <!-- Bảng hiển thị thông báo kết quả -->
-            <div id="statusBox" class="hidden p-4 rounded-xl border text-sm font-medium"></div>
+            <div id="statusBox" class="hidden p-4 rounded-none border text-sm font-medium"></div>
         </div>
 
         <!-- Lưới 20 Hộc Tủ (Cột phải) -->
-        <div class="lg:col-span-7 bg-slate-800/60 p-5 rounded-2xl border border-slate-700">
+        <div class="lg:col-span-7 bg-slate-800/60 p-5 rounded-none border border-slate-700">
             <h2 class="text-base font-bold mb-4 flex items-center justify-between text-slate-300">
                 <span><i class="fa-solid fa-table-cells mr-2"></i>TRẠNG THÁI 20 HỘC TỦ</span>
                 <span id="connStatus" class="text-xs font-normal text-emerald-400">Firestore Trực tuyến</span>
@@ -214,7 +243,7 @@
                 }
 
                 grid.innerHTML += `
-                    <div class="border rounded-xl p-3 flex flex-col items-center justify-center space-y-1 transition duration-300 ${colorClass}">
+                    <div class="border rounded-none p-3 flex flex-col items-center justify-center space-y-1 transition duration-300 ${colorClass}">
                         <i class="fa-solid ${icon} text-lg"></i>
                         <span class="font-bold text-xs tracking-wider">${l.so_hoc}</span>
                         <span class="text-[10px] uppercase font-semibold">${statusText}</span>
@@ -249,12 +278,12 @@
                 const out = await db.runTransaction(async tx => {
                     const s = await tx.get(oref), o = s.data(), name = o.so_hoc;
                     if (o.trang_thai_don !== 'da_soan_xong') return { err: (BLOCK[o.trang_thai_don] || (() => 'Đơn không hợp lệ để nhận sách.'))(name) };
-                    const due = new Date(); due.setDate(due.getDate() + 14);
+                    const dueStr = App.addMonths(App.today(), App.LOAN.months); // mượn 2 tháng
                     const books = o.books || [];
                     books.forEach((b, i) => tx.set(db.collection('borrowings').doc(`${s.id}_${i}`), {
                         order_id: s.id, mssv: o.mssv, ho_ten: o.ho_ten || 'Sinh viên DUE', book_id: b.book_id || null,
                         ten_sach: b.ten_sach, ma_vach: b.ma_vach || 'DUE-BOOK', vi_tri_ke: b.vi_tri_ke || 'Kệ chính',
-                        ngay_muon: App.today(), han_tra: due.toISOString().split('T')[0], trang_thai: 'dang_muon', ngay_tao: FV()
+                        ngay_muon: App.today(), han_tra: dueStr, trang_thai: 'dang_muon', ngay_tao: FV()
                     }));
                     tx.update(oref, { trang_thai_don: 'da_nhan', thoi_gian_nhan: FV() });
                     tx.set(App.lockerRef(name), { so_hoc: name, trang_thai: 'dang_mo', cap_nhat_luc: FV() }, { merge: true });
@@ -268,30 +297,124 @@
             } catch (err) { console.error(err); showNotice("Lỗi nhận sách: " + err.message, "error"); }
         }
 
-        // TRẢ SÁCH: chỉ chấp nhận mã còn ở trạng thái chờ bỏ sách (cho_bo_sach / cho_tra_tai_kiosk cũ)
+        // ================= TRẢ SÁCH (BPMN R1 → Gate 2 → R2a → R2b) =================
+        const WAIT_DROP = ['cho_bo_sach', 'cho_tra_tai_kiosk'];
+        const FINE_PER_DAY = 5000;
+        // Cấu hình nhận tiền phạt (R2a) qua VietQR
+        const FINE_PAYMENT_CONFIG = {
+            bankId: 'mbbank', bankName: 'MB Bank', accountNo: '0905673987', accountName: 'PHAM NHAT HA', template: 'compact',
+            memo: (mssv, barcode) => `PHAT ${mssv} ${barcode}`,
+            generateQrUrl(amount, mssv, barcode) {
+                return `https://img.vietqr.io/image/${this.bankId}-${this.accountNo}-${this.template}.png?amount=${amount}&addInfo=${encodeURIComponent(this.memo(mssv, barcode))}&accountName=${encodeURIComponent(this.accountName)}`;
+            }
+        };
+        let ret = null, bottomCam = null;   // ret = phiên đối soát đang mở
+        const vnd = n => (Number(n) || 0).toLocaleString('vi-VN') + ' đ';
+        const escH = s => String(s == null ? '' : s).replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+
+        // Bước 1: quét QR TRA-... hợp lệ => mở khung đối soát mã vạch (chưa mở hộc)
         async function handleReturn() {
             const code = $('manualInput').value.trim().toUpperCase();
             if (!code) return showNotice("Vui lòng nhập hoặc quét mã QR Trả sách (TRA-...)!", "error");
+            if (ret) return showNotice("Đang đối soát một đơn trả khác. Hãy hoàn tất hoặc bấm Hủy.", "error");
             try {
                 const q = await db.collection('returns').where('qr_token', '==', code).limit(1).get();
                 if (q.empty) return showNotice("Mã trả sách không tồn tại!", "error");
-                const rref = q.docs[0].ref;
-                const out = await db.runTransaction(async tx => {
-                    const r = (await tx.get(rref)).data(), name = r.so_hoc;
-                    if (!['cho_bo_sach', 'cho_tra_tai_kiosk'].includes(r.trang_thai)) return { err: "Mã trả sách này đã được sử dụng hoặc đã xử lý!" };
-                    tx.update(rref, { trang_thai: 'cho_kiem_tra', thoi_gian_bo_tu: FV() });
-                    tx.set(App.lockerRef(name), { so_hoc: name, trang_thai: 'dang_mo', cap_nhat_luc: FV() }, { merge: true });
-                    (r.items || []).forEach(it => it.borrow_id && tx.set(db.collection('borrowings').doc(it.borrow_id),
-                        { trang_thai: 'cho_kiem_tra', so_hoc_tra: name, ngay_tra_tai_tu: FV() }, { merge: true }));
-                    return { name, n: (r.items || []).length };
-                });
-                if (out.err) return showNotice(out.err, "error");
-                openedLockerName = out.name;
-                showNotice(`🔓 ĐANG MỞ ${out.name}! Hãy đặt ${out.n} cuốn sách vào hộc và đóng cửa tủ.`, "success");
-                $('manualInput').value = '';
-                releaseLockerLater(out.name, 'chua_sach_tra', code);
+                const d = q.docs[0], r = d.data();
+                if (!WAIT_DROP.includes(r.trang_thai)) return showNotice("Mã trả sách này đã được sử dụng hoặc đã xử lý!", "error");
+                const rows = await Promise.all((r.items || []).map(async it => {
+                    const bs = it.borrow_id ? await db.collection('borrowings').doc(it.borrow_id).get() : null;
+                    return { ...it, due: bs && bs.exists ? bs.data().han_tra : null, scanned: false, days: 0, fine: 0 };
+                }));
+                ret = { id: d.id, ref: d.ref, token: code, mssv: r.mssv, so_hoc: r.so_hoc, rows, total: 0, busy: false };
+                $('manualInput').value = ''; $('statusBox').classList.add('hidden');
+                $('returnSession').classList.remove('hidden'); $('finePanel').classList.add('hidden');
+                renderRetRows(); loadSimChips(); startBottomCam();
             } catch (err) { console.error(err); showNotice("Lỗi trả sách: " + err.message, "error"); }
         }
+
+        function renderRetRows() {
+            $('retRows').innerHTML = ret.rows.map(r => {
+                const st = !r.scanned ? '<span class="text-slate-400">Chờ quét</span>'
+                    : r.fine ? `<span class="text-rose-300 font-bold">Trễ ${r.days} ngày · phạt ${vnd(r.fine)}</span>` : '<span class="text-emerald-300 font-bold">✓ Đúng hạn</span>';
+                return `<div class="flex items-center justify-between gap-2 border border-slate-700 bg-slate-900/60 px-3 py-2 text-xs">
+                    <div class="min-w-0"><p class="font-mono text-blue-300">${escH(r.ma_vach)}</p><p class="truncate text-slate-300">${escH(r.ten_sach)}</p></div>${st}</div>`;
+            }).join('');
+        }
+
+        // Chip giả lập: mã vạch của đơn + các mã có trong kho
+        async function loadSimChips() {
+            const codes = ret.rows.map(r => r.ma_vach);
+            try { (await db.collection('books').limit(12).get()).forEach(d => { const m = d.data().ma_vach || d.id; if (!codes.includes(m)) codes.push(m); }); } catch (e) { console.warn(e); }
+            $('simChips').innerHTML = codes.slice(0, 10).map(c => `<button onclick="onBarcode('${escH(c)}')" class="px-2.5 py-1 text-[11px] font-mono bg-slate-700 hover:bg-blue-600 border border-slate-600 transition">${escH(c)}</button>`).join('');
+        }
+        function submitBarcode() { const v = $('barcodeInput').value; $('barcodeInput').value = ''; onBarcode(v); }
+
+        // R1: nhận mã vạch (camera dưới hoặc giả lập) → Gate 2: current_date > due_date ?
+        function onBarcode(raw) {
+            if (!ret || ret.busy) return;
+            const code = String(raw || '').trim().toUpperCase(); if (!code) return;
+            const row = ret.rows.find(r => !r.scanned && String(r.ma_vach).toUpperCase() === code);
+            if (!row) return showToast.error(ret.rows.some(r => r.scanned && String(r.ma_vach).toUpperCase() === code) ? 'Đã quét rồi' : 'Sai mã vạch',
+                ret.rows.some(r => r.scanned && String(r.ma_vach).toUpperCase() === code) ? `Cuốn ${code} đã được đối soát.` : `Mã ${code} không thuộc đơn trả này.`);
+            row.scanned = true;
+            if (row.due && App.today() > row.due) { row.days = Math.round((Date.parse(App.today()) - Date.parse(row.due)) / 864e5); row.fine = row.days * FINE_PER_DAY; }
+            renderRetRows();
+            showToast.success('Đã đối soát', row.fine ? `${row.ma_vach}: trễ ${row.days} ngày.` : `${row.ma_vach}: đúng hạn.`);
+            if (ret.rows.every(r => r.scanned)) finishScan();
+        }
+
+        function finishScan() {
+            ret.total = ret.rows.reduce((t, r) => t + r.fine, 0);
+            if (!ret.total) return completeReturn();                       // Gate 2 = không trễ → R2b
+            const late = ret.rows.filter(r => r.fine), memoCode = late[0].ma_vach + (late.length > 1 ? '+' + (late.length - 1) : '');   // R2a
+            $('fineQr').src = FINE_PAYMENT_CONFIG.generateQrUrl(ret.total, ret.mssv, memoCode);
+            $('fineAmount').innerText = vnd(ret.total);
+            $('fineInfo').innerHTML = [['Ngân hàng', FINE_PAYMENT_CONFIG.bankName], ['Số tài khoản', FINE_PAYMENT_CONFIG.accountNo], ['Chủ tài khoản', FINE_PAYMENT_CONFIG.accountName],
+                ['Nội dung CK', FINE_PAYMENT_CONFIG.memo(ret.mssv, memoCode)], ['Cách tính', late.map(r => `${r.days} ngày × ${vnd(FINE_PER_DAY)}`).join(' + ')]]
+                .map(([k, v]) => `<div class="flex justify-between gap-3"><span class="text-slate-400">${k}</span><b class="text-right text-white">${escH(v)}</b></div>`).join('');
+            $('finePanel').classList.remove('hidden');
+            stopBottomCam();
+        }
+        function confirmPayment() { if (ret && ret.total) completeReturn(); }   // giả lập webhook "đã nhận thanh toán"
+
+        // R2b: mở hộc, ghi nhận (kèm khoản phạt đã thu) trong 1 transaction
+        async function completeReturn() {
+            const s = ret; if (!s || s.busy) return; s.busy = true;
+            const pay = $('payBtn'); pay.disabled = true;
+            try {
+                const out = await db.runTransaction(async tx => {
+                    const r = (await tx.get(s.ref)).data(), name = r.so_hoc;
+                    if (!WAIT_DROP.includes(r.trang_thai)) return { err: "Mã trả sách này đã được sử dụng hoặc đã xử lý!" };
+                    tx.update(s.ref, { trang_thai: 'cho_kiem_tra', thoi_gian_bo_tu: FV(), tien_phat_thu: s.total });
+                    tx.set(App.lockerRef(name), { so_hoc: name, trang_thai: 'dang_mo', cap_nhat_luc: FV() }, { merge: true });
+                    s.rows.forEach(row => row.borrow_id && tx.set(db.collection('borrowings').doc(row.borrow_id),
+                        Object.assign({ trang_thai: 'cho_kiem_tra', so_hoc_tra: name, ngay_tra_tai_tu: FV() },
+                            row.fine ? { tien_phat: row.fine, ghi_chu_phat: `Trả trễ ${row.days} ngày × ${vnd(FINE_PER_DAY)}`, da_thu_phi: true, ngay_thu_phi: FV() } : {}), { merge: true }));
+                    return { name, n: s.rows.length };
+                });
+                if (out.err) { showNotice(out.err, "error"); return closeReturnSession(); }
+                closeReturnSession();
+                openedLockerName = out.name;
+                showNotice(`🔓 ĐANG MỞ ${out.name}! Hãy đặt ${out.n} cuốn sách vào hộc và đóng cửa tủ.`, "success");
+                releaseLockerLater(out.name, 'chua_sach_tra', s.token);
+            } catch (err) { console.error(err); s.busy = false; pay.disabled = false; showNotice("Lỗi trả sách: " + err.message, "error"); }
+        }
+
+        function closeReturnSession() { stopBottomCam(); ret = null; $('returnSession').classList.add('hidden'); $('finePanel').classList.add('hidden'); $('payBtn').disabled = false; }
+
+        // Camera dưới: chuyên quét mã vạch. Chỉ có 1 camera thì dùng giả lập (tránh tranh chấp thiết bị với camera QR phía trên)
+        async function startBottomCam() {
+            const note = $('bottomCamNote'); note.classList.add('hidden');
+            try {
+                const cams = await Html5Qrcode.getCameras();
+                if (cams.length < 2) { note.innerText = 'Chưa có camera thứ 2: dùng nút giả lập bên dưới.'; return note.classList.remove('hidden'); }
+                const F = Html5QrcodeSupportedFormats;
+                bottomCam = new Html5Qrcode('readerBottom', { formatsToSupport: [F.CODE_128, F.CODE_39, F.EAN_13, F.EAN_8, F.UPC_A], verbose: false });
+                await bottomCam.start(cams[1].id, { fps: 10, qrbox: { width: 300, height: 120 } }, txt => onBarcode(txt), () => {});
+            } catch (e) { note.innerText = 'Không mở được camera barcode: dùng nút giả lập bên dưới.'; note.classList.remove('hidden'); }
+        }
+        function stopBottomCam() { if (bottomCam) { const c = bottomCam; bottomCam = null; c.stop().then(() => c.clear()).catch(() => {}); } }
 
         function showNotice(msg, type) {
             const box = $('statusBox');
@@ -314,7 +437,7 @@
                     { facingMode: "environment" },
                     { fps: 10, qrbox: { width: 250, height: 250 } },
                     (decodedText) => {
-                        if (isScanningLocked) return;
+                        if (isScanningLocked || ret) return;
                         isScanningLocked = true;
 
                         const cleanCode = decodedText.trim().toUpperCase();
