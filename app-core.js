@@ -96,5 +96,56 @@
     });
   }
 
-  window.App = { auth, db, FV, PAGE, login, watchAuth, listen, stopAll, lockerName, lockerId, lockerRef, today, resolveBookRef, stockRefs, allocate };
+
+  // ---- Popup thay cho alert()/confirm() của trình duyệt (xếp hàng, không chặn luồng chạy) ----
+  const queue = [];
+  let busy = false;
+  const LOOK = { warn: { icon: "!", bg: "#fef3c7", fg: "#b45309" } };
+  function showNext() {
+    if (busy || !queue.length) return;
+    busy = true;
+    const { msg, ask, done } = queue.shift();
+    const text = String(msg).replace(/^(🎉|⚠️|🔓|❌)\s*/, "");
+    const k = LOOK.warn;
+    const ov = document.createElement("div");
+    ov.style.cssText = "position:fixed;inset:0;z-index:99999;background:rgba(15,23,42,.55);display:flex;align-items:center;justify-content:center;padding:16px;font-family:inherit";
+    ov.innerHTML =
+      '<div role="dialog" aria-modal="true" style="background:#fff;color:#0f172a;width:100%;max-width:380px;border-radius:20px;padding:24px;box-shadow:0 20px 50px rgba(0,0,0,.3);text-align:center">' +
+      '<div style="width:48px;height:48px;border-radius:50%;margin:0 auto 12px;display:flex;align-items:center;justify-content:center;font-weight:800;font-size:22px;background:' + k.bg + ';color:' + k.fg + '">' + k.icon + '</div>' +
+      '<div style="font-weight:800;font-size:16px;margin-bottom:6px">' + 'Xác nhận' + '</div>' +
+      '<div class="dlg-msg" style="font-size:14px;line-height:1.5;color:#475569;white-space:pre-line"></div>' +
+      '<div style="display:flex;gap:8px;margin-top:20px"></div></div>';
+    ov.querySelector(".dlg-msg").textContent = text;
+    const row = ov.lastChild.lastChild;
+    const close = (val) => { document.removeEventListener("keydown", onKey); ov.remove(); busy = false; done(val); showNext(); };
+    const mk = (label, primary, val) => {
+      const b = document.createElement("button");
+      b.textContent = label;
+      b.style.cssText = "flex:1;padding:10px 14px;border-radius:12px;font-weight:700;font-size:14px;cursor:pointer;border:0;" +
+        (primary ? "background:#ea580c;color:#fff" : "background:#f1f5f9;color:#334155");
+      b.onclick = () => close(val);
+      row.appendChild(b);
+      return b;
+    };
+    if (ask) mk("Hủy", false, false);
+    const ok = mk(ask ? "Đồng ý" : "OK", true, true);
+    const onKey = (e) => { if (e.key === "Escape") close(!ask); };
+    document.addEventListener("keydown", onKey);
+    document.body.appendChild(ov);
+    ok.focus();
+  }
+  // alert() cũ -> Toast: tự nhận loại thông báo và tách tiêu đề / mô tả từ câu chữ
+  const KINDS = [["error", /^(❌|Lỗi|Không thể)/], ["warning", /^(⚠️|Vui lòng|Toàn bộ|Đơn này|Mã |Sai|Không)/], ["success", /(thành công|🎉|🔓|^Đã )/]];
+  function notify(msg) {
+    const raw = String(msg).trim(), text = raw.replace(/^(🎉|⚠️|🔓|❌)\s*/u, "");
+    if (typeof window.showToast !== "function") return console.log(text);
+    let type = "info";
+    for (const [t, re] of KINDS) if (re.test(raw)) { type = t; break; }
+    const m = text.match(/^(.{3,80}?[!.])\s+([\s\S]+)$/);
+    window.showToast({ type, title: m ? m[1].replace(/\.$/, "") : "", message: m ? m[2] : text });
+  }
+  function confirmBox(msg) { return new Promise((res) => { queue.push({ msg, ask: true, done: res }); showNext(); }); }
+  window.alert = notify;
+
+  window.App = { notify, confirm: confirmBox, auth, db, FV, PAGE, login, watchAuth, listen, stopAll, lockerName, lockerId, lockerRef, today, resolveBookRef, stockRefs, allocate };
 })();

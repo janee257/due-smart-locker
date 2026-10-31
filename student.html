@@ -16,6 +16,7 @@
     <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
     
+    <script src="toast.js"></script>
     <script src="app-core.js"></script>
     <script>const { auth, db } = App; const loginWithFirebase = App.login;</script>
     
@@ -325,10 +326,10 @@
         App.watchAuth(user => {
             const mssv = (user.email || '').toLowerCase().replace('@due.udn.vn', '').trim();
             currentUser = { mssv, ho_ten: user.displayName || `Sinh viên (${mssv})`, email: user.email, tien_no_phat: 0 };
-            booksStarted = false; borrowStarted = false;
+            booksStarted = false; borrowStarted = false; activeWatchStarted = false; hideQrCards();
             showApp();
         }, msg => {
-            App.stopAll(); booksStarted = false; borrowStarted = false; currentUser = null; showLogin();
+            App.stopAll(); booksStarted = false; borrowStarted = false; activeWatchStarted = false; hideQrCards(); currentUser = null; showLogin();
             if (msg) { const eb = document.getElementById('loginError'); eb.innerText = msg; eb.classList.remove('hidden'); }
         });
 
@@ -558,82 +559,74 @@
         }
 
         // ================= TỰ ĐỘNG ĐÓNG QR KHI KIOSK QUÉT THÀNH CÔNG =================
-        let unsubscribeActivePickupQr = null;
-        let unsubscribeActiveReturnQr = null;
+        // QR LẤY SÁCH / TRẢ SÁCH được dựng từ Firestore, nên tải lại trang hay mở trên thiết bị khác vẫn thấy lại mã.
+        let shownPickupToken = null, shownReturnToken = null, orderStates = {}, returnStates = {}, activeWatchStarted = false;
 
-        function showQr(title, slot, locker, token) {
+        function renderQrCard(o) {
             const card = document.getElementById('activeQrCard');
+            if (shownPickupToken === o.qr_token) return;
+            shownPickupToken = o.qr_token;
+            const books = o.books || [];
+            document.getElementById('qrBookTitle').innerText = `${books.length} cuốn: ${books.map(b => b.ten_sach).join(", ")}`;
+            document.getElementById('qrSlot').innerText = `${o.ngay_hen || ''} (${o.khung_gio || ''})`;
+            document.getElementById('qrLockerNum').innerText = o.so_hoc;
+            document.getElementById('qrTokenVal').innerText = o.qr_token;
+            const box = document.getElementById('qrcode'); box.innerHTML = '';
+            new QRCode(box, { text: o.qr_token, width: 140, height: 140 });
             card.classList.remove('hidden');
-            document.getElementById('qrBookTitle').innerText = title;
-            document.getElementById('qrSlot').innerText = slot;
-            document.getElementById('qrLockerNum').innerText = locker;
-            document.getElementById('qrTokenVal').innerText = token;
-
-            const qrContainer = document.getElementById('qrcode');
-            qrContainer.innerHTML = '';
-            new QRCode(qrContainer, { text: token, width: 140, height: 140 });
-            window.scrollTo({ top: 0, behavior: 'smooth' });
-
-            // Lắng nghe realtime trạng thái đơn từ bảng 'orders'
-            if (unsubscribeActivePickupQr) unsubscribeActivePickupQr();
-            unsubscribeActivePickupQr = db.collection('orders').where('mssv', '==', currentUser.mssv).where('qr_token', '==', token)
-                .onSnapshot(snapshot => {
-                    snapshot.forEach(doc => {
-                        const data = doc.data();
-                        
-                        // 1. Nếu sinh viên đã lấy sách tại Kiosk
-                        if (data.trang_thai_don === 'da_nhan') {
-                            card.classList.add('hidden');
-                            alert(`🎉 Bạn đã nhận sách thành công tại ${locker}! Vui lòng kiểm tra sách trong tab "Đang mượn".`);
-                            if (unsubscribeActivePickupQr) {
-                                unsubscribeActivePickupQr();
-                                unsubscribeActivePickupQr = null;
-                            }
-                            fetchBorrowedBooks();
-                        }
-                        
-                        // 2. NẾU THỦ THƯ ĐÃ THU HỒI SÁCH DO QUÁ HẠN LẤY
-                        else if (data.trang_thai_don === 'da_huy_do_qua_han') {
-                            card.classList.add('hidden'); // Tắt mã QR ngay lập tức
-                            alert(`⚠️ Đơn mượn sách tại ${locker} đã bị Thủ thư thu hồi do quá hạn đến nhận! Hộc tủ đã được mở trống.`);
-                            if (unsubscribeActivePickupQr) {
-                                unsubscribeActivePickupQr();
-                                unsubscribeActivePickupQr = null;
-                            }
-                            fetchBooks(); // Cập nhật lại số lượng sách có sẵn trong kho
-                        }
-                    });
-                });
         }
-        function showReturnQr(count, lockerName, token) {
+        function renderReturnCard(r) {
             const card = document.getElementById('activeReturnQrCard');
+            if (shownReturnToken === r.qr_token) return;
+            shownReturnToken = r.qr_token;
+            document.getElementById('returnBookCount').innerText = r.so_luong || (r.items || []).length;
+            document.getElementById('returnLockerNum').innerText = r.so_hoc;
+            document.getElementById('returnTokenVal').innerText = r.qr_token;
+            const box = document.getElementById('returnQrcode'); box.innerHTML = '';
+            new QRCode(box, { text: r.qr_token, width: 140, height: 140 });
             card.classList.remove('hidden');
-            document.getElementById('returnBookCount').innerText = count;
-            document.getElementById('returnLockerNum').innerText = lockerName;
-            document.getElementById('returnTokenVal').innerText = token;
-
-            const qrBox = document.getElementById('returnQrcode');
-            qrBox.innerHTML = '';
-            new QRCode(qrBox, { text: token, width: 140, height: 140 });
-            window.scrollTo({ top: 0, behavior: 'smooth' });
-
-            // Lắng nghe realtime đơn trả trong bảng 'returns'
-            if (unsubscribeActiveReturnQr) unsubscribeActiveReturnQr();
-            unsubscribeActiveReturnQr = db.collection('returns').where('mssv', '==', currentUser.mssv).where('qr_token', '==', token)
-                .onSnapshot(snapshot => {
-                    snapshot.forEach(doc => {
-                        const data = doc.data();
-                        // Khi Kiosk quét thành công -> đơn trả chuyển sang 'cho_kiem_tra'
-                        if (data.trang_thai === 'cho_kiem_tra') {
-                            card.classList.add('hidden'); // Tắt QR ngay lập tức
-                            alert(`🎉 Đã mở ${lockerName}! Bạn đã gửi sách vào tủ thành công, vui lòng chờ Thủ thư kiểm tra.`);
-                            unsubscribeActiveReturnQr();
-                            unsubscribeActiveReturnQr = null;
-                            fetchBorrowedBooks(); // Cập nhật lại trạng thái sách sang "Chờ kiểm tra"
-                        }
-                    });
-                });
         }
+        function hideQrCards() {
+            shownPickupToken = shownReturnToken = null; orderStates = {}; returnStates = {};
+            document.getElementById('activeQrCard').classList.add('hidden');
+            document.getElementById('activeReturnQrCard').classList.add('hidden');
+        }
+        const tsMs = d => (d && d.toMillis) ? d.toMillis() : Date.now(); // đơn vừa tạo chưa có timestamp từ server
+
+        // Hai listener theo MSSV: dựng/ẩn thẻ QR và báo khi Kiosk quét thành công hay Thủ thư thu hồi
+        function watchActiveQr() {
+            if (!currentUser || activeWatchStarted) return; activeWatchStarted = true;
+            const mssv = String(currentUser.mssv).trim();
+            App.listen('myOrders', db.collection('orders').where('mssv', '==', mssv), snap => {
+                const list = []; snap.forEach(d => list.push({ id: d.id, ...d.data() }));
+                list.forEach(o => {
+                    const prev = orderStates[o.id], now = o.trang_thai_don, wasActive = prev === 'cho_soan' || prev === 'da_soan_xong';
+                    if (wasActive && now === 'da_nhan') alert(`🎉 Bạn đã nhận sách thành công tại ${o.so_hoc}! Vui lòng kiểm tra sách trong tab "Đang mượn".`);
+                    if (wasActive && now === 'da_huy_do_qua_han') alert(`⚠️ Đơn mượn sách tại ${o.so_hoc} đã bị Thủ thư thu hồi do quá hạn đến nhận! Hộc tủ đã được mở trống.`);
+                    orderStates[o.id] = now;
+                });
+                const active = list.filter(o => o.trang_thai_don === 'cho_soan' || o.trang_thai_don === 'da_soan_xong')
+                                   .sort((a, b) => tsMs(b.ngay_tao) - tsMs(a.ngay_tao))[0];
+                if (active) renderQrCard(active);
+                else { shownPickupToken = null; document.getElementById('activeQrCard').classList.add('hidden'); }
+            });
+            App.listen('myReturns', db.collection('returns').where('mssv', '==', mssv), snap => {
+                const list = []; snap.forEach(d => list.push({ id: d.id, ...d.data() }));
+                list.forEach(r => {
+                    if (returnStates[r.id] === 'cho_tra_tai_kiosk' && r.trang_thai === 'cho_kiem_tra')
+                        alert(`🎉 Đã mở ${r.so_hoc}! Bạn đã gửi sách vào tủ thành công, vui lòng chờ Thủ thư kiểm tra.`);
+                    returnStates[r.id] = r.trang_thai;
+                });
+                const active = list.filter(r => r.trang_thai === 'cho_tra_tai_kiosk')
+                                   .sort((a, b) => tsMs(b.ngay_tao) - tsMs(a.ngay_tao))[0];
+                if (active) renderReturnCard(active);
+                else { shownReturnToken = null; document.getElementById('activeReturnQrCard').classList.add('hidden'); }
+            });
+        }
+        // Giữ tên cũ để các chỗ gọi sẵn có vẫn chạy
+        function showQr(title, slot, locker, token) { window.scrollTo({ top: 0, behavior: 'smooth' }); }
+        function showReturnQr(count, lockerName, token) { window.scrollTo({ top: 0, behavior: 'smooth' }); }
+
         // MỘT listener duy nhất cho 'borrowings' của sinh viên: nuôi cả tab Đang mượn lẫn tab Lịch sử (realtime, mọi thiết bị)
         function fetchBorrowedBooks() {
             if (!currentUser || borrowStarted) return; borrowStarted = true;
@@ -1048,6 +1041,7 @@
         function loadInitialData() {
             fetchBooks();
             fetchBorrowedBooks();
+            watchActiveQr();
         }
     </script>
 </body>

@@ -22,6 +22,7 @@
     <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
 
+    <script src="toast.js"></script>
     <script src="app-core.js"></script>
     <script>const { auth, db } = App; const loginWithFirebase = App.login;</script>
 </head>
@@ -623,7 +624,7 @@
 
         // THU HỒI ĐƠN QUÁ HẠN: đổi trạng thái + nhả hộc + hoàn tồn kho trong 1 transaction (chống bấm 2 lần)
         async function cancelExpiredOrder(orderId) {
-            if (!confirm("Xác nhận sinh viên không đến nhận sách, thu hồi sách về kệ và mở trống hộc tủ?")) return;
+            if (!(await App.confirm("Xác nhận sinh viên không đến nhận sách, thu hồi sách về kệ và mở trống hộc tủ?"))) return;
             try {
                 const oref = db.collection('orders').doc(orderId);
                 const pre = (await oref.get()).data();
