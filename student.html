@@ -17,9 +17,12 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
     
     <link rel="stylesheet" href="dash.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@400;500;600;700;800&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="ui.css">
     <script src="dash.js"></script>
     <script src="toast.js"></script>
+    <script src="ui.js" defer></script>
     <script src="app-core.js"></script>
     <script>const { auth, db } = App; const loginWithFirebase = App.login;</script>
     
@@ -495,6 +498,7 @@
         // KHO SÁCH REALTIME (gộp theo tên, id = bản ghi còn nhiều tồn nhất)
         function fetchBooks() {
             if (booksStarted) return; booksStarted = true;
+            const bl = document.getElementById('booksList'); if (bl && window.UI) bl.innerHTML = UI.skeleton(6);
             App.listen('books', db.collection('books'), snapshot => {
                 const grouped = {};
                 snapshot.forEach(doc => {

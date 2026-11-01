@@ -1,55 +1,74 @@
-/* ui.css: khối lớn DÍNH LIỀN, vuông góc, chỉ ngăn bằng đường kẻ mảnh.
-   Nút bấm và các chi tiết nhỏ (chip, nhãn, ô nhập, avatar...) giữ bo tròn như cũ.
-   Muốn đổi độ bo của chi tiết nhỏ: chỉnh các biến --r-* bên dưới. */
-:root{--r-btn:12px;--r-input:12px;--r-chip:999px;--r-tag:6px;--r-small:10px;--line:#e2e8f0}
+/* ui.css: DESIGN SYSTEM chung cho Student / Kiosk / Librarian.
+   Token -> component. Các trang dùng Tailwind CDN; file này đặt chuẩn thương hiệu DUE lên trên. */
+:root{
+  --primary:#F97316;--primary-hover:#EA580C;--primary-light:#FFF7ED;
+  --bg:#F8FAFC;--surface:#FFFFFF;--border:#E2E8F0;--text:#172033;--text-2:#64748B;--muted:#94A3B8;
+  --success:#16A34A;--warning:#D97706;--danger:#DC2626;--info:#2563EB;
+  --r-card:14px;--r-ctl:12px;--r-pill:999px;--r-tag:6px;
+  --shadow:0 1px 2px rgba(15,23,42,.05),0 4px 14px rgba(15,23,42,.04);
+}
 
-/* ============ 1) CHI TIẾT NHỎ: bo tròn như cũ ============ */
-button,[role="button"]{border-radius:var(--r-btn)!important}
-input:not([type="checkbox"]):not([type="radio"]),select,textarea{border-radius:var(--r-input)!important}
+/* ---------- Nền & chữ ---------- */
+body{font-family:'Be Vietnam Pro',Inter,system-ui,-apple-system,'Segoe UI',sans-serif}
+body:not(.page-kiosk){background:var(--bg)!important;color:var(--text)}
+.font-mono{font-family:ui-monospace,'JetBrains Mono',Consolas,monospace}
+
+/* ---------- Bo góc: thẻ/khung 14px (mức thấp nhất), chi tiết nhỏ ghi đè bên dưới ---------- */
+:where([class*="rounded-none"]){border-radius:var(--r-card)!important}
+:where([class*="shadow-sm"],[class*="shadow-md"]){box-shadow:var(--shadow)!important}
+
+/* ---------- Component: Button / Input / Chip / Badge ---------- */
+button,[role="button"]{border-radius:var(--r-ctl)!important;transition:background-color .15s,color .15s,border-color .15s,box-shadow .15s,transform .1s}
+button:active:not(:disabled){transform:translateY(1px)}
+button:disabled,button[disabled]{opacity:.55;cursor:not-allowed}
+input:not([type="checkbox"]):not([type="radio"]),select,textarea{border-radius:var(--r-ctl)!important;transition:border-color .15s,box-shadow .15s}
 input[type="checkbox"]{border-radius:4px!important}
-label[class*="border"],div:has(>select){border-radius:var(--r-input)!important}   /* ô sắp xếp, "Chỉ sách còn" */
-.filter-chip,#categoryChips button,#libCategoryChips button,.dash-nav .badge,.badge{border-radius:var(--r-chip)!important}
-.dash-nav{border-radius:14px!important}
-span[class*="bg-"][class*="px-"],span[class*="bg-"][class*="py-"]{border-radius:var(--r-chip)!important}     /* nhãn trạng thái */
-span[class*="font-mono"][class*="bg-"]{border-radius:var(--r-tag)!important}                                /* mã sách */
-#userAvatar,div[class*="w-7"][class*="h-7"][class*="font-black"]{border-radius:50%!important}               /* avatar, bước tiến trình */
-div[class*="w-11"][class*="h-11"],img[alt*="DUE"]{border-radius:var(--r-small)!important}                   /* ô icon, logo */
-#lockerGrid>div,#lockersGrid>div{border-radius:var(--r-small)!important}                                    /* ô hộc tủ */
-#cartBar,#confirmReturnBar{border-radius:16px!important}                                                     /* thanh thao tác nổi */
+label[class*="border"],div:has(>select){border-radius:var(--r-ctl)!important}
+.filter-chip,#categoryChips button,#libCategoryChips button,.badge{border-radius:var(--r-pill)!important}
+span[class*="bg-"][class*="px-"],span[class*="bg-"][class*="py-"]{border-radius:var(--r-pill)!important}
+span[class*="font-mono"][class*="bg-"]{border-radius:var(--r-tag)!important}
+#userAvatar,div[class*="w-7"][class*="h-7"][class*="font-black"]{border-radius:50%!important}
+div[class*="w-11"][class*="h-11"],img[alt*="DUE"]{border-radius:10px!important}
+#lockerGrid>div,#lockersGrid>div{border-radius:12px!important}
+.dt-card{border-radius:var(--r-card)!important}
 
-/* ============ 2) KHỐI LỚN: dính liền (student + librarian) ============ */
-.dash-main{background:#fff;min-height:100vh}
-.dash-main main{max-width:none!important;margin:0!important;padding:0!important}
-.dash-main main>*+*,[id^="tabContent"]>*+*,[id^="libTabContent"]>*+*{margin-top:0!important}
-.dash-main main :not(button)[class*="shadow"]{box-shadow:none!important}
+/* ---------- Focus / chuyển động ---------- */
+:focus-visible{outline:2px solid var(--primary)!important;outline-offset:2px}
+input:focus,select:focus,textarea:focus{border-color:var(--primary)!important;box-shadow:0 0 0 3px rgba(249,115,22,.18)!important;outline:none!important}
+@media (prefers-reduced-motion:reduce){*,*::before,*::after{animation-duration:.01ms!important;transition-duration:.01ms!important}}
 
-/* khối đơn (ô lọc, banner, bảng): chỉ còn đường kẻ dưới */
-[id^="tabContent"]>div:not(.grid):not(#confirmReturnBar),
-[id^="libTabContent"]>section,[id^="libTabContent"]>div:not(.grid){border-width:0 0 1px 0!important;border-radius:0!important}
-#tabContentBorrow>div:nth-child(2){padding:10px 24px}
-[id^="tabContent"]>div:not(.grid):not(#confirmReturnBar):not(#tabContentBorrow>div:first-child){padding-left:24px;padding-right:24px}
-#libTabContentLockers>div{padding:16px 24px}
+/* ---------- Sidebar (Student + Librarian) ---------- */
+.dash-aside{width:260px}
+@media (min-width:1024px){.dash-main{margin-left:260px}}
+.dash-main{background:var(--bg)}
+.dash-topbar{background:var(--surface);border-bottom:1px solid var(--border)}
+.dash-nav{border-radius:10px!important;font-weight:600}
+.dash-nav:hover{background:#F1F5F9;color:var(--text);transform:none}
+.dash-nav.active{background:var(--primary-light)!important;color:#C2410C!important;box-shadow:inset 3px 0 0 var(--primary)!important}
+.dash-nav .badge{background:#FEE2E2;color:#B91C1C}
+.dash-nav.active .badge{background:var(--primary);color:#fff}
+/* Khối hồ sơ sinh viên: nền sáng, cam chỉ làm điểm nhấn (không còn gradient cam toàn khối) */
+.page-student .dash-aside>div:first-child{background:var(--surface)!important;color:var(--text)!important;border-bottom:1px solid var(--border)}
+.page-student .dash-aside .text-orange-100{color:var(--text-2)!important}
+.page-student .dash-aside #userAvatar{background:var(--primary-light)!important;color:#C2410C;box-shadow:0 0 0 2px var(--primary)!important}
+.page-student .dash-aside span[class*="bg-white/20"]{background:#DCFCE7!important;color:#166534}
+.page-student .dash-aside b{color:var(--text)}
+.page-student .dash-aside p.text-\[10px\]{color:var(--text-2)!important}
 
-/* lưới thẻ: các ô chia nhau bằng đường kẻ, không còn khoảng hở */
-#booksList,#borrowedBooksList,#borrowedOnlyList,#qrList,#historyList,#librarianBooksGrid,.dash-main main>.grid{gap:0!important}
-#booksList>*,#borrowedBooksList>*,#borrowedOnlyList>*,#qrList>*,#historyList>*,#librarianBooksGrid>*,.dash-main main>.grid>*{
-  border:0!important;border-right:1px solid var(--line)!important;border-bottom:1px solid var(--line)!important;border-radius:0!important;margin:0!important}
-#borrowedBooksList>*:has(input:checked){background:#eff6ff!important;box-shadow:inset 0 0 0 2px #3b82f6!important}
+/* ---------- Đăng nhập: nút hiện/ẩn mật khẩu ---------- */
+.pw-wrap{position:relative}
+.pw-wrap>input{padding-right:64px!important}
+.pw-toggle{position:absolute;right:6px;top:50%;transform:translateY(-50%);padding:6px 10px;font-size:12px;font-weight:700;color:var(--text-2);background:transparent;border:0;cursor:pointer;min-height:0!important}
+.pw-toggle:hover{color:var(--primary-hover);background:var(--primary-light)}
 
-/* danh sách dọc */
-#returnTracker,#noticeList,#finesList{margin:0!important}
-#returnTracker>*,#noticeList>*,#finesList>*{border:0!important;border-bottom:1px solid var(--line)!important;border-radius:0!important;margin:0!important}
-#returnTracker>p{padding:12px 24px 0;margin:0}
+/* ---------- Skeleton & trạng thái rỗng ---------- */
+.skeleton{background:linear-gradient(90deg,#EEF2F7 25%,#F8FAFC 37%,#EEF2F7 63%);background-size:400% 100%;animation:sk 1.3s ease infinite;border-radius:var(--r-card)}
+.sk-card{height:168px}
+@keyframes sk{0%{background-position:100% 50%}100%{background-position:0 50%}}
 
-/* ============ 3) KIOSK ============ */
-body>div.flex-1.grid{gap:0!important;padding:0!important;max-width:none!important;margin:0!important}
-body>div.flex-1.grid>div:first-child{border-right:1px solid #334155}
-body>div.flex-1.grid>div:first-child>*+*{margin-top:0!important;border-top:1px solid #334155}
-body>div.flex-1.grid>div{border-radius:0!important}
-body>div.flex-1.grid>div:last-child{border-width:0!important}
-body>div.flex-1.grid [class*="shadow"]:not(button){box-shadow:none!important}
-
-/* ============ 4) Chỉnh lề cho các hàng tiêu đề / nhãn ============ */
-.dash-main main>div.flex{padding:14px 24px;border-bottom:1px solid var(--line)}      /* hàng tiêu đề thủ thư */
-[id^="tabContent"]>p{padding:14px 24px 8px;margin:0}                                   /* nhãn nhóm */
-#tabContentReturn>#confirmReturnBar{margin:12px 16px!important}                        /* thanh tạo mã nổi, không dính mép */
+/* ---------- Kiosk: ưu tiên màn hình cảm ứng ---------- */
+.kiosk-clock{font-variant-numeric:tabular-nums;color:#CBD5E1;font-weight:600;font-size:15px;white-space:nowrap}
+.page-kiosk button,.page-kiosk input:not([type="checkbox"]){min-height:52px;font-size:16px}
+.page-kiosk .pw-toggle{min-height:0}
+.page-kiosk #lockersGrid>div{min-height:78px}
+.page-kiosk header{padding-top:14px;padding-bottom:14px}
