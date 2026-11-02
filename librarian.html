@@ -225,7 +225,7 @@
         <div id="libTabContentLockers" class="hidden space-y-4">
             <div class="flex flex-wrap gap-2 text-[11px] font-semibold">
                 <span class="px-2.5 py-1 rounded-sm bg-emerald-100 text-emerald-700">Trống</span><span class="px-2.5 py-1 rounded-sm bg-amber-100 text-amber-700">Sách chờ lấy</span>
-                <span class="px-2.5 py-1 rounded-sm bg-blue-100 text-blue-700">Sách trả chờ kiểm</span><span class="px-2.5 py-1 rounded-sm bg-rose-100 text-rose-700">Đang mở</span>
+                <span class="px-2.5 py-1 rounded-sm bg-violet-100 text-violet-700">Chờ trả</span><span class="px-2.5 py-1 rounded-sm bg-blue-100 text-blue-700">Sách trả chờ kiểm</span><span class="px-2.5 py-1 rounded-sm bg-rose-100 text-rose-700">Đang mở</span>
             </div>
             <div id="lockerGrid" class="grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-5 gap-3"></div>
         </div>
@@ -478,7 +478,7 @@
         }
         function renderLockers() {
             const ST = { trong: ['Trống', 'bg-emerald-50 border-emerald-200 text-emerald-700'], cho_nhan: ['Sách chờ lấy', 'bg-amber-50 border-amber-200 text-amber-700'],
-                cho_tra: ['Chờ SV bỏ sách', 'bg-sky-50 border-sky-200 text-sky-700'], chua_sach_tra: ['Sách trả chờ kiểm', 'bg-blue-50 border-blue-300 text-blue-700'], dang_mo: ['Đang mở', 'bg-rose-50 border-rose-300 text-rose-700'] };
+                cho_tra: ['Chờ trả', 'bg-violet-50 border-violet-300 text-violet-700'], chua_sach_tra: ['Sách trả chờ kiểm', 'bg-blue-50 border-blue-300 text-blue-700'], dang_mo: ['Đang mở', 'bg-rose-50 border-rose-300 text-rose-700'] };
             const by = {}; dashLockers.forEach(x => { by[x.so_hoc] = x; });
             document.getElementById('lockerGrid').innerHTML = Array.from({ length: 20 }, (_, i) => {
                 const name = App.lockerName(i + 1), x = by[name], [lb, cls] = ST[(x && x.trang_thai) || 'trong'] || ['Không rõ', 'bg-slate-50 border-slate-200 text-slate-600'];

@@ -76,6 +76,7 @@
             <span class="flex items-center gap-1.5"><span class="w-2.5 h-2.5 rounded-full bg-slate-500"></span> Trống</span>
             <span class="flex items-center gap-1.5"><span class="w-2.5 h-2.5 rounded-full bg-amber-500"></span> Chờ lấy</span>
             <span class="flex items-center gap-1.5"><span class="w-2.5 h-2.5 rounded-full bg-blue-500"></span> Sách trả</span>
+            <span class="flex items-center gap-1.5"><span class="w-2.5 h-2.5 rounded-full bg-violet-500"></span> Chờ trả</span>
             <span class="flex items-center gap-1.5"><span class="w-2.5 h-2.5 rounded-full bg-emerald-400 animate-ping"></span> 🔓 Đang mở</span>
         </div>
     </header>
@@ -90,6 +91,7 @@
                 
                 <!-- Khung camera -->
                 <div class="relative bg-black rounded-none overflow-hidden aspect-video border border-slate-600 flex items-center justify-center">
+                    <div id="camModeBadge" class="absolute top-2 left-2 z-10 px-2.5 py-1 text-[11px] font-bold text-white bg-orange-600">CHẾ ĐỘ: QUÉT MÃ QR</div>
                     <div id="reader" class="w-full h-full"></div>
                 </div>
 
@@ -116,11 +118,8 @@
                 <h2 class="text-base font-bold text-blue-400 flex items-center gap-2"><i class="fa-solid fa-barcode"></i> ĐỐI SOÁT MÃ VẠCH SÁCH TRẢ</h2>
                 <button onclick="closeReturnSession()" class="px-3 py-1 text-xs bg-slate-700 hover:bg-rose-600 font-bold transition">Hủy</button>
             </div>
-            <p class="text-xs text-slate-300">Vui lòng đưa mã vạch (Barcode) sau sách vào camera bên dưới để đối soát.</p>
-            <div class="relative bg-black overflow-hidden aspect-video border border-slate-600 flex items-center justify-center">
-                <div id="readerBottom" class="w-full h-full"></div>
-                <span id="bottomCamNote" class="hidden absolute inset-x-0 text-center px-4 text-[11px] text-slate-400"></span>
-            </div>
+            <p class="text-xs text-slate-300">Vui lòng đưa mã vạch (Barcode) sau sách vào khung camera phía trên để đối soát.</p>
+            <div class="flex items-start gap-2 bg-violet-900/30 border border-violet-500/50 text-violet-200 text-xs p-3"><span aria-hidden="true">📷</span><span>Camera ở khung quét phía trên đã <b>tự chuyển sang chế độ quét mã vạch</b>. Đưa mã vạch sau gáy sách vào khung đó, hoặc dùng nút giả lập bên dưới. Quét xong, camera tự quay về quét QR.</span></div>
             <div id="retRows" class="space-y-2"></div>
             <div class="space-y-2">
                 <p class="text-[11px] font-semibold text-slate-400">Giả lập quét mã vạch (mã có sẵn trong kho):</p>
@@ -314,7 +313,7 @@
                 return `https://img.vietqr.io/image/${this.bankId}-${this.accountNo}-${this.template}.png?amount=${amount}&addInfo=${encodeURIComponent(this.memo(mssv, barcode))}&accountName=${encodeURIComponent(this.accountName)}`;
             }
         };
-        let ret = null, bottomCam = null;   // ret = phiên đối soát đang mở
+        let ret = null;   // ret = phiên đối soát đang mở
         const vnd = n => (Number(n) || 0).toLocaleString('vi-VN') + ' đ';
         const escH = s => String(s == null ? '' : s).replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
 
@@ -336,7 +335,7 @@
                 ret = { id: d.id, ref: d.ref, token: code, mssv: r.mssv, so_hoc: r.so_hoc, rows, total: 0, busy: false };
                 $('manualInput').value = ''; $('statusBox').classList.add('hidden');
                 $('returnSession').classList.remove('hidden'); $('finePanel').classList.add('hidden');
-                renderRetRows(); loadSimChips(); startBottomCam();
+                renderRetRows(); loadSimChips(); setCamMode('barcode');
             } catch (err) { console.error(err); showNotice("Lỗi trả sách: " + err.message, "error"); }
         }
 
@@ -381,7 +380,7 @@
                 ['Nội dung CK', FINE_PAYMENT_CONFIG.memo(ret.mssv, memoCode)], ['Cách tính', late.map(r => `${r.days} ngày × ${vnd(FINE_PER_DAY)}`).join(' + ')]]
                 .map(([k, v]) => `<div class="flex justify-between gap-3"><span class="text-slate-400">${k}</span><b class="text-right text-white">${escH(v)}</b></div>`).join('');
             $('finePanel').classList.remove('hidden');
-            stopBottomCam();
+            backToQrCam();
         }
         function confirmPayment() { if (ret && ret.total) completeReturn(); }   // giả lập webhook "đã nhận thanh toán"
 
@@ -408,20 +407,7 @@
             } catch (err) { console.error(err); s.busy = false; pay.disabled = false; showNotice("Lỗi trả sách: " + err.message, "error"); }
         }
 
-        function closeReturnSession() { stopBottomCam(); ret = null; $('returnSession').classList.add('hidden'); $('finePanel').classList.add('hidden'); $('payBtn').disabled = false; }
-
-        // Camera dưới: chuyên quét mã vạch. Chỉ có 1 camera thì dùng giả lập (tránh tranh chấp thiết bị với camera QR phía trên)
-        async function startBottomCam() {
-            const note = $('bottomCamNote'); note.classList.add('hidden');
-            try {
-                const cams = await Html5Qrcode.getCameras();
-                if (cams.length < 2) { note.innerText = 'Chưa có camera thứ 2: dùng nút giả lập bên dưới.'; return note.classList.remove('hidden'); }
-                const F = Html5QrcodeSupportedFormats;
-                bottomCam = new Html5Qrcode('readerBottom', { formatsToSupport: [F.CODE_128, F.CODE_39, F.EAN_13, F.EAN_8, F.UPC_A], verbose: false });
-                await bottomCam.start(cams[1].id, { fps: 10, qrbox: { width: 300, height: 120 } }, txt => onBarcode(txt), () => {});
-            } catch (e) { note.innerText = 'Không mở được camera barcode: dùng nút giả lập bên dưới.'; note.classList.remove('hidden'); }
-        }
-        function stopBottomCam() { if (bottomCam) { const c = bottomCam; bottomCam = null; c.stop().then(() => c.clear()).catch(() => {}); } }
+        function closeReturnSession() { backToQrCam(); ret = null; $('returnSession').classList.add('hidden'); $('finePanel').classList.add('hidden'); $('payBtn').disabled = false; }
 
         // ---------- Thông báo trạng thái: tiêu đề + mô tả + hướng dẫn bước tiếp theo ----------
         const NOTICE_MAP = [
@@ -463,36 +449,40 @@
         ['pointerdown', 'keydown', 'input'].forEach(ev => document.addEventListener(ev, resetIdle, { passive: true }));
         setStep(1); resetIdle();
 
-        // Khởi động Camera quét mã
-        function startCamera() {
-            if (cameraStarted) return;
-            cameraStarted = true;
-            try {
-                const html5QrCode = new Html5Qrcode("reader");
-                html5QrCode.start(
-                    { facingMode: "environment" },
-                    { fps: 10, qrbox: { width: 250, height: 250 } },
-                    (decodedText) => {
-                        if (isScanningLocked || ret) return;
-                        isScanningLocked = true;
-
-                        const cleanCode = decodedText.trim().toUpperCase();
-                        $('manualInput').value = cleanCode;
-
-                        if (cleanCode.startsWith("TRA-")) {
-                            handleReturn();
-                        } else {
-                            handlePickup();
-                        }
-
-                        setTimeout(() => { isScanningLocked = false; }, 4000);
-                    },
-                    (err) => {}
-                ).catch(err => { console.log("Không tìm thấy camera"); cameraStarted = false; showNotice("Camera không hoạt động. Hãy cấp quyền camera hoặc nhập mã thủ công bên dưới.", "error"); });
-            } catch (e) {
-                console.log("Trình quét camera chạy ở chế độ tương thích.");
-            }
+        // ---------- MỘT camera cho cả hai việc: quét QR giao dịch, rồi tự chuyển sang quét mã vạch sách ----------
+        let mainCam = null, camMode = 'qr', camBusy = false, lastBarcode = { t: '', at: 0 };
+        function updateCamBadge() {
+            const b = $('camModeBadge'), bc = camMode === 'barcode';
+            b.textContent = bc ? 'CHẾ ĐỘ: QUÉT MÃ VẠCH SÁCH' : 'CHẾ ĐỘ: QUÉT MÃ QR';
+            b.className = 'absolute top-2 left-2 z-10 px-2.5 py-1 text-[11px] font-bold text-white ' + (bc ? 'bg-violet-600' : 'bg-orange-600');
         }
+        function onDecoded(text) {
+            const t = String(text).trim().toUpperCase();
+            if (camMode === 'barcode') {   // chống đọc lặp cùng một mã liên tục
+                const now = Date.now(); if (t === lastBarcode.t && now - lastBarcode.at < 2500) return;
+                lastBarcode = { t, at: now }; return onBarcode(t);
+            }
+            if (isScanningLocked || ret) return;
+            isScanningLocked = true; $('manualInput').value = t;
+            if (t.startsWith('TRA-')) handleReturn(); else handlePickup();
+            setTimeout(() => { isScanningLocked = false; }, 4000);
+        }
+        async function setCamMode(mode) {
+            if (camBusy) return; camBusy = true;
+            try {
+                if (mainCam) { const c = mainCam; mainCam = null; try { await c.stop(); c.clear(); } catch (e) { } }
+                camMode = mode; updateCamBadge(); isScanningLocked = false;
+                const F = Html5QrcodeSupportedFormats, bc = mode === 'barcode';
+                mainCam = new Html5Qrcode('reader', bc ? { formatsToSupport: [F.CODE_128, F.CODE_39, F.EAN_13, F.EAN_8, F.UPC_A], verbose: false } : { verbose: false });
+                await mainCam.start({ facingMode: 'environment' }, bc ? { fps: 10, qrbox: { width: 300, height: 120 } } : { fps: 10, qrbox: { width: 250, height: 250 } }, onDecoded, () => { });
+                cameraStarted = true;
+            } catch (e) {
+                console.log('Không mở được camera', e); cameraStarted = false; mainCam = null;
+                showNotice('Camera không hoạt động. Hãy cấp quyền camera, nhập mã thủ công hoặc dùng nút giả lập bên dưới.', 'error');
+            } finally { camBusy = false; }
+        }
+        function startCamera() { if (cameraStarted || camBusy) return; setCamMode('qr'); }
+        function backToQrCam() { if (camMode === 'barcode') setCamMode('qr'); }
     </script>
 </body>
 </html>
