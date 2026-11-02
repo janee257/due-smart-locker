@@ -72,3 +72,14 @@ input:focus,select:focus,textarea:focus{border-color:var(--primary)!important;bo
 .page-kiosk .pw-toggle{min-height:0}
 .page-kiosk #lockersGrid>div{min-height:78px}
 .page-kiosk header{padding-top:14px;padding-bottom:14px}
+
+/* ---------- Hộp thoại chi tiết (UI.modal) ---------- */
+.ui-modal-ov{position:fixed;inset:0;z-index:9000;background:rgba(15,23,42,.5);display:flex;align-items:center;justify-content:center;padding:16px}
+.ui-modal{background:#fff;color:var(--text);width:100%;max-width:520px;max-height:88vh;overflow:auto;border-radius:16px;box-shadow:0 20px 50px rgba(15,23,42,.3)}
+.ui-modal-h{display:flex;justify-content:space-between;align-items:center;padding:16px 20px;border-bottom:1px solid var(--border);position:sticky;top:0;background:#fff}
+.ui-modal-h b{font-size:16px}
+.ui-modal-x{width:32px;height:32px;color:var(--text-2);background:transparent;border:0;cursor:pointer}
+.ui-modal-x:hover{background:#F1F5F9;color:var(--text)}
+.ui-modal-b{padding:16px 20px 20px;font-size:14px}
+.ui-modal-b dl{display:grid;grid-template-columns:130px 1fr;gap:8px 12px;margin:0}
+.ui-modal-b dt{color:var(--text-2)}.ui-modal-b dd{margin:0;font-weight:600;overflow-wrap:anywhere}

@@ -605,23 +605,64 @@
         }
 
         // ================= TAB 1: HIỂN THỊ ĐƠN SOẠN =================
+        // ---------- Bảng đơn mượn: tìm kiếm, lọc trạng thái / ngày, sắp xếp, phân trang, xem chi tiết ----------
+        let orderPage = 1; const ORDER_PAGE_SIZE = 10;
+        const ORDER_ST = { cho_soan: ['Chờ nạp hộc', 'bg-amber-100 text-amber-700'], da_soan_xong: ['Đã trong hộc', 'bg-emerald-100 text-emerald-700'],
+            da_nhan: ['Đã nhận', 'bg-blue-100 text-blue-700'], da_huy_do_qua_han: ['Đã thu hồi', 'bg-rose-100 text-rose-700'] };
+        function ensureOrderToolbar() {
+            if (document.getElementById('orderToolbar')) return;
+            const wrap = document.getElementById('ordersTableBody').closest('.overflow-x-auto');
+            const bar = document.createElement('div'); bar.id = 'orderToolbar'; bar.className = 'flex flex-wrap gap-2 items-center';
+            const ctl = 'px-3 py-2 border border-slate-200 text-xs bg-slate-50 outline-none';
+            bar.innerHTML = `<input id="orderSearch" type="search" aria-label="Tìm đơn mượn" placeholder="Tìm hộc, tên, MSSV, sách, mã QR..." class="flex-1 min-w-[200px] ${ctl}">
+                <select id="orderStatus" aria-label="Lọc trạng thái" class="${ctl}"><option value="active">Đang xử lý</option><option value="cho_soan">Chờ nạp hộc</option><option value="da_soan_xong">Đã trong hộc</option><option value="da_nhan">Đã nhận</option><option value="da_huy_do_qua_han">Đã thu hồi</option><option value="all">Tất cả</option></select>
+                <input id="orderDate" type="date" aria-label="Lọc theo ngày hẹn" class="${ctl}">
+                <select id="orderSort" aria-label="Sắp xếp" class="${ctl}"><option value="new">Mới nhất</option><option value="old">Cũ nhất</option><option value="appt">Ngày hẹn gần nhất</option></select>
+                <button id="orderReset" type="button" class="px-3 py-2 text-xs font-bold bg-slate-100 hover:bg-slate-200 text-slate-700">Xóa lọc</button>`;
+            wrap.parentNode.insertBefore(bar, wrap);
+            const pager = document.createElement('div'); pager.id = 'ordersPager'; pager.className = 'flex items-center justify-between text-xs text-slate-500'; wrap.after(pager);
+            bar.addEventListener('input', () => { orderPage = 1; renderOrders(allOrders); });
+            document.getElementById('orderReset').onclick = () => { document.getElementById('orderSearch').value = ''; document.getElementById('orderDate').value = ''; document.getElementById('orderStatus').value = 'active'; document.getElementById('orderSort').value = 'new'; orderPage = 1; renderOrders(allOrders); };
+        }
+        function orderGo(d) { orderPage += d; renderOrders(allOrders); }
+        function openOrderDetail(id) {
+            const o = allOrders.find(x => x.id === id); if (!o) return;
+            const [stl] = ORDER_ST[o.trang_thai_don] || [o.trang_thai_don || '—'];
+            const made = o.ngay_tao && o.ngay_tao.toDate ? o.ngay_tao.toDate().toLocaleString('vi-VN') : '—';
+            UI.modal({ title: 'Chi tiết đơn mượn', html: `<dl><dt>Sinh viên</dt><dd>${esc(o.ho_ten || '—')}</dd><dt>MSSV</dt><dd>${esc(o.mssv)}</dd><dt>Hộc tủ</dt><dd>${esc(o.so_hoc)}</dd>
+                <dt>Hẹn lấy</dt><dd>${esc(o.ngay_hen)} (${esc(o.khung_gio)})</dd><dt>Trạng thái</dt><dd>${esc(stl)}</dd><dt>Ngày đặt</dt><dd>${esc(made)}</dd><dt>Mã QR</dt><dd class="font-mono">${esc(o.qr_token)}</dd>
+                <dt>Sách</dt><dd>${(o.books || []).map(b => `${esc(b.ten_sach)} <span style="font-weight:400;color:#64748B">(${esc(b.vi_tri_ke || 'Kệ chính')})</span>`).join('<br>')}</dd></dl>` });
+        }
         function renderOrders(orders) {
+            ensureOrderToolbar();
             const activeOrders = orders.filter(o => o.trang_thai_don === 'cho_soan' || o.trang_thai_don === 'da_soan_xong');
             document.getElementById('totalOrdersBadge').innerText = activeOrders.length;
-            document.getElementById('orderCount').innerText = `${activeOrders.length} đơn`;
+            const q = document.getElementById('orderSearch').value.trim().toLowerCase(), st = document.getElementById('orderStatus').value;
+            const dt = document.getElementById('orderDate').value, sort = document.getElementById('orderSort').value;
+            let list = orders.filter(o => st === 'all' ? true : st === 'active' ? (o.trang_thai_don === 'cho_soan' || o.trang_thai_don === 'da_soan_xong') : o.trang_thai_don === st);
+            if (dt) list = list.filter(o => o.ngay_hen === dt);
+            if (q) list = list.filter(o => [o.so_hoc, o.ho_ten, o.mssv, o.qr_token, o.id, ...(o.books || []).map(b => b.ten_sach)].join(' ').toLowerCase().includes(q));
+            const tm = o => (o.ngay_tao && o.ngay_tao.toMillis) ? o.ngay_tao.toMillis() : 0;
+            list.sort(sort === 'old' ? (a, b) => tm(a) - tm(b) : sort === 'appt' ? (a, b) => String(a.ngay_hen || '').localeCompare(String(b.ngay_hen || '')) : (a, b) => tm(b) - tm(a));
+            const pages = Math.max(1, Math.ceil(list.length / ORDER_PAGE_SIZE)); orderPage = Math.min(Math.max(1, orderPage), pages);
+            const view = list.slice((orderPage - 1) * ORDER_PAGE_SIZE, orderPage * ORDER_PAGE_SIZE);
+            document.getElementById('orderCount').innerText = `${list.length} đơn`;
+            document.getElementById('ordersPager').innerHTML = list.length ? `<span>Hiển thị ${(orderPage - 1) * ORDER_PAGE_SIZE + 1}–${(orderPage - 1) * ORDER_PAGE_SIZE + view.length} / ${list.length} đơn</span>
+                <span class="flex items-center gap-2"><button type="button" onclick="orderGo(-1)" ${orderPage <= 1 ? 'disabled' : ''} class="px-3 py-1.5 bg-slate-100 font-bold">‹ Trước</button><b>${orderPage}/${pages}</b><button type="button" onclick="orderGo(1)" ${orderPage >= pages ? 'disabled' : ''} class="px-3 py-1.5 bg-slate-100 font-bold">Sau ›</button></span>` : '';
 
             const tbody = document.getElementById('ordersTableBody');
             tbody.innerHTML = '';
 
-            if (activeOrders.length === 0) {
-                tbody.innerHTML = `<tr><td colspan="6" class="p-6 text-center text-slate-400 text-xs">Hiện không có đơn nào đang chờ soạn hoặc chờ lấy.</td></tr>`;
+            if (view.length === 0) {
+                tbody.innerHTML = `<tr><td colspan="6" class="p-8 text-center text-slate-400 text-xs">${orders.length ? 'Không có đơn nào khớp bộ lọc. Bấm "Xóa lọc" để xem lại tất cả.' : 'Chưa có đơn mượn nào.'}</td></tr>`;
                 return;
             }
 
             const todayStr = App.today();
 
-            activeOrders.forEach(o => {
-                const isReady = o.trang_thai_don === 'da_soan_xong';
+            view.forEach(o => {
+                const isReady = o.trang_thai_don === 'da_soan_xong', canAct = o.trang_thai_don === 'cho_soan' || isReady;
+                const [stl, stc] = ORDER_ST[o.trang_thai_don] || [o.trang_thai_don || '—', 'bg-slate-100 text-slate-600'];
                 const booksList = o.books || [];
                 
                 // Kiểm tra xem đơn đã quá ngày hẹn lấy sách chưa
@@ -665,21 +706,12 @@
                             ${isExpired ? '<span class="inline-block mt-1 px-2 py-0.5 rounded bg-rose-100 text-rose-700 font-bold text-[10px]">Đã quá hạn nhận</span>' : ''}
                         </td>
                         <td class="p-3.5 align-middle whitespace-nowrap">
-                            <span class="px-2.5 py-1 rounded-sm text-[11px] font-bold ${isReady ? 'bg-emerald-100 text-emerald-700' : 'bg-amber-100 text-amber-700'}">
-                                ${isReady ? 'Đã trong hộc' : 'Chờ nạp hộc'}
-                            </span>
+                            <span class="px-2.5 py-1 text-[11px] font-bold ${stc}">${stl}</span>
                         </td>
                         <td class="p-3.5 align-middle text-right space-x-1.5 whitespace-nowrap">
-                            ${!isReady ? `
-                                <button onclick="markOrderReady('${o.id}')" class="px-3 py-1.5 bg-emerald-600 hover:bg-emerald-700 text-white rounded-none text-xs font-bold shadow-sm transition">
-                                    <i class="fa-solid fa-check mr-1"></i> Đã nạp hộc
-                                </button>
-                            ` : `
-                                <span class="text-xs text-emerald-600 font-bold mr-2"><i class="fa-solid fa-circle-check"></i> Sẵn sàng</span>
-                            `}
-                            <button onclick="cancelExpiredOrder('${o.id}')" class="px-2.5 py-1.5 ${isExpired ? 'bg-rose-600 text-white hover:bg-rose-700' : 'bg-rose-50 hover:bg-rose-100 text-rose-600'} rounded-none text-xs font-bold transition shadow-xs" title="Sinh viên không đến nhận -> Thu hồi cả đơn">
-                                <i class="fa-solid fa-arrow-rotate-left mr-1"></i> Thu hồi
-                            </button>
+                            <button type="button" onclick="openOrderDetail('${o.id}')" class="px-2.5 py-1.5 bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-bold transition">Chi tiết</button>
+                            ${canAct && !isReady ? `<button onclick="markOrderReady('${o.id}')" class="px-3 py-1.5 bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold shadow-sm transition">Đã nạp hộc</button>` : ''}
+                            ${canAct ? `<button onclick="cancelExpiredOrder('${o.id}')" class="px-2.5 py-1.5 ${isExpired ? 'bg-rose-600 text-white hover:bg-rose-700' : 'bg-rose-50 hover:bg-rose-100 text-rose-600'} text-xs font-bold transition">Thu hồi</button>` : ''}
                         </td>
                     </tr>
                 `;

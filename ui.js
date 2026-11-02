@@ -10,6 +10,21 @@
     }
   };
 
+  // Hộp thoại chi tiết dùng chung: UI.modal({ title, html }) -> { close }
+  window.UI.modal = function (o) {
+    var prev = document.activeElement, ov = document.createElement('div');
+    ov.className = 'ui-modal-ov';
+    ov.innerHTML = '<div class="ui-modal" role="dialog" aria-modal="true"><div class="ui-modal-h"><b></b><button type="button" class="ui-modal-x" aria-label="Đóng">✕</button></div><div class="ui-modal-b"></div></div>';
+    ov.querySelector('b').textContent = o.title; ov.querySelector('.ui-modal').setAttribute('aria-label', o.title);
+    ov.querySelector('.ui-modal-b').innerHTML = o.html;
+    function close() { document.removeEventListener('keydown', onKey); ov.remove(); if (prev && prev.focus) prev.focus(); }
+    function onKey(e) { if (e.key === 'Escape') close(); }
+    ov.addEventListener('click', function (e) { if (e.target === ov) close(); });
+    ov.querySelector('.ui-modal-x').addEventListener('click', close);
+    document.addEventListener('keydown', onKey); document.body.appendChild(ov); ov.querySelector('.ui-modal-x').focus();
+    return { close: close };
+  };
+
   document.addEventListener('DOMContentLoaded', function () {
     document.body.classList.add('page-' + page);
 

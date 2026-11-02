@@ -1,4 +1,4 @@
-=<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="vi">
 <head>
     <meta charset="UTF-8">
@@ -140,7 +140,8 @@
         </div>
 
             <!-- Bảng hiển thị thông báo kết quả -->
-            <div id="statusBox" class="hidden p-4 rounded-none border text-sm font-medium"></div>
+            <div id="kioskSteps" class="flex items-center gap-2" aria-label="Tiến trình giao dịch"></div>
+            <div id="statusBox" role="status" aria-live="polite" class="hidden p-4 rounded-none border text-sm font-medium"></div>
         </div>
 
         <!-- Lưới 20 Hộc Tủ (Cột phải) -->
@@ -266,7 +267,7 @@
         function releaseLockerLater(name, state, token) {
             clearTimeout(openedTimer);
             openedTimer = setTimeout(async () => {
-                openedLockerName = null;
+                openedLockerName = null; setStep(5);
                 try { await App.lockerRef(name).set({ so_hoc: name, trang_thai: state, qr_token: token, cap_nhat_luc: FV() }, { merge: true }); } catch (e) { console.error(e); }
             }, 5000);
         }
@@ -276,6 +277,7 @@
             const token = $('manualInput').value.trim().toUpperCase();
             if (!token) return showNotice("Vui lòng nhập hoặc quét mã QR Token nhận sách!", "error");
             try {
+                setStep(2);
                 const q = await db.collection('orders').where('qr_token', '==', token).limit(1).get();
                 if (q.empty) return showNotice("Mã Token không hợp lệ hoặc không tồn tại!", "error");
                 const oref = q.docs[0].ref;
@@ -322,6 +324,7 @@
             if (!code) return showNotice("Vui lòng nhập hoặc quét mã QR Trả sách (TRA-...)!", "error");
             if (ret) return showNotice("Đang đối soát một đơn trả khác. Hãy hoàn tất hoặc bấm Hủy.", "error");
             try {
+                setStep(2);
                 const q = await db.collection('returns').where('qr_token', '==', code).limit(1).get();
                 if (q.empty) return showNotice("Mã trả sách không tồn tại!", "error");
                 const d = q.docs[0], r = d.data();
@@ -420,16 +423,45 @@
         }
         function stopBottomCam() { if (bottomCam) { const c = bottomCam; bottomCam = null; c.stop().then(() => c.clear()).catch(() => {}); } }
 
+        // ---------- Thông báo trạng thái: tiêu đề + mô tả + hướng dẫn bước tiếp theo ----------
+        const NOTICE_MAP = [
+            [/camera/i, 'Camera không hoạt động', 'Bạn vẫn có thể nhập mã thủ công vào ô bên dưới.'],
+            [/không tồn tại|không hợp lệ/i, 'QR không hợp lệ', 'Kiểm tra lại mã, hoặc tạo mã mới trên cổng sinh viên.'],
+            [/đã được sử dụng|đã xử lý|đã được nhận|nhận trước đó/i, 'Giao dịch đã được sử dụng', 'Mỗi mã chỉ dùng được một lần.'],
+            [/quá hạn|thu hồi/i, 'Giao dịch hết hạn', 'Vui lòng đặt lại sách trên cổng sinh viên.'],
+            [/chưa nạp/i, 'Sách chưa sẵn sàng', 'Thủ thư đang soạn sách. Hãy quay lại khi có thông báo.'],
+            [/Lỗi/i, 'Giao dịch thất bại', 'Vui lòng thử lại hoặc liên hệ thủ thư.']
+        ];
         function showNotice(msg, type) {
-            const box = $('statusBox');
+            const box = $('statusBox'), ok = type === 'success';
             box.classList.remove('hidden', 'bg-emerald-900/50', 'border-emerald-500', 'text-emerald-200', 'bg-rose-900/50', 'border-rose-500', 'text-rose-200');
-            if (type === 'success') {
-                box.classList.add('bg-emerald-900/50', 'border-emerald-500', 'text-emerald-200');
-            } else {
-                box.classList.add('bg-rose-900/50', 'border-rose-500', 'text-rose-200');
-            }
-            box.innerText = msg;
+            box.classList.add(...(ok ? ['bg-emerald-900/50', 'border-emerald-500', 'text-emerald-200'] : ['bg-rose-900/50', 'border-rose-500', 'text-rose-200']));
+            let title = ok ? 'Thành công' : 'Không thể xử lý', hint = '';
+            if (ok) { if (/ĐANG MỞ/.test(msg)) hint = 'Mô phỏng: hệ thống đã ghi nhận lệnh mở khóa, chưa nối với khóa vật lý.'; }
+            else { const m = NOTICE_MAP.find(x => x[0].test(msg)); if (m) { title = m[1]; hint = m[2]; } }
+            box.innerHTML = `<div class="flex gap-3 items-start"><div class="text-2xl" aria-hidden="true">${ok ? '✅' : '⚠️'}</div><div><p class="font-bold text-base">${escH(title)}</p><p>${escH(msg)}</p>${hint ? `<p class="text-xs opacity-80 mt-1">${escH(hint)}</p>` : ''}</div></div>`;
+            if (ok && /ĐANG MỞ/.test(msg)) setStep(3); else if (!ok) setStep(1);
         }
+
+        // ---------- Thanh tiến trình giao dịch ----------
+        const KSTEPS = ['Quét mã', 'Xác thực', 'Mở hộc', 'Hoàn tất'];
+        function setStep(n) {   // n: bước đang làm (5 = tất cả đã xong)
+            $('kioskSteps').innerHTML = KSTEPS.map((t, i) => {
+                const done = i + 1 < n, cur = i + 1 === n;
+                return `<div class="flex items-center gap-2 ${done || cur ? 'text-orange-300' : 'text-slate-500'}"><span class="w-7 h-7 rounded-full flex items-center justify-center text-xs font-bold ${done ? 'bg-emerald-500 text-white' : cur ? 'bg-orange-500 text-white' : 'bg-slate-700'}">${done ? '✓' : i + 1}</span><span class="text-xs font-semibold">${t}</span></div>`;
+            }).join('<div class="flex-1 h-px bg-slate-600"></div>');
+        }
+
+        // ---------- Hết thời gian thao tác: tự về màn hình chờ, xóa dữ liệu trên màn hình ----------
+        let idleT = null;
+        function goIdle() {
+            if (ret && ret.busy) return resetIdle();
+            if (ret) closeReturnSession();
+            $('manualInput').value = ''; $('statusBox').classList.add('hidden'); setStep(1);
+        }
+        function resetIdle() { clearTimeout(idleT); idleT = setTimeout(goIdle, ret ? 180000 : 60000); }
+        ['pointerdown', 'keydown', 'input'].forEach(ev => document.addEventListener(ev, resetIdle, { passive: true }));
+        setStep(1); resetIdle();
 
         // Khởi động Camera quét mã
         function startCamera() {
@@ -456,7 +488,7 @@
                         setTimeout(() => { isScanningLocked = false; }, 4000);
                     },
                     (err) => {}
-                ).catch(err => console.log("Không tìm thấy camera"));
+                ).catch(err => { console.log("Không tìm thấy camera"); cameraStarted = false; showNotice("Camera không hoạt động. Hãy cấp quyền camera hoặc nhập mã thủ công bên dưới.", "error"); });
             } catch (e) {
                 console.log("Trình quét camera chạy ở chế độ tương thích.");
             }

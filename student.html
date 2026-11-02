@@ -258,6 +258,8 @@
                 <button onclick="closeBookingCartModal()" class="text-slate-400 hover:text-slate-600"><i class="fa-solid fa-xmark text-lg"></i></button>
             </div>
 
+            <div id="bookSteps" class="flex items-center gap-2" aria-label="Các bước đặt mượn"></div>
+
             <div class="overflow-y-auto space-y-2 flex-1 pr-1" id="cartItemsList"></div>
 
             <div class="pt-2 border-t space-y-3">
@@ -304,7 +306,7 @@
                     </select>
                 </div>
 
-                <button onclick="confirmCartBooking()" class="w-full py-3 bg-orange-600 hover:bg-orange-700 text-white font-bold rounded-none text-xs sm:text-sm shadow-sm shadow-orange-600/30 transition">
+                <button id="bookSubmitBtn" onclick="submitBookingFlow()" class="w-full py-3 bg-orange-600 hover:bg-orange-700 text-white font-bold rounded-none text-xs sm:text-sm shadow-sm shadow-orange-600/30 transition">
                     Xác Nhận Đặt Mượn Tất Cả
                 </button>
             </div>
@@ -1073,6 +1075,31 @@
             initDefaultBookingDate();
             renderMonthlyCalendar();
             document.getElementById('cartModal').classList.remove('hidden');
+            renderBookSteps();
+        }
+
+        // ---------- Tiến trình đặt mượn: Chọn sách -> Chọn lịch nhận -> Xác nhận ----------
+        function renderBookSteps() {
+            const hasDate = !!document.getElementById('bookDate').value, st = [cart.length > 0, hasDate, false];
+            const names = ['Chọn sách', 'Chọn lịch nhận', 'Xác nhận'], cur = st.indexOf(false);
+            document.getElementById('bookSteps').innerHTML = names.map((t, i) => {
+                const done = st[i], now = i === cur;
+                return `<div class="flex items-center gap-1.5 ${done || now ? 'text-orange-700' : 'text-slate-400'}"><span class="w-6 h-6 rounded-full flex items-center justify-center text-[11px] font-bold ${done ? 'bg-emerald-500 text-white' : now ? 'bg-orange-500 text-white' : 'bg-slate-200'}">${done ? '✓' : i + 1}</span><span class="text-[11px] font-semibold">${t}</span></div>`;
+            }).join('<div class="flex-1 h-px bg-slate-200"></div>');
+        }
+        document.getElementById('cartModal').addEventListener('click', () => setTimeout(renderBookSteps, 0));
+
+        // Xác nhận lại trước khi gửi + trạng thái đang xử lý trên nút (chống bấm liên tục)
+        async function submitBookingFlow() {
+            if (bookingBusy || !ensureEligible(0)) return;
+            const date = document.getElementById('bookDate').value, slot = document.getElementById('bookSlot').value;
+            if (!cart.length) return showToast.warning('Giỏ mượn trống', 'Hãy chọn ít nhất một cuốn sách.');
+            if (!date) return showToast.warning('Chưa chọn ngày', 'Vui lòng chọn ngày nhận sách trên lịch.');
+            const ok = await App.confirm(`Gửi yêu cầu mượn ${cart.length} cuốn?\nNhận sách ngày ${dmy(date)}, khung giờ ${slot}.`);
+            if (!ok) return;
+            const btn = document.getElementById('bookSubmitBtn'), html = btn.innerHTML;
+            btn.disabled = true; btn.innerHTML = '⏳ Đang gửi yêu cầu...';
+            try { await confirmCartBooking(); } finally { btn.disabled = false; btn.innerHTML = html; }
         }
 
         function closeBookingCartModal() {
