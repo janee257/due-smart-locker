@@ -261,40 +261,162 @@
             <div id="bookSteps" class="flex items-center gap-2" aria-label="Các bước đặt mượn"></div>
 
             <div class="overflow-y-auto space-y-2 flex-1 pr-1" id="cartItemsList"></div>
+            
+<div class="pt-2 border-t space-y-3">
 
-            <div class="pt-2 border-t space-y-3">
-                <!-- KHỐI LỊCH THÁNG TRỰC QUAN -->
-                <div class="space-y-2">
-                    <div class="flex justify-between items-center">
-                        <label class="block text-xs font-bold text-slate-700">
-                            <i class="fa-regular fa-calendar-days text-orange-600 mr-1"></i> Chọn ngày nhận sách:
-                        </label>
-                        
-                        <div class="flex items-center gap-1.5 bg-orange-50 px-2 py-1 rounded-none border border-orange-200">
-                            <button type="button" onclick="changeCalendarMonth(-1)" id="prevMonthBtn" title="Tháng trước" class="w-6 h-6 rounded-sm hover:bg-orange-200/70 text-orange-700 flex items-center justify-center font-bold text-xs transition disabled:opacity-30 disabled:cursor-not-allowed">
-                                <i class="fa-solid fa-chevron-left text-[11px]"></i>
-                            </button>
-                            <span id="calendarMonthYear" class="text-xs font-bold text-orange-700 min-w-[95px] text-center select-none"></span>
-                            <button type="button" onclick="changeCalendarMonth(1)" id="nextMonthBtn" title="Tháng sau" class="w-6 h-6 rounded-sm hover:bg-orange-200/70 text-orange-700 flex items-center justify-center font-bold text-xs transition disabled:opacity-30 disabled:cursor-not-allowed">
-                                <i class="fa-solid fa-chevron-right text-[11px]"></i>
-                            </button>
-                        </div>
-                    </div>
+    <!-- DATE PICKER POPOVER -->
+    <div class="relative" id="bookingDatePicker">
 
-                    <div class="bg-slate-50 border border-slate-200 rounded-none p-2.5">
-                        <div class="grid grid-cols-7 text-center text-[10px] font-bold text-slate-400 mb-1.5 pb-1 border-b border-slate-200">
-                            <span>T2</span><span>T3</span><span>T4</span><span>T5</span><span>T6</span><span class="text-rose-400">T7</span><span class="text-rose-400">CN</span>
-                        </div>
-                        <div id="calendarDaysGrid" class="grid grid-cols-7 gap-1 text-center"></div>
-                    </div>
+        <!-- NÚT HIỂN THỊ NGÀY ĐÃ CHỌN -->
+        <div class="flex items-center justify-between gap-3">
+            <label class="text-xs font-bold text-slate-700">
+                <i class="fa-regular fa-calendar-days text-orange-600 mr-1"></i>
+                Ngày nhận sách
+            </label>
 
-                    <input type="hidden" id="bookDate" value="">
-                    
-                    <div class="flex items-center justify-between text-[10px] text-slate-400 px-1">
-                        <span>* Chỉ nhận Thứ 2 - Thứ 6 (8h - 17h)</span>
-                        <span class="text-slate-800 font-bold" id="selectedDateText">Chưa chọn ngày</span>
-                    </div>
+            <button
+                type="button"
+                id="datePickerTrigger"
+                onclick="toggleBookingCalendar()"
+                aria-expanded="false"
+                aria-controls="bookingCalendarPopover"
+                class="flex items-center gap-2 px-3 py-2 rounded-xl
+                       border border-orange-200 bg-orange-50
+                       hover:bg-orange-100 transition text-orange-700
+                       text-xs font-bold">
+
+                <i class="fa-regular fa-calendar"></i>
+
+                <span id="selectedDateText">Chưa chọn ngày</span>
+
+                <i class="fa-solid fa-chevron-down text-[10px]"
+                   id="datePickerArrow"></i>
+            </button>
+        </div>
+
+        <!-- POPOVER LỊCH -->
+        <div
+            id="bookingCalendarPopover"
+            class="hidden absolute bottom-full right-0 mb-2
+                   w-full max-w-sm bg-white rounded-2xl
+                   border border-slate-200 shadow-2xl
+                   p-3 z-[70]">
+
+            <!-- HEADER LỊCH -->
+            <div class="flex items-center justify-between mb-3">
+
+                <span class="text-sm font-bold text-slate-800">
+                    Chọn ngày nhận sách
+                </span>
+
+                <div class="flex items-center gap-2
+                            bg-orange-50 px-2 py-1 rounded-lg">
+
+                    <button
+                        type="button"
+                        onclick="changeCalendarMonth(-1)"
+                        id="prevMonthBtn"
+                        title="Tháng trước"
+                        class="w-7 h-7 rounded-lg hover:bg-orange-200
+                               text-orange-700 flex items-center
+                               justify-center transition">
+
+                        <i class="fa-solid fa-chevron-left text-xs"></i>
+                    </button>
+
+                    <span
+                        id="calendarMonthYear"
+                        class="text-xs font-bold text-orange-700
+                               min-w-[90px] text-center">
+                    </span>
+
+                    <button
+                        type="button"
+                        onclick="changeCalendarMonth(1)"
+                        id="nextMonthBtn"
+                        title="Tháng sau"
+                        class="w-7 h-7 rounded-lg hover:bg-orange-200
+                               text-orange-700 flex items-center
+                               justify-center transition">
+
+                        <i class="fa-solid fa-chevron-right text-xs"></i>
+                    </button>
                 </div>
+            </div>
+
+            <!-- THỨ TRONG TUẦN -->
+            <div class="grid grid-cols-7 text-center
+                        text-[11px] font-bold text-slate-400
+                        mb-2 pb-2 border-b border-slate-100">
+
+                <span>T2</span>
+                <span>T3</span>
+                <span>T4</span>
+                <span>T5</span>
+                <span>T6</span>
+                <span class="text-rose-400">T7</span>
+                <span class="text-rose-400">CN</span>
+            </div>
+
+            <!-- NGÀY -->
+            <div
+                id="calendarDaysGrid"
+                class="grid grid-cols-7 gap-1.5 text-center">
+            </div>
+
+            <!-- CHÚ THÍCH -->
+            <div class="mt-3 pt-2 border-t border-slate-100
+                        flex items-center justify-between">
+
+                <span class="text-[10px] text-slate-400">
+                    Chỉ nhận Thứ 2 - Thứ 6
+                </span>
+
+                <button
+                    type="button"
+                    onclick="closeBookingCalendar()"
+                    class="text-xs font-bold text-orange-600
+                           hover:text-orange-700">
+                    Đóng
+                </button>
+            </div>
+        </div>
+
+        <!-- GIỮ NGUYÊN ID ĐỂ TƯƠNG THÍCH JS -->
+        <input type="hidden" id="bookDate" value="">
+
+    </div>
+
+    <!-- KHUNG GIỜ NHẬN -->
+    <div>
+        <label class="block text-xs font-bold text-slate-700 mb-1">
+            Khung giờ nhận sách (8h - 17h):
+        </label>
+
+        <select id="bookSlot"
+            class="w-full p-2.5 border border-slate-200
+                   rounded-xl text-xs sm:text-sm bg-slate-50
+                   outline-none">
+
+            <option value="08:00 - 09:30">08:00 - 09:30</option>
+            <option value="09:30 - 11:30">09:30 - 11:30</option>
+            <option value="13:30 - 15:30">13:30 - 15:30</option>
+            <option value="15:30 - 17:00">15:30 - 17:00</option>
+        </select>
+    </div>
+
+    <!-- NÚT XÁC NHẬN -->
+    <button id="bookSubmitBtn"
+        onclick="submitBookingFlow()"
+        class="w-full py-3 bg-orange-600 hover:bg-orange-700
+               text-white font-bold rounded-xl text-xs sm:text-sm
+               shadow-sm shadow-orange-600/30 transition">
+
+        Xác Nhận Đặt Mượn Tất Cả
+    </button>
+
+</div>
+
 
                 <div>
                     <label class="block text-xs font-bold text-slate-700 mb-1">Khung giờ nhận sách (8h - 17h):</label>
@@ -600,7 +722,7 @@
         }
 
         // ---------- Gate 1 (BPMN): thẻ còn hạn, nợ phạt = 0 đ, số sách đang giữ ≤ 3 cuốn. Sai => Task T1.Ex ----------
-        const NOT_ELIGIBLE = 'Tài khoản của bạn hiện không đủ điều kiện mượn sách mới do đang có nợ phạt / đạt giới hạn 3 cuốn. Vui lòng thanh toán hoặc hoàn tất trả sách trước.';
+        const NOT_ELIGIBLE = 'Tài khoản của bạn hiện không đủ điều kiện mượn sách mới do đạt giới hạn 3 cuốn / đang có nợ phạt. Vui lòng thanh toán hoặc hoàn tất trả sách trước.';
         let eligToast = null;
         function ensureEligible(extra = 1) {
             const raw = currentHistoryRawList || [];
@@ -1065,18 +1187,63 @@
             });
         }
         // ================= CỤM LỊCH THÁNG =================
-        function openBookingCartModal() {
-            if (cart.length === 0) return alert("Giỏ hàng đang trống!");
-            document.getElementById('cartModalCount').innerText = cart.length;
-            renderCartModalItems();
+        
+// ================= DATE PICKER POPOVER =================
 
-            const now = new Date();
-            calendarViewDate = new Date(now.getFullYear(), now.getMonth(), 1);
-            initDefaultBookingDate();
-            renderMonthlyCalendar();
-            document.getElementById('cartModal').classList.remove('hidden');
-            renderBookSteps();
-        }
+function toggleBookingCalendar() {
+    const popover = document.getElementById('bookingCalendarPopover');
+    const trigger = document.getElementById('datePickerTrigger');
+    const arrow = document.getElementById('datePickerArrow');
+
+    const isOpening = popover.classList.contains('hidden');
+
+    if (isOpening) {
+        popover.classList.remove('hidden');
+        trigger.setAttribute('aria-expanded', 'true');
+        arrow.classList.add('rotate-180');
+        renderMonthlyCalendar();
+    } else {
+        closeBookingCalendar();
+    }
+}
+
+function closeBookingCalendar() {
+    const popover = document.getElementById('bookingCalendarPopover');
+    const trigger = document.getElementById('datePickerTrigger');
+    const arrow = document.getElementById('datePickerArrow');
+
+    popover.classList.add('hidden');
+    trigger.setAttribute('aria-expanded', 'false');
+    arrow.classList.remove('rotate-180');
+}
+
+        
+function openBookingCartModal() {
+    if (cart.length === 0) return alert("Giỏ hàng đang trống!");
+
+    document.getElementById('cartModalCount').innerText = cart.length;
+
+    renderCartModalItems();
+
+    const now = new Date();
+    calendarViewDate = new Date(
+        now.getFullYear(),
+        now.getMonth(),
+        1
+    );
+
+    initDefaultBookingDate();
+
+    // Đóng popover khi mở lại giỏ hàng
+    closeBookingCalendar();
+
+    // Đồng bộ ngày đã chọn
+    renderMonthlyCalendar();
+
+    document.getElementById('cartModal').classList.remove('hidden');
+
+    renderBookSteps();
+}
 
         // ---------- Tiến trình đặt mượn: Chọn sách -> Chọn lịch nhận -> Xác nhận ----------
         function renderBookSteps() {
@@ -1208,22 +1375,49 @@
             updateCalendarSelectionUI();
         }
 
-        function selectCalendarDate(dateStr) {
-            selectedBookingDate = dateStr;
-            renderMonthlyCalendar();
-        }
+        
+function selectCalendarDate(dateStr) {
+    selectedBookingDate = dateStr;
 
-        function updateCalendarSelectionUI() {
-            document.getElementById('bookDate').value = selectedBookingDate;
-            if (selectedBookingDate) {
-                const parts = selectedBookingDate.split('-');
-                const d = new Date(parts[0], parts[1] - 1, parts[2]);
-                const dayName = d.toLocaleDateString('vi-VN', { weekday: 'long' });
-                document.getElementById('selectedDateText').innerText = `Đã chọn: ${dayName}, ${parts[2]}/${parts[1]}/${parts[0]}`;
-            } else {
-                document.getElementById('selectedDateText').innerText = `Chưa chọn ngày`;
-            }
-        }
+    // Cập nhật ngày vào input hidden và giao diện
+    renderMonthlyCalendar();
+
+    // Chọn xong thì tự động đóng lịch
+    closeBookingCalendar();
+
+    // Cập nhật tiến trình đặt mượn
+    renderBookSteps();
+}
+
+
+        
+function updateCalendarSelectionUI() {
+    document.getElementById('bookDate').value = selectedBookingDate;
+
+    const dateText = document.getElementById('selectedDateText');
+
+    if (selectedBookingDate) {
+        const parts = selectedBookingDate.split('-');
+
+        const d = new Date(
+            Number(parts[0]),
+            Number(parts[1]) - 1,
+            Number(parts[2])
+        );
+
+        const dayName = d.toLocaleDateString('vi-VN', {
+            weekday: 'long'
+        });
+
+        const formattedDate =
+            `${dayName.charAt(0).toUpperCase() + dayName.slice(1)}, ` +
+            `${parts[2]}/${parts[1]}/${parts[0]}`;
+
+        dateText.innerText = formattedDate;
+    } else {
+        dateText.innerText = 'Chưa chọn ngày';
+    }
+}
 
         function loadInitialData() {
             fetchBooks();
