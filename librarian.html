@@ -78,15 +78,15 @@
             </div>
             <span class="inline-block bg-gradient-to-r from-orange-600 to-amber-500 text-white text-[11px] font-bold px-3 py-1 rounded-sm">Cán bộ Thư viện DUE</span>
             <p id="libAdminEmail" class="mt-2 text-xs text-slate-300 truncate">thuthu@due.udn.vn</p>
-            <button onclick="handleLibrarianLogout()" class="mt-3 w-full py-2 rounded-none bg-slate-800 hover:bg-rose-600 text-white text-xs font-bold transition">🚪 Đăng xuất</button>
+            <button onclick="handleLibrarianLogout()" class="mt-3 w-full py-2 rounded-none bg-slate-800 hover:bg-rose-600 text-white text-xs font-bold transition">Đăng xuất</button>
         </div>
         <nav class="p-3 space-y-1.5 flex-1">
-            <button onclick="switchLibTab('orders')" id="libTabBtnOrders" class="dash-nav"><span class="em">📥</span><span>Chờ soạn sách / Nạp hộc</span><span id="navOrders" class="badge zero">0</span></button>
-                <button onclick="switchLibTab('inspect')" id="libTabBtnInspect" class="dash-nav"><span class="em">📦</span><span>Nghiệm thu trả sách</span><span id="navInspect" class="badge zero">0</span></button>
-                <button onclick="switchLibTab('lockers')" id="libTabBtnLockers" class="dash-nav"><span class="em">🗄️</span><span>Giám sát hộc tủ</span></button>
-                <button onclick="switchLibTab('warehouse')" id="libTabBtnWarehouse" class="dash-nav"><span class="em">📚</span><span>Quản lý kho sách</span></button>
-                <button onclick="switchLibTab('fines')" id="libTabBtnFines" class="dash-nav"><span class="em">⚖️</span><span>Xử lý phạt & Thu phí</span><span id="navFines" class="badge zero">0</span></button>
-                <button onclick="switchLibTab('borrows')" id="libTabBtnBorrows" class="dash-nav"><span class="em">👥</span><span>Danh sách mượn trả</span><span id="totalActiveBorrowBadge" class="badge zero">0</span></button>
+            <button onclick="switchLibTab('orders')" id="libTabBtnOrders" class="dash-nav"><span class="em"></span><span>Chờ soạn sách / Nạp hộc</span><span id="navOrders" class="badge zero">0</span></button>
+                <button onclick="switchLibTab('inspect')" id="libTabBtnInspect" class="dash-nav"><span class="em"></span><span>Nghiệm thu trả sách</span><span id="navInspect" class="badge zero">0</span></button>
+                <button onclick="switchLibTab('lockers')" id="libTabBtnLockers" class="dash-nav"><span class="em"></span><span>Giám sát hộc tủ</span></button>
+                <button onclick="switchLibTab('warehouse')" id="libTabBtnWarehouse" class="dash-nav"><span class="em"></span><span>Quản lý kho sách</span></button>
+                <button onclick="switchLibTab('fines')" id="libTabBtnFines" class="dash-nav"><span class="em"></span><span>Xử lý phạt & Thu phí</span><span id="navFines" class="badge zero">0</span></button>
+                <button onclick="switchLibTab('borrows')" id="libTabBtnBorrows" class="dash-nav"><span class="em"></span><span>Danh sách mượn trả</span><span id="totalActiveBorrowBadge" class="badge zero">0</span></button>
             <span id="totalOrdersBadge" class="hidden"></span>
         </nav>
     </aside>
@@ -98,7 +98,7 @@
     </div>
     <main class="max-w-6xl mx-auto p-4 sm:p-6 space-y-6">
         <div class="grid grid-cols-2 xl:grid-cols-4 gap-3">
-            <div class="bg-white rounded-none border border-slate-200 shadow-sm p-4 flex items-center gap-3"><div class="w-11 h-11 rounded-none bg-amber-100 flex items-center justify-center text-xl">📥</div><div class="min-w-0"><p class="text-[11px] text-slate-500 font-semibold">Đơn cần soạn</p><p id="kpiOrders" class="text-xl font-black text-slate-800 truncate">0</p></div></div><div class="bg-white rounded-none border border-slate-200 shadow-sm p-4 flex items-center gap-3"><div class="w-11 h-11 rounded-none bg-blue-100 flex items-center justify-center text-xl">📚</div><div class="min-w-0"><p class="text-[11px] text-slate-500 font-semibold">Sách đang mượn ngoài</p><p id="kpiBorrow" class="text-xl font-black text-slate-800 truncate">0</p></div></div><div class="bg-white rounded-none border border-slate-200 shadow-sm p-4 flex items-center gap-3"><div class="w-11 h-11 rounded-none bg-emerald-100 flex items-center justify-center text-xl">🗄️</div><div class="min-w-0"><p class="text-[11px] text-slate-500 font-semibold">Hộc tủ đang trống</p><p id="kpiLockers" class="text-xl font-black text-slate-800 truncate">0</p></div></div><div class="bg-white rounded-none border border-slate-200 shadow-sm p-4 flex items-center gap-3"><div class="w-11 h-11 rounded-none bg-rose-100 flex items-center justify-center text-xl">⚖️</div><div class="min-w-0"><p class="text-[11px] text-slate-500 font-semibold">Tiền phạt chưa thu</p><p id="kpiFines" class="text-xl font-black text-slate-800 truncate">0</p></div></div>
+            <div class="bg-white rounded-none border border-slate-200 shadow-sm p-4 flex items-center gap-3"><div class="w-11 h-11 rounded-none bg-amber-100 flex items-center justify-center text-xl"></div><div class="min-w-0"><p class="text-[11px] text-slate-500 font-semibold">Đơn cần soạn</p><p id="kpiOrders" class="text-xl font-black text-slate-800 truncate">0</p></div></div><div class="bg-white rounded-none border border-slate-200 shadow-sm p-4 flex items-center gap-3"><div class="w-11 h-11 rounded-none bg-blue-100 flex items-center justify-center text-xl"></div><div class="min-w-0"><p class="text-[11px] text-slate-500 font-semibold">Sách đang mượn ngoài</p><p id="kpiBorrow" class="text-xl font-black text-slate-800 truncate">0</p></div></div><div class="bg-white rounded-none border border-slate-200 shadow-sm p-4 flex items-center gap-3"><div class="w-11 h-11 rounded-none bg-emerald-100 flex items-center justify-center text-xl"></div><div class="min-w-0"><p class="text-[11px] text-slate-500 font-semibold">Hộc tủ đang trống</p><p id="kpiLockers" class="text-xl font-black text-slate-800 truncate">0</p></div></div><div class="bg-white rounded-none border border-slate-200 shadow-sm p-4 flex items-center gap-3"><div class="w-11 h-11 rounded-none bg-rose-100 flex items-center justify-center text-xl"></div><div class="min-w-0"><p class="text-[11px] text-slate-500 font-semibold">Tiền phạt chưa thu</p><p id="kpiFines" class="text-xl font-black text-slate-800 truncate">0</p></div></div>
         </div>
         <div class="flex flex-wrap items-center justify-between gap-2">
             <h2 id="libPageTitle" class="text-lg font-black text-slate-800">Chờ soạn sách / Nạp hộc</h2>
@@ -482,7 +482,7 @@
             const by = {}; dashLockers.forEach(x => { by[x.so_hoc] = x; });
             document.getElementById('lockerGrid').innerHTML = Array.from({ length: 20 }, (_, i) => {
                 const name = App.lockerName(i + 1), x = by[name], [lb, cls] = ST[(x && x.trang_thai) || 'trong'] || ['Không rõ', 'bg-slate-50 border-slate-200 text-slate-600'];
-                return `<div class="rounded-none border-2 p-3 text-center ${cls}"><p class="text-xl">🗄️</p><p class="font-black text-sm">${name}</p><p class="text-[11px] font-semibold">${lb}</p></div>`;
+                return `<div class="rounded-none border-2 p-3 text-center ${cls}"><p class="text-xl"></p><p class="font-black text-sm">${name}</p><p class="text-[11px] font-semibold">${lb}</p></div>`;
             }).join('');
         }
         function renderFines() {

@@ -119,7 +119,7 @@
                 <button onclick="closeReturnSession()" class="px-3 py-1 text-xs bg-slate-700 hover:bg-rose-600 font-bold transition">Hủy</button>
             </div>
             <p class="text-xs text-slate-300">Vui lòng đưa mã vạch (Barcode) sau sách vào khung camera phía trên để đối soát.</p>
-            <div class="flex items-start gap-2 bg-violet-900/30 border border-violet-500/50 text-violet-200 text-xs p-3"><span aria-hidden="true">📷</span><span>Camera ở khung quét phía trên đã <b>tự chuyển sang chế độ quét mã vạch</b>. Đưa mã vạch sau gáy sách vào khung đó, hoặc dùng nút giả lập bên dưới. Quét xong, camera tự quay về quét QR.</span></div>
+            <div class="flex items-start gap-2 bg-violet-900/30 border border-violet-500/50 text-violet-200 text-xs p-3"><span aria-hidden="true"></span><span>Camera ở khung quét phía trên đã <b>tự chuyển sang chế độ quét mã vạch</b>. Đưa mã vạch sau gáy sách vào khung đó, hoặc dùng nút giả lập bên dưới. Quét xong, camera tự quay về quét QR.</span></div>
             <div id="retRows" class="space-y-2"></div>
             <div class="space-y-2">
                 <p class="text-[11px] font-semibold text-slate-400">Giả lập quét mã vạch (mã có sẵn trong kho):</p>
@@ -258,7 +258,7 @@
 
         const FV = () => firebase.firestore.FieldValue.serverTimestamp();
         const BLOCK = {
-            cho_soan: n => `⚠️ Thủ thư chưa nạp sách vào ${n}. Vui lòng quay lại sau khi nhận được thông báo!`,
+            cho_soan: n => `Thủ thư chưa nạp sách vào ${n}. Vui lòng quay lại sau khi nhận được thông báo!`,
             da_nhan: n => `Đơn sách tại ${n} đã được nhận trước đó!`,
             da_huy_do_qua_han: n => `Đơn sách tại ${n} đã bị thu hồi do quá hạn lấy!`
         };
@@ -296,7 +296,7 @@
                 });
                 if (out.err) return showNotice(out.err, "error");
                 openedLockerName = out.name;
-                showNotice(`🔓 ĐANG MỞ ${out.name}! Sinh viên hãy lấy ${out.n} cuốn sách.`, "success");
+                showNotice(`ĐANG MỞ ${out.name}! Sinh viên hãy lấy ${out.n} cuốn sách.`, "success");
                 $('manualInput').value = '';
                 releaseLockerLater(out.name, 'trong', null);
             } catch (err) { console.error(err); showNotice("Lỗi nhận sách: " + err.message, "error"); }
@@ -402,7 +402,7 @@
                 if (out.err) { showNotice(out.err, "error"); return closeReturnSession(); }
                 closeReturnSession();
                 openedLockerName = out.name;
-                showNotice(`🔓 ĐANG MỞ ${out.name}! Hãy đặt ${out.n} cuốn sách vào hộc và đóng cửa tủ.`, "success");
+                showNotice(`ĐANG MỞ ${out.name}! Hãy đặt ${out.n} cuốn sách vào hộc và đóng cửa tủ.`, "success");
                 releaseLockerLater(out.name, 'chua_sach_tra', s.token);
             } catch (err) { console.error(err); s.busy = false; pay.disabled = false; showNotice("Lỗi trả sách: " + err.message, "error"); }
         }
