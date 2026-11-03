@@ -11,7 +11,6 @@
 .dash-nav:hover{background:#fff7ed;color:#c2410c;transform:translateX(2px)}
 .dash-nav.active{background:linear-gradient(90deg,#ea580c,#f59e0b);color:#fff;box-shadow:0 6px 14px rgba(234,88,12,.28);transform:none}
 .dark .dash-nav{color:#cbd5e1}.dark .dash-nav:hover{background:#1e293b;color:#fff}.dark .dash-nav.active{color:#fff}
-.dash-nav .em{font-size:18px;width:24px;text-align:center}
 .dash-nav .badge{margin-left:auto;min-width:22px;padding:1px 7px;border-radius:999px;background:#fee2e2;color:#b91c1c;font-size:11px;font-weight:800;text-align:center}
 .dash-nav .badge.zero{opacity:.4}
 .dash-nav.active .badge{background:#fff;color:#c2410c}
