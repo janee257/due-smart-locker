@@ -401,7 +401,7 @@
             $('fineQr').src = FINE_PAYMENT_CONFIG.generateQrUrl(ret.total, ret.mssv, memoCode);
             $('fineAmount').innerText = vnd(ret.total);
             $('fineInfo').innerHTML = [['Ngân hàng', FINE_PAYMENT_CONFIG.bankName], ['Số tài khoản', FINE_PAYMENT_CONFIG.accountNo], ['Chủ tài khoản', FINE_PAYMENT_CONFIG.accountName],
-                ['Nội dung CK', FINE_PAYMENT_CONFIG.memo(ret.mssv, memoCode)], ['Cách tính', late.map(r => `${r.days} ngày × ${vnd(FINE_PER_DAY)}`).join(' + ')]]
+                ['Nội dung CK', FINE_PAYMENT_CONFIG.memo(ret.mssv, memoCode)]]
                 .map(([k, v]) => `<div class="flex justify-between gap-3"><span class="text-slate-400">${k}</span><b class="text-right text-white">${escH(v)}</b></div>`).join('');
             
             $('finePanel').classList.remove('hidden');
