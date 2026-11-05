@@ -286,7 +286,7 @@
                     // Tự động nhận diện loại sách: nếu thuộc diện tham khảo thì 15 ngày, giáo trình 70 ngày
                     const isRefBook = (books) => books.some(b => (b.category || '').toLowerCase().includes('tham khảo') || (b.the_loai || '').toLowerCase().includes('tham khảo'));
                     const loanDays = isRefBook(o.books || []) ? App.LOAN.daysRef : App.LOAN.daysTextbook;
-                    const dueStr = App.addDays(App.today(), loanDays);
+                    const dueStr = App.addDays(App.today(), 70);
                     const books = o.books || [];
                     books.forEach((b, i) => tx.set(db.collection('borrowings').doc(`${s.id}_${i}`), {
                         order_id: s.id, mssv: o.mssv, ho_ten: o.ho_ten || 'Sinh viên DUE', book_id: b.book_id || null,
