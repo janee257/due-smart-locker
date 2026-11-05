@@ -104,7 +104,7 @@
                 <button onclick="switchTab('borrowed')" id="tabBtnBorrowed" class="dash-nav"><span>Đang mượn</span><span id="borrowedCount" class="badge zero">0</span></button>
                 <button onclick="switchTab('return')" id="tabBtnReturn" class="dash-nav"><span>Trả sách</span><span id="returnCount" class="badge zero">0</span></button>
                 <button onclick="switchTab('history')" id="tabBtnHistory" class="dash-nav"><span>Lịch sử mượn trả</span></button>
-                <button onclick="switchTab('fines')" id="tabBtnFines" class="dash-nav"><span>Nợ phạt & Thông báo</span><span id="finesCount" class="badge zero">0</span></button>
+                <button onclick="switchTab('fines')" id="tabBtnFines" class="dash-nav"><span>Thông báo</span><span id="finesCount" class="badge zero">0</span></button>
             </nav>
             <div class="p-3 border-t border-slate-100">
                 <button onclick="handleLogout()" class="dash-nav"><span>Đăng xuất</span></button>
@@ -614,8 +614,11 @@
                     const name = b.ten_sach || "Sách chưa đặt tên";
                     const left = Number(b.so_luong_con !== undefined ? b.so_luong_con : (b.so_luong || 1));
                     const g = grouped[name] || (grouped[name] = { id: doc.id, ten_sach: name, tac_gia: b.tac_gia || "Đang cập nhật",
-                        vi_tri_ke: b.vi_tri_ke || "Kệ chính", ma_vach: b.ma_vach || doc.id, loai_sach: b.loai_sach || 'giao_trinh', tong_so_luong: 0, so_luong_con: 0, _best: -1 });
-                    if (left > g._best) { g._best = left; g.id = doc.id; g.ma_vach = b.ma_vach || doc.id; }
+                        vi_tri_ke: b.vi_tri_ke || "Kệ chính", ma_vach: b.ma_vach || doc.id, mo_ta: b.mo_ta || "", loai_sach: b.loai_sach || 'giao_trinh', tong_so_luong: 0, so_luong_con: 0, _best: -1 });
+                        if (!g.mo_ta && b.mo_ta) {
+                            g.mo_ta = b.mo_ta;
+                        }
+                        if (left > g._best) { g._best = left; g.id = doc.id; g.ma_vach = b.ma_vach || doc.id; }
                     g.tong_so_luong += Number(b.so_luong || 1);
                     g.so_luong_con += left;
                 });
@@ -703,6 +706,45 @@
                     </div>
                 `;
             });
+            list.querySelectorAll('[data-book-detail]').forEach(btn => {
+                btn.addEventListener('click', () => {
+                    openBookDetails(btn.dataset.bookDetail);
+                });
+            });
+        }
+        function openBookDetails(bookId) {
+            const book = allBooks.find(b => b.id === bookId);
+            if (!book) return;
+
+            document.getElementById('bookDetailsTitle').textContent =
+                book.ten_sach;
+
+            document.getElementById('bookDetailsAuthor').textContent =
+                book.tac_gia || 'Đang cập nhật';
+
+            document.getElementById('bookDetailsBarcode').textContent =
+                book.ma_vach || '—';
+
+            document.getElementById('bookDetailsShelf').textContent =
+                book.vi_tri_ke || 'Đang cập nhật';
+
+            document.getElementById('bookDetailsStock').textContent =
+                book.so_luong_con > 0
+                    ? `Còn ${book.so_luong_con} cuốn`
+                    : 'Tạm hết';
+
+            document.getElementById('bookDetailsDescription').textContent =
+                book.mo_ta || 'Chưa cập nhật mô tả cho cuốn sách này.';
+
+            const dialog = document.getElementById('bookDetailsDialog');
+            dialog.classList.remove('hidden');
+            dialog.classList.add('flex');
+        }
+
+        function closeBookDetails() {
+            const dialog = document.getElementById('bookDetailsDialog');
+            dialog.classList.add('hidden');
+            dialog.classList.remove('flex');
         }
 
         // ---------- Gate 1 (BPMN): thẻ còn hạn, nợ phạt = 0 đ, số sách đang giữ ≤ 3 cuốn. Sai => Task T1.Ex ----------
@@ -941,7 +983,14 @@
                                 <span class="text-[10px] font-mono bg-blue-50 text-blue-700 px-2 py-0.5 rounded font-bold">${b.ma_vach}</span>
                                 ${statusBadge}
                             </div>
-                            <h4 class="font-bold text-slate-800 text-xs sm:text-sm leading-snug">${b.ten_sach}</h4>
+                            <button
+                                type="button"
+                                data-book-detail="${esc(b.id)}"
+                                class="book-detail-trigger block text-left w-full font-bold text-slate-800 text-xs sm:text-sm leading-snug hover:text-orange-600 hover:underline"
+                                title="Xem thông tin sách"
+                            >
+                                ${esc(b.ten_sach)}
+                            </button>
                             <p class="text-[11px] text-slate-400">Ngày mượn: <b>${b.ngay_muon || 'Hôm nay'}</b></p>
                             <p class="text-[11px] text-slate-600">Hạn trả: <b class="text-orange-600">${b.han_tra}</b></p>
                             ${b.trang_thai === 'cho_kiem_tra' ? `<p class="text-[10px] text-blue-600 font-semibold mt-1">Đã đặt vào ${b.so_hoc_tra || 'hộc tủ'}, chờ Thủ thư nghiệm thu.</p>` : ''}
@@ -1419,5 +1468,80 @@ function updateCalendarSelectionUI() {
             fetchBorrowedBooks();
         }
     </script>
+    
+<!-- Cửa sổ thông tin chi tiết sách -->
+<div id="bookDetailsDialog"
+     class="hidden fixed inset-0 z-[100] items-center justify-center bg-slate-900/60 p-4"
+     role="dialog"
+     aria-modal="true"
+     aria-labelledby="bookDetailsTitle"
+     onclick="if(event.target === this) closeBookDetails()">
+
+    <div class="w-full max-w-lg bg-white shadow-2xl max-h-[85vh] overflow-y-auto">
+
+        <div class="flex items-start justify-between gap-3 p-5 border-b">
+            <div>
+                <p class="text-xs font-semibold text-orange-600 uppercase">
+                    Thông tin sách
+                </p>
+                <h3 id="bookDetailsTitle"
+                    class="text-lg font-extrabold text-slate-900 mt-1">
+                </h3>
+            </div>
+
+            <button type="button"
+                    onclick="closeBookDetails()"
+                    class="text-slate-500 hover:text-slate-900 text-xl px-2">
+                &times;
+            </button>
+        </div>
+
+        <div class="p-5 space-y-4 text-sm text-slate-700">
+
+            <div class="grid grid-cols-2 gap-4 text-xs">
+
+                <div>
+                    <p class="text-slate-400">Tác giả</p>
+                    <p id="bookDetailsAuthor" class="font-semibold mt-1"></p>
+                </div>
+
+                <div>
+                    <p class="text-slate-400">Mã sách</p>
+                    <p id="bookDetailsBarcode" class="font-semibold mt-1"></p>
+                </div>
+
+                <div>
+                    <p class="text-slate-400">Vị trí kệ</p>
+                    <p id="bookDetailsShelf" class="font-semibold mt-1"></p>
+                </div>
+
+                <div>
+                    <p class="text-slate-400">Tình trạng</p>
+                    <p id="bookDetailsStock" class="font-semibold mt-1"></p>
+                </div>
+
+            </div>
+
+            <div class="border-t pt-4">
+                <h4 class="font-bold text-slate-800 mb-2">
+                    Mô tả nội dung
+                </h4>
+
+                <p id="bookDetailsDescription"
+                   class="whitespace-pre-line leading-relaxed text-slate-600">
+                </p>
+            </div>
+
+            <div class="text-right">
+                <button type="button"
+                        onclick="closeBookDetails()"
+                        class="px-4 py-2 bg-orange-600 hover:bg-orange-700 text-white text-xs font-bold">
+                    Đóng
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
 </body>
 </html>
