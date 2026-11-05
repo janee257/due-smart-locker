@@ -232,47 +232,7 @@
         
         <!-- ================= XỬ LÝ PHẠT & THU PHÍ ================= -->
         <div id="libTabContentFines" class="hidden space-y-4">
-            <!-- Bổ sung khối Đối soát Thanh toán Phạt vào modal hoặc bảng chi tiết đơn trả -->
-    <div id="reconcileSection" class="mt-4 p-4 rounded-xl bg-slate-800 border border-slate-700">
-        <div class="flex items-center justify-between mb-3">
-            <h4 class="font-semibold text-white flex items-center gap-2">
-                <span class="w-2.5 h-2.5 rounded-full bg-amber-400"></span>
-                Đối soát Thanh toán Phạt (SePAY / MB Bank)
-            </h4>
-            <span id="reconcileBadge" class="px-2.5 py-0.5 text-xs font-medium rounded-full bg-amber-500/20 text-amber-300">
-                Chờ thủ thư xác nhận
-            </span>
-        </div>
-        
-        <div class="grid grid-cols-2 gap-3 text-sm mb-4 bg-slate-900/50 p-3 rounded-lg border border-slate-800">
-            <div>
-                <span class="text-slate-400 block text-xs">Số tiền cần thu</span>
-                <b id="recAmount" class="text-rose-400 font-mono text-base">5.000 đ</b>
-            </div>
-            <div>
-                <span class="text-slate-400 block text-xs">Cú pháp tra cứu</span>
-                <code id="recSyntax" class="text-emerald-400 font-mono text-xs">PHAT 251121514110</code>
-            </div>
-        </div>
-
-        <div class="flex gap-2">
-            <button id="btnCheckSepay" onclick="checkSepayAuto()" class="flex-1 py-2 px-3 bg-indigo-600 hover:bg-indigo-500 text-white text-xs font-semibold rounded-lg flex items-center justify-center gap-1.5 transition">
-                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/></svg>
-                Kiểm tra SePAY tự động
-            </button>
-            <button id="btnManualConfirm" onclick="confirmPaymentManual()" class="flex-1 py-2 px-3 bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-semibold rounded-lg flex items-center justify-center gap-1.5 transition">
-                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>
-                Thủ thư duyệt đã thu tiền
-            </button>
-        </div>
-    </div>
-            <section class="bg-white p-5 rounded-none border border-slate-200 shadow-sm overflow-x-auto">
-                <table class="w-full text-left text-sm">
-                    <thead><tr class="text-xs text-slate-500 font-bold border-b bg-slate-50"><th class="p-3">MSSV</th><th class="p-3">Sách</th><th class="p-3">Lý do</th><th class="p-3">Số tiền</th><th class="p-3 text-right">Thu phí</th></tr></thead>
-                    <tbody id="finesTableBody" class="divide-y divide-slate-100"></tbody>
-                </table>
-            </section>
-        </div>
+            
 
         <!-- ================= TAB 3: KHO SÁCH ================= -->
         <div id="libTabContentWarehouse" class="hidden space-y-6">
@@ -329,6 +289,65 @@
                 <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3" id="librarianBooksGrid"></div>
             </section>
         </div>
+        <!-- Modal Đối Soát Thanh Toán Phạt (Pop-up Chính Giữa Màn Hình) -->
+<div id="reconcileModal" class="hidden fixed inset-0 bg-black/60 z-50 flex items-center justify-center p-4 backdrop-blur-sm">
+    <div class="bg-white w-full max-w-md rounded-none p-6 space-y-4 shadow-xl border border-slate-200">
+        <div class="flex justify-between items-center border-b pb-3">
+            <h3 class="font-bold text-slate-800 text-sm flex items-center gap-2">
+                <i class="fa-solid fa-qrcode text-orange-600"></i>
+                Đối Soát & Xác Nhận Thu Phạt
+            </h3>
+            <button onclick="closeReconcileModal()" class="text-slate-400 hover:text-slate-600"><i class="fa-solid fa-xmark text-lg"></i></button>
+        </div>
+
+        <div class="space-y-3 text-xs">
+            <input type="hidden" id="recBorrowId">
+            <div>
+                <label class="block font-bold text-slate-700 mb-1">Sinh viên vi phạm:</label>
+                <div class="p-2.5 bg-slate-50 border border-slate-200 flex justify-between items-center">
+                    <span id="recStudentName" class="font-bold text-slate-800">Phạm Nhật Hạ</span>
+                    <span id="recMssv" class="font-mono text-orange-600 font-bold">251121514110</span>
+                </div>
+            </div>
+
+            <div>
+                <label class="block font-bold text-slate-700 mb-1">Tài liệu nộp phạt:</label>
+                <div id="recBookTitle" class="p-2.5 bg-slate-50 border border-slate-200 font-semibold text-slate-800">
+                    An toàn và Bảo mật Hệ thống Thông tin
+                </div>
+            </div>
+
+            <div class="grid grid-cols-2 gap-2">
+                <div>
+                    <label class="block font-bold text-slate-700 mb-1">Số tiền phạt:</label>
+                    <div id="recAmount" class="p-2.5 bg-rose-50 border border-rose-200 font-black text-rose-600 text-sm font-mono">
+                        5.000 đ
+                    </div>
+                </div>
+                <div>
+                    <label class="block font-bold text-slate-700 mb-1">Cú pháp chuyển khoản:</label>
+                    <div id="recSyntax" class="p-2.5 bg-emerald-50 border border-emerald-200 font-mono text-emerald-700 font-bold text-xs truncate">
+                        PHAT 251121514110
+                    </div>
+                </div>
+            </div>
+
+            <div id="recStatusNotice" class="p-3 bg-amber-50 border border-amber-200 text-amber-800 text-[11px] leading-relaxed rounded-none">
+                <i class="fa-solid fa-circle-info mr-1 text-amber-600"></i>
+                Vui lòng kiểm tra biến động số dư tài khoản MB Bank trước khi nhấn xác nhận thu phí.
+            </div>
+
+            <div class="pt-3 flex gap-2">
+                <button type="button" onclick="closeReconcileModal()" class="flex-1 py-2.5 bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold transition">
+                    Đóng
+                </button>
+                <button type="button" id="btnConfirmPay" onclick="submitConfirmPayment()" class="flex-1 py-2.5 bg-emerald-600 hover:bg-emerald-700 text-white font-bold shadow-md transition flex items-center justify-center gap-1.5">
+                    <i class="fa-solid fa-check"></i> Xác nhận Đã Thu
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
     </main>
     </div>
 
@@ -519,17 +538,24 @@
                 return `<div class="rounded-none border-2 p-3 text-center ${cls}"><p class="text-xl"></p><p class="font-black text-sm">${name}</p><p class="text-[11px] font-semibold">${lb}</p></div>`;
             }).join('');
         }
-        function renderFines() {
+            function renderFines() {
             const rows = dashBorrows.filter(b => Number(b.tien_phat) > 0).sort((a, b) => (a.da_thu_phi ? 1 : 0) - (b.da_thu_phi ? 1 : 0));
             setBadge('navFines', rows.filter(b => !b.da_thu_phi).length);
             document.getElementById('finesTableBody').innerHTML = rows.length ? rows.map(b => `<tr>
-                <td class="p-3 font-mono text-xs">${esc(b.mssv)}</td><td class="p-3 font-semibold">${esc(b.ten_sach)}</td><td class="p-3 text-xs text-slate-500">${esc(b.ghi_chu_phat || '')}</td>
-                <td class="p-3 font-black text-rose-600">${money(b.tien_phat)}</td>
-                <td class="p-3 text-right">${b.da_thu_phi ? '<span class="text-xs font-bold text-emerald-600">Đã thu</span>'
-                    : `<button onclick="collectFine('${esc(b.id)}')" class="px-3 py-1.5 bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold rounded-sm transition">Xác nhận đã thu</button>`}</td></tr>`).join('')
+                <td class="p-3 font-mono text-xs">${esc(b.mssv)}</td>
+                <td class="p-3 font-semibold text-xs">${esc(b.ten_sach)}</td>
+                <td class="p-3 text-xs text-slate-500">${esc(b.ghi_chu_phat || 'Quá hạn trả sách')}</td>
+                <td class="p-3 font-black text-rose-600 font-mono">${money(b.tien_phat)}</td>
+                <td class="p-3 text-right">
+                    ${b.da_thu_phi 
+                        ? '<span class="inline-flex items-center gap-1 text-xs font-bold text-emerald-600 bg-emerald-50 px-2 py-1 border border-emerald-200"><i class="fa-solid fa-check-double"></i> Đã thu tiền</span>'
+                        : `<button onclick="openReconcileModal('${esc(b.id)}', '${esc(b.mssv)}', '${esc(b.ho_ten || 'Sinh viên')}', '${esc(b.ten_sach)}', ${b.tien_phat})" class="px-3 py-1.5 bg-orange-600 hover:bg-orange-700 text-white text-xs font-bold rounded-none shadow-sm transition flex items-center gap-1 ml-auto">
+                            <i class="fa-solid fa-file-invoice-dollar"></i> Đối soát & Thu phí
+                           </button>`}
+                </td></tr>`).join('')
                 : '<tr><td colspan="5" class="p-8 text-center text-sm text-slate-400">Không có khoản phạt nào.</td></tr>';
         }
-        async function collectFine(id) {
+            async function collectFine(id) {
             return App.guard('fine:' + id, async () => {
                 try {
                     await db.collection('borrowings').doc(id).update({ da_thu_phi: true, ngay_thu_phi: App.FV.serverTimestamp() });
@@ -1240,42 +1266,52 @@ let currentReturnId = null;
 let currentReturnData = null;
 
 // Hàm thủ thư bấm kiểm tra biến động giao dịch thực tế từ SePAY
-async function checkSepayAuto() {
-    const btn = $('btnCheckSepay');
-    btn.disabled = true;
-    btn.innerText = 'Đang tra cứu SePAY...';
-
-    try {
-        // Cú pháp cần tìm trong nội dung chuyển khoản
-        const searchPattern = `PHAT ${currentReturnData.mssv}`;
-        
-        // Gọi API SePAY lấy danh sách giao dịch gần nhất
-        const res = await fetch(`https://my.sepay.vn/userapi/transactions/list?account_number=${SEPAY_CONFIG.accountNumber}&limit=20`, {
-            headers: { 'Authorization': `Bearer ${SEPAY_CONFIG.apiToken}` }
-        });
-        const data = await res.json();
-        
-        // Tìm giao dịch khớp cú pháp và khớp số tiền phạt
-        const match = data.transactions?.find(tx => 
-            tx.transaction_content.includes(searchPattern) && 
-            parseFloat(tx.amount_in) >= (currentReturnData.tien_phat_thu || 0)
-        );
-
-        if (match) {
-            showToast.success('Tìm thấy giao dịch!', `Mã GD: ${match.reference_number} (+${vnd(match.amount_in)})`);
-            await applyPaymentSuccess(match.reference_number);
-        } else {
-            showToast.warning('Chưa thấy giao dịch', 'Chưa có biến động số dư khớp cú pháp trên tài khoản.');
+// Mở Pop-up modal đối soát chính giữa màn hình
+        function openReconcileModal(borrowId, mssv, name, bookTitle, amount) {
+            document.getElementById('recBorrowId').value = borrowId;
+            document.getElementById('recMssv').innerText = mssv;
+            document.getElementById('recStudentName').innerText = name;
+            document.getElementById('recBookTitle').innerText = bookTitle;
+            document.getElementById('recAmount').innerText = (amount || 0).toLocaleString('vi-VN') + ' đ';
+            document.getElementById('recSyntax').innerText = `PHAT ${mssv}`;
+            document.getElementById('reconcileModal').classList.remove('hidden');
         }
-    } catch (e) {
-        console.warn('Lỗi gọi API SePAY trực tiếp (CORS), chuyển sang duyệt bằng tay:', e);
-        showToast.info('Thông báo', 'Bạn có thể kiểm tra tin nhắn ngân hàng và bấm "Thủ thư duyệt đã thu tiền".');
-    } finally {
-        btn.disabled = false;
-        btn.innerText = 'Kiểm tra SePAY tự động';
-    }
-}
 
+        function closeReconcileModal() {
+            document.getElementById('reconcileModal').classList.add('hidden');
+        }
+
+        // Thủ thư nhấn nút duyệt trong Modal
+        async function submitConfirmPayment() {
+            const borrowId = document.getElementById('recBorrowId').value;
+            if (!borrowId) return;
+
+            const btn = document.getElementById('btnConfirmPay');
+            btn.disabled = true;
+            btn.innerText = 'Đang xử lý...';
+
+            try {
+                // Cập nhật trạng thái đã thu tiền vào bảng borrowings
+                await db.collection('borrowings').doc(borrowId).update({
+                    da_thu_phi: true,
+                    ngay_thu_phi: firebase.firestore.FieldValue.serverTimestamp(),
+                    nguoi_thu_phi: 'Thủ thư trực'
+                });
+
+                closeReconcileModal();
+                if (window.showToast) {
+                    showToast.success('Thành công', 'Đã ghi nhận thu phạt thành công vào hệ thống!');
+                } else {
+                    alert('Đã ghi nhận thu phạt thành công!');
+                }
+            } catch (err) {
+                console.error("Lỗi cập nhật thu phí:", err);
+                alert("Lỗi khi cập nhật thu phí: " + err.message);
+            } finally {
+                btn.disabled = false;
+                btn.innerHTML = '<i class="fa-solid fa-check"></i> Xác nhận Đã Thu';
+            }
+        }
 // Hàm thủ thư duyệt tay khi thấy tiền đã vào MB Bank
 async function confirmPaymentManual() {
     if (!confirm('Xác nhận đã nhận đủ tiền phạt của sinh viên vào tài khoản?')) return;
