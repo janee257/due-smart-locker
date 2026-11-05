@@ -688,7 +688,7 @@
                                     ${isAvailable ? `Còn: ${b.so_luong_con} cuốn` : 'Tạm hết'}
                                 </span>
                             </div>
-                            <h4 class="font-bold text-slate-800 text-xs sm:text-sm leading-snug">${b.ten_sach}</h4>
+                            <button type="button" data-book-detail="${esc(b.id)}" class="block w-full text-left font-bold text-slate-800 text-xs sm:text-sm leading-snug hover:text-orange-600 hover:underline" title="Xem thông tin sách">${esc(b.ten_sach)}</button>
                             <p class="text-[11px] text-slate-400">${b.tac_gia} • <span class="text-orange-600 font-semibold">${b.vi_tri_ke}</span></p>
                         </div>
 
@@ -983,14 +983,7 @@
                                 <span class="text-[10px] font-mono bg-blue-50 text-blue-700 px-2 py-0.5 rounded font-bold">${b.ma_vach}</span>
                                 ${statusBadge}
                             </div>
-                            <button
-                                type="button"
-                                data-book-detail="${esc(b.id)}"
-                                class="book-detail-trigger block text-left w-full font-bold text-slate-800 text-xs sm:text-sm leading-snug hover:text-orange-600 hover:underline"
-                                title="Xem thông tin sách"
-                            >
-                                ${esc(b.ten_sach)}
-                            </button>
+                            <p class="font-bold text-slate-800 text-xs sm:text-sm leading-snug">${esc(b.ten_sach)}</p>
                             <p class="text-[11px] text-slate-400">Ngày mượn: <b>${b.ngay_muon || 'Hôm nay'}</b></p>
                             <p class="text-[11px] text-slate-600">Hạn trả: <b class="text-orange-600">${b.han_tra}</b></p>
                             ${b.trang_thai === 'cho_kiem_tra' ? `<p class="text-[10px] text-blue-600 font-semibold mt-1">Đã đặt vào ${b.so_hoc_tra || 'hộc tủ'}, chờ Thủ thư nghiệm thu.</p>` : ''}
