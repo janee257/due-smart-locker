@@ -553,7 +553,7 @@
             const L = App.LOAN, t = App.today(), used = Number(b.so_lan_gia_han) || 0, from = App.addDays(b.han_tra, -L.extendWindowDays);
             if (used >= L.maxExtensions) return { ok: false, msg: `Đã gia hạn ${used}/${L.maxExtensions} lần` };
             if (t > b.han_tra) return { ok: false, msg: 'Đã quá hạn, không thể gia hạn' };
-            if (t < from) return { ok: false, msg: `Được gia hạn từ ${dmy(from)} (trước hạn ${L.extendWindowDays} ngày)` };
+            if (t < from) return { ok: false, msg: `Được gia hạn từ ${dmy(from)}` };
             return { ok: true };
         }
         function extendHtml(b) {
