@@ -4,7 +4,6 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>DUE Smart Locker - Quản Trị Thủ Thư</title>
-    <!-- ĐỔI BIỂU TƯỢNG FAVICON SANG LOGO DUE -->
     <link rel="icon" type="image/png" href="https://due.udn.vn/Portals/0/logo-due.png">
     <link rel="shortcut icon" type="image/png" href="https://due.udn.vn/Portals/0/logo-due.png">
     <script src="https://cdn.tailwindcss.com"></script>
@@ -82,11 +81,11 @@
         </div>
         <nav class="p-3 space-y-1.5 flex-1">
             <button onclick="switchLibTab('orders')" id="libTabBtnOrders" class="dash-nav"><span>Chờ soạn sách / Nạp hộc</span><span id="navOrders" class="badge zero">0</span></button>
-                <button onclick="switchLibTab('inspect')" id="libTabBtnInspect" class="dash-nav"><span>Nghiệm thu trả sách</span><span id="navInspect" class="badge zero">0</span></button>
-                <button onclick="switchLibTab('lockers')" id="libTabBtnLockers" class="dash-nav"><span>Giám sát hộc tủ</span></button>
-                <button onclick="switchLibTab('warehouse')" id="libTabBtnWarehouse" class="dash-nav"><span>Quản lý kho sách</span></button>
-                <button onclick="switchLibTab('fines')" id="libTabBtnFines" class="dash-nav"><span>Xử lý phạt & Thu phí</span><span id="navFines" class="badge zero">0</span></button>
-                <button onclick="switchLibTab('borrows')" id="libTabBtnBorrows" class="dash-nav"><span>Danh sách mượn trả</span><span id="totalActiveBorrowBadge" class="badge zero">0</span></button>
+            <button onclick="switchLibTab('inspect')" id="libTabBtnInspect" class="dash-nav"><span>Nghiệm thu trả sách</span><span id="navInspect" class="badge zero">0</span></button>
+            <button onclick="switchLibTab('lockers')" id="libTabBtnLockers" class="dash-nav"><span>Giám sát hộc tủ</span></button>
+            <button onclick="switchLibTab('warehouse')" id="libTabBtnWarehouse" class="dash-nav"><span>Quản lý kho sách</span></button>
+            <button onclick="switchLibTab('fines')" id="libTabBtnFines" class="dash-nav"><span>Xử lý phạt & Thu phí</span><span id="navFines" class="badge zero">0</span></button>
+            <button onclick="switchLibTab('borrows')" id="libTabBtnBorrows" class="dash-nav"><span>Danh sách mượn trả</span><span id="totalActiveBorrowBadge" class="badge zero">0</span></button>
             <span id="totalOrdersBadge" class="hidden"></span>
         </nav>
     </aside>
@@ -98,7 +97,10 @@
     </div>
     <main class="max-w-6xl mx-auto p-4 sm:p-6 space-y-6">
         <div class="grid grid-cols-2 xl:grid-cols-4 gap-3">
-            <div class="bg-white rounded-none border border-slate-200 shadow-sm p-4 flex items-center gap-3"><div class="w-11 h-11 rounded-none bg-amber-100 flex items-center justify-center text-xl"></div><div class="min-w-0"><p class="text-[11px] text-slate-500 font-semibold">Đơn cần soạn</p><p id="kpiOrders" class="text-xl font-black text-slate-800 truncate">0</p></div></div><div class="bg-white rounded-none border border-slate-200 shadow-sm p-4 flex items-center gap-3"><div class="w-11 h-11 rounded-none bg-blue-100 flex items-center justify-center text-xl"></div><div class="min-w-0"><p class="text-[11px] text-slate-500 font-semibold">Sách đang mượn ngoài</p><p id="kpiBorrow" class="text-xl font-black text-slate-800 truncate">0</p></div></div><div class="bg-white rounded-none border border-slate-200 shadow-sm p-4 flex items-center gap-3"><div class="w-11 h-11 rounded-none bg-emerald-100 flex items-center justify-center text-xl"></div><div class="min-w-0"><p class="text-[11px] text-slate-500 font-semibold">Hộc tủ đang trống</p><p id="kpiLockers" class="text-xl font-black text-slate-800 truncate">0</p></div></div><div class="bg-white rounded-none border border-slate-200 shadow-sm p-4 flex items-center gap-3"><div class="w-11 h-11 rounded-none bg-rose-100 flex items-center justify-center text-xl"></div><div class="min-w-0"><p class="text-[11px] text-slate-500 font-semibold">Tiền phạt chưa thu</p><p id="kpiFines" class="text-xl font-black text-slate-800 truncate">0</p></div></div>
+            <div class="bg-white rounded-none border border-slate-200 shadow-sm p-4 flex items-center gap-3"><div class="w-11 h-11 rounded-none bg-amber-100 flex items-center justify-center text-xl"></div><div class="min-w-0"><p class="text-[11px] text-slate-500 font-semibold">Đơn cần soạn</p><p id="kpiOrders" class="text-xl font-black text-slate-800 truncate">0</p></div></div>
+            <div class="bg-white rounded-none border border-slate-200 shadow-sm p-4 flex items-center gap-3"><div class="w-11 h-11 rounded-none bg-blue-100 flex items-center justify-center text-xl"></div><div class="min-w-0"><p class="text-[11px] text-slate-500 font-semibold">Sách đang mượn ngoài</p><p id="kpiBorrow" class="text-xl font-black text-slate-800 truncate">0</p></div></div>
+            <div class="bg-white rounded-none border border-slate-200 shadow-sm p-4 flex items-center gap-3"><div class="w-11 h-11 rounded-none bg-emerald-100 flex items-center justify-center text-xl"></div><div class="min-w-0"><p class="text-[11px] text-slate-500 font-semibold">Hộc tủ đang trống</p><p id="kpiLockers" class="text-xl font-black text-slate-800 truncate">0</p></div></div>
+            <div class="bg-white rounded-none border border-slate-200 shadow-sm p-4 flex items-center gap-3"><div class="w-11 h-11 rounded-none bg-rose-100 flex items-center justify-center text-xl"></div><div class="min-w-0"><p class="text-[11px] text-slate-500 font-semibold">Tiền phạt chưa thu</p><p id="kpiFines" class="text-xl font-black text-slate-800 truncate">0</p></div></div>
         </div>
         <div class="flex flex-wrap items-center justify-between gap-2">
             <h2 id="libPageTitle" class="text-lg font-black text-slate-800">Chờ soạn sách / Nạp hộc</h2>
@@ -137,11 +139,10 @@
                     </table>
                 </div>
             </section>
-
         </div>
 
+        <!-- ================= NGHIỆM THU TRẢ SÁCH ================= -->
         <div id="libTabContentInspect" class="hidden space-y-6">
-            <!-- BẢNG SÁCH CHỜ KIỂM TRA -->
             <section class="bg-white p-5 rounded-none border border-blue-200 shadow-sm space-y-4">
                 <div class="flex justify-between items-center border-b pb-3">
                     <div>
@@ -190,23 +191,7 @@
                         <input type="search" id="borrowSearchInput" oninput="renderActiveBorrowsTable()" placeholder="Nhập MSSV, Họ tên hoặc Tên sách để tìm..." 
                                class="w-full pl-10 pr-4 py-2 bg-white border border-slate-200 rounded-none text-xs sm:text-sm outline-none focus:ring-2 focus:ring-orange-500">
                     </div>
-                    <!-- ================= XỬ LÝ PHẠT & THU PHÍ ================= -->
-                    <div id="libTabContentFines" class="hidden space-y-4">
-                        <section class="bg-white p-5 rounded-none border border-slate-200 shadow-sm overflow-x-auto">
-                            <table class="w-full text-left text-sm">
-                                <thead>
-                                    <tr class="text-xs text-slate-500 font-bold border-b bg-slate-50">
-                                        <th class="p-3">MSSV</th>
-                                        <th class="p-3">Sách</th>
-                                        <th class="p-3">Lý do</th>
-                                        <th class="p-3">Số tiền</th>
-                                        <th class="p-3 text-right">Thu phí</th>
-                                    </tr>
-                                </thead>
-                                <tbody id="finesTableBody" class="divide-y divide-slate-100"></tbody>
-                            </table>
-                        </section>
-                    </div>
+
                     <div class="flex items-center gap-2">
                         <div class="flex items-center gap-1.5 bg-white border border-slate-200 px-3 py-2 rounded-none text-xs">
                             <i class="fa-solid fa-filter text-orange-600"></i>
@@ -248,7 +233,29 @@
         
         <!-- ================= XỬ LÝ PHẠT & THU PHÍ ================= -->
         <div id="libTabContentFines" class="hidden space-y-4">
-            
+            <section class="bg-white p-5 rounded-none border border-slate-200 shadow-sm overflow-x-auto">
+                <div class="flex justify-between items-center border-b pb-3 mb-4">
+                    <div>
+                        <h2 class="text-base font-bold flex items-center gap-2 text-rose-600">
+                            <i class="fa-solid fa-file-invoice-dollar"></i> DANH SÁCH VI PHẠM & ĐỐI SOÁT PHẠT
+                        </h2>
+                        <p class="text-xs text-slate-400 mt-0.5">Xác nhận thu tiền phạt quá hạn hoặc vi phạm quy chế mượn trả</p>
+                    </div>
+                </div>
+                <table class="w-full text-left text-sm">
+                    <thead>
+                        <tr class="text-xs text-slate-500 font-bold border-b bg-slate-50">
+                            <th class="p-3">MSSV</th>
+                            <th class="p-3">Sách</th>
+                            <th class="p-3">Lý do</th>
+                            <th class="p-3">Số tiền</th>
+                            <th class="p-3 text-right">Thu phí</th>
+                        </tr>
+                    </thead>
+                    <tbody id="finesTableBody" class="divide-y divide-slate-100"></tbody>
+                </table>
+            </section>
+        </div>
 
         <!-- ================= TAB 3: KHO SÁCH ================= -->
         <div id="libTabContentWarehouse" class="hidden space-y-6">
@@ -305,66 +312,61 @@
                 <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3" id="librarianBooksGrid"></div>
             </section>
         </div>
-        <!-- Modal Đối Soát Thanh Toán Phạt (Pop-up Chính Giữa Màn Hình) -->
-<div id="reconcileModal" class="hidden fixed inset-0 bg-black/60 z-50 flex items-center justify-center p-4 backdrop-blur-sm">
-    <div class="bg-white w-full max-w-md rounded-none p-6 space-y-4 shadow-xl border border-slate-200">
-        <div class="flex justify-between items-center border-b pb-3">
-            <h3 class="font-bold text-slate-800 text-sm flex items-center gap-2">
-                <i class="fa-solid fa-qrcode text-orange-600"></i>
-                Đối Soát & Xác Nhận Thu Phạt
-            </h3>
-            <button onclick="closeReconcileModal()" class="text-slate-400 hover:text-slate-600"><i class="fa-solid fa-xmark text-lg"></i></button>
-        </div>
-
-        <div class="space-y-3 text-xs">
-            <input type="hidden" id="recBorrowId">
-            <div>
-                <label class="block font-bold text-slate-700 mb-1">Sinh viên vi phạm:</label>
-                <div class="p-2.5 bg-slate-50 border border-slate-200 flex justify-between items-center">
-                    <span id="recStudentName" class="font-bold text-slate-800">Phạm Nhật Hạ</span>
-                    <span id="recMssv" class="font-mono text-orange-600 font-bold">251121514110</span>
-                </div>
-            </div>
-
-            <div>
-                <label class="block font-bold text-slate-700 mb-1">Tài liệu nộp phạt:</label>
-                <div id="recBookTitle" class="p-2.5 bg-slate-50 border border-slate-200 font-semibold text-slate-800">
-                    An toàn và Bảo mật Hệ thống Thông tin
-                </div>
-            </div>
-
-            <div class="grid grid-cols-2 gap-2">
-                <div>
-                    <label class="block font-bold text-slate-700 mb-1">Số tiền phạt:</label>
-                    <div id="recAmount" class="p-2.5 bg-rose-50 border border-rose-200 font-black text-rose-600 text-sm font-mono">
-                        5.000 đ
-                    </div>
-                </div>
-                <div>
-                    <label class="block font-bold text-slate-700 mb-1">Cú pháp chuyển khoản:</label>
-                    <div id="recSyntax" class="p-2.5 bg-emerald-50 border border-emerald-200 font-mono text-emerald-700 font-bold text-xs truncate">
-                        PHAT 251121514110
-                    </div>
-                </div>
-            </div>
-
-            <div id="recStatusNotice" class="p-3 bg-amber-50 border border-amber-200 text-amber-800 text-[11px] leading-relaxed rounded-none">
-                <i class="fa-solid fa-circle-info mr-1 text-amber-600"></i>
-                Vui lòng kiểm tra biến động số dư tài khoản MB Bank trước khi nhấn xác nhận thu phí.
-            </div>
-
-            <div class="pt-3 flex gap-2">
-                <button type="button" onclick="closeReconcileModal()" class="flex-1 py-2.5 bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold transition">
-                    Đóng
-                </button>
-                <button type="button" id="btnConfirmPay" onclick="submitConfirmPayment()" class="flex-1 py-2.5 bg-emerald-600 hover:bg-emerald-700 text-white font-bold shadow-md transition flex items-center justify-center gap-1.5">
-                    <i class="fa-solid fa-check"></i> Xác nhận Đã Thu
-                </button>
-            </div>
-        </div>
-    </div>
-</div>
     </main>
+    </div>
+
+    <!-- Modal Đối Soát Thanh Toán Phạt (Pop-up Chính Giữa Màn Hình) -->
+    <div id="reconcileModal" class="hidden fixed inset-0 bg-black/60 z-50 flex items-center justify-center p-4 backdrop-blur-sm">
+        <div class="bg-white w-full max-w-md rounded-none p-6 space-y-4 shadow-xl border border-slate-200">
+            <div class="flex justify-between items-center border-b pb-3">
+                <h3 class="font-bold text-slate-800 text-sm flex items-center gap-2">
+                    <i class="fa-solid fa-qrcode text-orange-600"></i>
+                    Đối Soát & Xác Nhận Thu Phạt
+                </h3>
+                <button onclick="closeReconcileModal()" class="text-slate-400 hover:text-slate-600"><i class="fa-solid fa-xmark text-lg"></i></button>
+            </div>
+
+            <div class="space-y-3 text-xs">
+                <input type="hidden" id="recBorrowId">
+                <div>
+                    <label class="block font-bold text-slate-700 mb-1">Sinh viên vi phạm:</label>
+                    <div class="p-2.5 bg-slate-50 border border-slate-200 flex justify-between items-center">
+                        <span id="recStudentName" class="font-bold text-slate-800">Sinh viên</span>
+                        <span id="recMssv" class="font-mono text-orange-600 font-bold">--</span>
+                    </div>
+                </div>
+
+                <div>
+                    <label class="block font-bold text-slate-700 mb-1">Tài liệu nộp phạt:</label>
+                    <div id="recBookTitle" class="p-2.5 bg-slate-50 border border-slate-200 font-semibold text-slate-800">--</div>
+                </div>
+
+                <div class="grid grid-cols-2 gap-2">
+                    <div>
+                        <label class="block font-bold text-slate-700 mb-1">Số tiền phạt:</label>
+                        <div id="recAmount" class="p-2.5 bg-rose-50 border border-rose-200 font-black text-rose-600 text-sm font-mono">0 đ</div>
+                    </div>
+                    <div>
+                        <label class="block font-bold text-slate-700 mb-1">Cú pháp chuyển khoản:</label>
+                        <div id="recSyntax" class="p-2.5 bg-emerald-50 border border-emerald-200 font-mono text-emerald-700 font-bold text-xs truncate">PHAT</div>
+                    </div>
+                </div>
+
+                <div class="p-3 bg-amber-50 border border-amber-200 text-amber-800 text-[11px] leading-relaxed rounded-none">
+                    <i class="fa-solid fa-circle-info mr-1 text-amber-600"></i>
+                    Vui lòng đối chiếu với sao kê biến động số dư SePAY / MB Bank trước khi nhấn duyệt.
+                </div>
+
+                <div class="pt-3 flex gap-2">
+                    <button type="button" onclick="closeReconcileModal()" class="flex-1 py-2.5 bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold transition">
+                        Đóng
+                    </button>
+                    <button type="button" id="btnConfirmPay" onclick="submitConfirmPayment()" class="flex-1 py-2.5 bg-emerald-600 hover:bg-emerald-700 text-white font-bold shadow-md transition flex items-center justify-center gap-1.5">
+                        <i class="fa-solid fa-check"></i> Xác nhận Đã Thu
+                    </button>
+                </div>
+            </div>
+        </div>
     </div>
 
     <!-- Modal 1: Thêm Sách Mới -->
@@ -514,12 +516,22 @@
             try { App.stopAll(); await auth.signOut(); } finally { sessionStorage.clear(); location.reload(); }
         }
 
-        const LIB_TABS = { orders: 'Chờ soạn sách / Nạp hộc', inspect: 'Nghiệm thu trả sách', lockers: 'Giám sát hộc tủ (Smart Lockers)', warehouse: 'Quản lý kho sách', fines: 'Xử lý phạt & Thu phí', borrows: 'Danh sách mượn trả' };
+        const LIB_TABS = { 
+            orders: 'Chờ soạn sách / Nạp hộc', 
+            inspect: 'Nghiệm thu trả sách', 
+            lockers: 'Giám sát hộc tủ (Smart Lockers)', 
+            warehouse: 'Quản lý kho sách', 
+            fines: 'Xử lý phạt & Thu phí', 
+            borrows: 'Danh sách mượn trả' 
+        };
+
         function switchLibTab(tab) {
             Object.keys(LIB_TABS).forEach(t => {
                 const C = t.charAt(0).toUpperCase() + t.slice(1);
-                document.getElementById('libTabBtn' + C).classList.toggle('active', t === tab);
-                document.getElementById('libTabContent' + C).classList.toggle('hidden', t !== tab);
+                const btn = document.getElementById('libTabBtn' + C);
+                const content = document.getElementById('libTabContent' + C);
+                if (btn) btn.classList.toggle('active', t === tab);
+                if (content) content.classList.toggle('hidden', t !== tab);
             });
             document.getElementById('libPageTitle').innerText = LIB_TABS[tab];
             document.getElementById('libToolbar').classList.toggle('hidden', tab !== 'warehouse');
@@ -536,48 +548,100 @@
             App.listen('dLockers', db.collection('lockers'), s => { dashLockers = s.docs.map(d => d.data()); renderKpi(); renderLockers(); });
             switchLibTab('orders');
         }
+
         function renderKpi() {
             const need = dashOrders.filter(o => o.trang_thai_don === 'cho_soan').length;
             const out = dashBorrows.filter(b => b.trang_thai === 'dang_muon').length;
             const busy = dashLockers.filter(x => x.trang_thai && x.trang_thai !== 'trong').length;
             const owed = dashBorrows.filter(b => Number(b.tien_phat) > 0 && !b.da_thu_phi).reduce((t, b) => t + Number(b.tien_phat), 0);
-            document.getElementById('kpiOrders').innerText = need; document.getElementById('kpiBorrow').innerText = out;
-            document.getElementById('kpiLockers').innerText = Math.max(0, 20 - busy) + ' / 20'; document.getElementById('kpiFines').innerText = money(owed);
-            setBadge('navOrders', need); setBadge('totalActiveBorrowBadge', out);
+            document.getElementById('kpiOrders').innerText = need; 
+            document.getElementById('kpiBorrow').innerText = out;
+            document.getElementById('kpiLockers').innerText = Math.max(0, 20 - busy) + ' / 20'; 
+            document.getElementById('kpiFines').innerText = money(owed);
+            setBadge('navOrders', need); 
+            setBadge('totalActiveBorrowBadge', out);
         }
+
         function renderLockers() {
-            const ST = { trong: ['Trống', 'bg-emerald-50 border-emerald-200 text-emerald-700'], cho_nhan: ['Sách chờ lấy', 'bg-amber-50 border-amber-200 text-amber-700'],
-                cho_tra: ['Chờ trả', 'bg-violet-50 border-violet-300 text-violet-700'], chua_sach_tra: ['Sách trả chờ kiểm', 'bg-blue-50 border-blue-300 text-blue-700'], dang_mo: ['Đang mở', 'bg-rose-50 border-rose-300 text-rose-700'] };
+            const ST = { 
+                trong: ['Trống', 'bg-emerald-50 border-emerald-200 text-emerald-700'], 
+                cho_nhan: ['Sách chờ lấy', 'bg-amber-50 border-amber-200 text-amber-700'],
+                cho_tra: ['Chờ trả', 'bg-violet-50 border-violet-300 text-violet-700'], 
+                chua_sach_tra: ['Sách trả chờ kiểm', 'bg-blue-50 border-blue-300 text-blue-700'], 
+                dang_mo: ['Đang mở', 'bg-rose-50 border-rose-300 text-rose-700'] 
+            };
             const by = {}; dashLockers.forEach(x => { by[x.so_hoc] = x; });
             document.getElementById('lockerGrid').innerHTML = Array.from({ length: 20 }, (_, i) => {
                 const name = App.lockerName(i + 1), x = by[name], [lb, cls] = ST[(x && x.trang_thai) || 'trong'] || ['Không rõ', 'bg-slate-50 border-slate-200 text-slate-600'];
                 return `<div class="rounded-none border-2 p-3 text-center ${cls}"><p class="text-xl"></p><p class="font-black text-sm">${name}</p><p class="text-[11px] font-semibold">${lb}</p></div>`;
             }).join('');
         }
-            function renderFines() {
+
+        function renderFines() {
+            const tbody = document.getElementById('finesTableBody');
+            if (!tbody) return;
             const rows = dashBorrows.filter(b => Number(b.tien_phat) > 0).sort((a, b) => (a.da_thu_phi ? 1 : 0) - (b.da_thu_phi ? 1 : 0));
             setBadge('navFines', rows.filter(b => !b.da_thu_phi).length);
-            document.getElementById('finesTableBody').innerHTML = rows.length ? rows.map(b => `<tr>
+            
+            tbody.innerHTML = rows.length ? rows.map(b => `<tr>
                 <td class="p-3 font-mono text-xs">${esc(b.mssv)}</td>
                 <td class="p-3 font-semibold text-xs">${esc(b.ten_sach)}</td>
                 <td class="p-3 text-xs text-slate-500">${esc(b.ghi_chu_phat || 'Quá hạn trả sách')}</td>
                 <td class="p-3 font-black text-rose-600 font-mono">${money(b.tien_phat)}</td>
                 <td class="p-3 text-right">
                     ${b.da_thu_phi 
-                        ? '<span class="inline-flex items-center gap-1 text-xs font-bold text-emerald-600 bg-emerald-50 px-2 py-1 border border-emerald-200"><i class="fa-solid fa-check-double"></i> Đã thu tiền</span>'
+                        ? '<span class="inline-flex items-center gap-1 text-xs font-bold text-emerald-600 bg-emerald-50 px-2 py-1 border border-emerald-200"><i class="fa-solid fa-check-double"></i> Đã thu</span>'
                         : `<button onclick="openReconcileModal('${esc(b.id)}', '${esc(b.mssv)}', '${esc(b.ho_ten || 'Sinh viên')}', '${esc(b.ten_sach)}', ${b.tien_phat})" class="px-3 py-1.5 bg-orange-600 hover:bg-orange-700 text-white text-xs font-bold rounded-none shadow-sm transition flex items-center gap-1 ml-auto">
                             <i class="fa-solid fa-file-invoice-dollar"></i> Đối soát & Thu phí
                            </button>`}
                 </td></tr>`).join('')
                 : '<tr><td colspan="5" class="p-8 text-center text-sm text-slate-400">Không có khoản phạt nào.</td></tr>';
         }
-            async function collectFine(id) {
-            return App.guard('fine:' + id, async () => {
-                try {
-                    await db.collection('borrowings').doc(id).update({ da_thu_phi: true, ngay_thu_phi: App.FV.serverTimestamp() });
-                    showToast.success('Đã thu phí', 'Khoản phạt đã được ghi nhận là đã thu.');
-                } catch (e) { showToast.error('Lỗi', 'Không thể ghi nhận thu phí.'); }
-            });
+
+        // Pop-up modal đối soát chính giữa màn hình
+        function openReconcileModal(borrowId, mssv, name, bookTitle, amount) {
+            document.getElementById('recBorrowId').value = borrowId;
+            document.getElementById('recMssv').innerText = mssv;
+            document.getElementById('recStudentName').innerText = name;
+            document.getElementById('recBookTitle').innerText = bookTitle;
+            document.getElementById('recAmount').innerText = (amount || 0).toLocaleString('vi-VN') + ' đ';
+            document.getElementById('recSyntax').innerText = `PHAT ${mssv}`;
+            document.getElementById('reconcileModal').classList.remove('hidden');
+        }
+
+        function closeReconcileModal() {
+            document.getElementById('reconcileModal').classList.add('hidden');
+        }
+
+        // Thủ thư nhấn duyệt trên Modal
+        async function submitConfirmPayment() {
+            const borrowId = document.getElementById('recBorrowId').value;
+            if (!borrowId) return;
+
+            const btn = document.getElementById('btnConfirmPay');
+            btn.disabled = true;
+            btn.innerText = 'Đang xử lý...';
+
+            try {
+                await db.collection('borrowings').doc(borrowId).update({
+                    da_thu_phi: true,
+                    ngay_thu_phi: firebase.firestore.FieldValue.serverTimestamp(),
+                    nguoi_thu_phi: 'Thủ thư trực'
+                });
+
+                closeReconcileModal();
+                if (window.showToast) {
+                    showToast.success('Thành công', 'Đã ghi nhận thu phạt thành công vào hệ thống!');
+                } else {
+                    alert('Đã ghi nhận thu phạt thành công!');
+                }
+            } catch (err) {
+                console.error("Lỗi cập nhật thu phí:", err);
+                alert("Lỗi khi cập nhật thu phí: " + err.message);
+            } finally {
+                btn.disabled = false;
+                btn.innerHTML = '<i class="fa-solid fa-check"></i> Xác nhận Đã Thu';
+            }
         }
 
         // ================= TỰ ĐỘNG KHỞI TẠO 21 ĐẦU SÁCH & 20 HỘC TỦ NẾU FIRESTORE TRỐNG =================
@@ -645,46 +709,36 @@
 
         // ================= KẾT NỐI REALTIME VỚI CLOUD FIRESTORE =================
         function initLibrarianListeners() {
-            // 1. Lắng nghe đơn đặt mượn
             App.listen('orders', db.collection('orders').orderBy('ngay_tao', 'desc'), snapshot => {
                 allOrders = [];
-                snapshot.forEach(doc => {
-                    allOrders.push({ id: doc.id, ...doc.data() });
-                });
+                snapshot.forEach(doc => { allOrders.push({ id: doc.id, ...doc.data() }); });
                 renderOrders(allOrders);
-            }, err => {
-                console.error("Lỗi nghe orders:", err);
-            });
+            }, err => console.error("Lỗi nghe orders:", err));
 
-            // 2. Lắng nghe sách trả chờ kiểm tra
             App.listen('returns', db.collection('returns').where('trang_thai', '==', 'cho_kiem_tra'), snapshot => {
                 const returns = [];
-                snapshot.forEach(doc => {
-                    returns.push({ id: doc.id, ...doc.data() });
-                });
+                snapshot.forEach(doc => { returns.push({ id: doc.id, ...doc.data() }); });
                 renderInspectBooks(returns);
-            }, err => {
-                console.error("Lỗi nghe returns:", err);
-            });
+            }, err => console.error("Lỗi nghe returns:", err));
 
-            // 3. Lắng nghe toàn bộ danh sách mượn trả
             App.listen('borrowings', db.collection('borrowings').orderBy('ngay_tao', 'desc'), snap => {
                 allBorrowingsList = [];
                 snap.forEach(doc => allBorrowingsList.push({ id: doc.id, ...doc.data() }));
                 renderActiveBorrowsTable();
-            }, err => {
-                console.error("Lỗi nghe borrowings:", err);
-            });
+            }, err => console.error("Lỗi nghe borrowings:", err));
 
-            // 4. Tải danh mục kho sách
             loadLibrarianBooks();
         }
 
         // ================= TAB 1: HIỂN THỊ ĐƠN SOẠN =================
-        // ---------- Bảng đơn mượn: tìm kiếm, lọc trạng thái / ngày, sắp xếp, phân trang, xem chi tiết ----------
         let orderPage = 1; const ORDER_PAGE_SIZE = 10;
-        const ORDER_ST = { cho_soan: ['Chờ nạp hộc', 'bg-amber-100 text-amber-700'], da_soan_xong: ['Đã trong hộc', 'bg-emerald-100 text-emerald-700'],
-            da_nhan: ['Đã nhận', 'bg-blue-100 text-blue-700'], da_huy_do_qua_han: ['Đã thu hồi', 'bg-rose-100 text-rose-700'] };
+        const ORDER_ST = { 
+            cho_soan: ['Chờ nạp hộc', 'bg-amber-100 text-amber-700'], 
+            da_soan_xong: ['Đã trong hộc', 'bg-emerald-100 text-emerald-700'],
+            da_nhan: ['Đã nhận', 'bg-blue-100 text-blue-700'], 
+            da_huy_do_qua_han: ['Đã thu hồi', 'bg-rose-100 text-rose-700'] 
+        };
+
         function ensureOrderToolbar() {
             if (document.getElementById('orderToolbar')) return;
             const wrap = document.getElementById('ordersTableBody').closest('.overflow-x-auto');
@@ -700,6 +754,7 @@
             bar.addEventListener('input', () => { orderPage = 1; renderOrders(allOrders); });
             document.getElementById('orderReset').onclick = () => { document.getElementById('orderSearch').value = ''; document.getElementById('orderDate').value = ''; document.getElementById('orderStatus').value = 'active'; document.getElementById('orderSort').value = 'new'; orderPage = 1; renderOrders(allOrders); };
         }
+
         function orderGo(d) { orderPage += d; renderOrders(allOrders); }
         function openOrderDetail(id) {
             const o = allOrders.find(x => x.id === id); if (!o) return;
@@ -709,6 +764,7 @@
                 <dt>Hẹn lấy</dt><dd>${esc(o.ngay_hen)} (${esc(o.khung_gio)})</dd><dt>Trạng thái</dt><dd>${esc(stl)}</dd><dt>Ngày đặt</dt><dd>${esc(made)}</dd><dt>Mã QR</dt><dd class="font-mono">${esc(o.qr_token)}</dd>
                 <dt>Sách</dt><dd>${(o.books || []).map(b => `${esc(b.ten_sach)} <span style="font-weight:400;color:#64748B">(${esc(b.vi_tri_ke || 'Kệ chính')})</span>`).join('<br>')}</dd></dl>` });
         }
+
         function renderOrders(orders) {
             ensureOrderToolbar();
             const activeOrders = orders.filter(o => o.trang_thai_don === 'cho_soan' || o.trang_thai_don === 'da_soan_xong');
@@ -740,8 +796,6 @@
                 const isReady = o.trang_thai_don === 'da_soan_xong', canAct = o.trang_thai_don === 'cho_soan' || isReady;
                 const [stl, stc] = ORDER_ST[o.trang_thai_don] || [o.trang_thai_don || '—', 'bg-slate-100 text-slate-600'];
                 const booksList = o.books || [];
-                
-                // Kiểm tra xem đơn đã quá ngày hẹn lấy sách chưa
                 const isExpired = o.ngay_hen && o.ngay_hen < todayStr;
 
                 let booksHtml = '<div class="space-y-1.5 py-0.5">';
@@ -793,6 +847,7 @@
                 `;
             });
         }
+
         async function markOrderReady(orderId) {
             try {
                 await db.collection('orders').doc(orderId).update({
@@ -806,25 +861,29 @@
             }
         }
 
-        // THU HỒI ĐƠN QUÁ HẠN: đổi trạng thái + nhả hộc + hoàn tồn kho trong 1 transaction (chống bấm 2 lần)
         async function cancelExpiredOrder(orderId) {
             const ok0 = await App.confirm("Xác nhận sinh viên không đến nhận sách, thu hồi sách về kệ và mở trống hộc tủ?");
             if (!ok0) return;
-            return App.guard('cancel:' + orderId, async () => { try {
-                const oref = db.collection('orders').doc(orderId);
-                const pre = (await oref.get()).data();
-                if (!pre) return;
-                const { refs, missing } = await App.stockRefs(pre.books || []);
-                await db.runTransaction(async tx => {
-                    const st = (await tx.get(oref)).data().trang_thai_don;
-                    if (st !== 'cho_soan' && st !== 'da_soan_xong') throw new Error("Đơn này đã được xử lý (đã nhận hoặc đã thu hồi).");
-                    const restock = await App.restockPlan(tx, refs);
-                    tx.update(oref, { trang_thai_don: 'da_huy_do_qua_han', thoi_gian_huy: App.FV.serverTimestamp() });
-                    if (pre.so_hoc) tx.set(App.lockerRef(pre.so_hoc), { so_hoc: pre.so_hoc, trang_thai: 'trong', qr_token: null, cap_nhat_luc: App.FV.serverTimestamp() }, { merge: true });
-                    restock();
-                });
-                alert("Đã thu hồi sách về kho và giải phóng hộc tủ!" + (missing.length ? "\nChưa cộng được tồn kho cho: " + missing.join(", ") : ""));
-            } catch (err) { console.error("Lỗi thu hồi:", err); alert(err.message || "Không thể thu hồi đơn!"); } });
+            return App.guard('cancel:' + orderId, async () => { 
+                try {
+                    const oref = db.collection('orders').doc(orderId);
+                    const pre = (await oref.get()).data();
+                    if (!pre) return;
+                    const { refs, missing } = await App.stockRefs(pre.books || []);
+                    await db.runTransaction(async tx => {
+                        const st = (await tx.get(oref)).data().trang_thai_don;
+                        if (st !== 'cho_soan' && st !== 'da_soan_xong') throw new Error("Đơn này đã được xử lý (đã nhận hoặc đã thu hồi).");
+                        const restock = await App.restockPlan(tx, refs);
+                        tx.update(oref, { trang_thai_don: 'da_huy_do_qua_han', thoi_gian_huy: App.FV.serverTimestamp() });
+                        if (pre.so_hoc) tx.set(App.lockerRef(pre.so_hoc), { so_hoc: pre.so_hoc, trang_thai: 'trong', qr_token: null, cap_nhat_luc: App.FV.serverTimestamp() }, { merge: true });
+                        restock();
+                    });
+                    alert("Đã thu hồi sách về kho và giải phóng hộc tủ!" + (missing.length ? "\nChưa cộng được tồn kho cho: " + missing.join(", ") : ""));
+                } catch (err) { 
+                    console.error("Lỗi thu hồi:", err); 
+                    alert(err.message || "Không thể thu hồi đơn!"); 
+                } 
+            });
         }
 
         // ================= BẢNG KIỂM TRA SÁCH TRẢ =================
@@ -866,8 +925,6 @@
             });
         }
 
-
-       // NGHIỆM THU / LẬP BIÊN BẢN PHẠT dùng chung 1 hàm: trạng thái đơn trả + hộc + borrowings + tồn kho (chỉ khi sách tốt) cùng 1 transaction
         async function finishReturn(returnId, penalty) {
             const rref = db.collection('returns').doc(returnId);
             const pre = (await rref.get()).data();
@@ -889,10 +946,15 @@
         }
 
         async function approveReturnOrder(returnId) {
-            return App.guard('approve:' + returnId, async () => { try {
-                const r = await finishReturn(returnId);
-                alert(`Đã nghiệm thu ${r.items.length} cuốn, cộng lại tồn kho và giải phóng ${r.pre.so_hoc}!` + (r.missing.length ? "\nChưa khớp kho: " + r.missing.join(", ") : ""));
-            } catch (err) { console.error("Lỗi nghiệm thu sách:", err); alert(err.message || "Lỗi khi nghiệm thu sách!"); } });
+            return App.guard('approve:' + returnId, async () => { 
+                try {
+                    const r = await finishReturn(returnId);
+                    alert(`Đã nghiệm thu ${r.items.length} cuốn, cộng lại tồn kho và giải phóng ${r.pre.so_hoc}!` + (r.missing.length ? "\nChưa khớp kho: " + r.missing.join(", ") : ""));
+                } catch (err) { 
+                    console.error("Lỗi nghiệm thu sách:", err); 
+                    alert(err.message || "Lỗi khi nghiệm thu sách!"); 
+                } 
+            });
         }
 
         async function openReportModal(returnId) {
@@ -920,11 +982,16 @@
             const fine = parseInt(document.getElementById('reportFineAmount').value) || 0;
             const reason = document.getElementById('reportReason').value.trim();
             if (!reason) return alert("Vui lòng nhập lý do lập biên bản phạt!");
-            return App.guard('penalty:' + returnId, async () => { try {
-                await finishReturn(returnId, { fine, reason, mssv, tenSach });
-                alert(`Đã lập biên bản phạt ${fine.toLocaleString()} đ cho MSSV ${mssv} và giải phóng hộc tủ!`);
-                closeReportModal();
-            } catch (err) { console.error("Lỗi lập biên bản:", err); alert(err.message || "Không thể lưu biên bản!"); } });
+            return App.guard('penalty:' + returnId, async () => { 
+                try {
+                    await finishReturn(returnId, { fine, reason, mssv, tenSach });
+                    alert(`Đã lập biên bản phạt ${fine.toLocaleString()} đ cho MSSV ${mssv} và giải phóng hộc tủ!`);
+                    closeReportModal();
+                } catch (err) { 
+                    console.error("Lỗi lập biên bản:", err); 
+                    alert(err.message || "Không thể lưu biên bản!"); 
+                } 
+            });
         }
 
         // ================= TAB 2: QUẢN LÝ SÁCH MƯỢN =================
@@ -946,7 +1013,6 @@
             if (!tbody) return;
             tbody.innerHTML = '';
 
-            // 1. Gom nhóm danh sách sách theo sinh viên (khóa chính là MSSV)
             const groupedUsers = {};
             allBorrowingsList.forEach(b => {
                 const mssv = b.mssv || 'Chưa rõ';
@@ -961,7 +1027,6 @@
                 groupedUsers[mssv].books.push(b);
             });
 
-            // 2. Lọc theo thanh tìm kiếm và bộ lọc trạng thái
             let userList = Object.values(groupedUsers).filter(u => {
                 const matchQuery = u.ho_ten.toLowerCase().includes(query) || 
                                    u.mssv.toLowerCase().includes(query) ||
@@ -982,13 +1047,10 @@
                 return;
             }
 
-            // 3. Render danh sách cha - con dạng Accordion
             userList.forEach(u => {
                 const isExpanded = expandedUserMssvs.includes(u.mssv);
                 const activeCount = u.books.filter(b => b.trang_thai === 'dang_muon').length;
-                const inspectCount = u.books.filter(b => b.trang_thai === 'cho_kiem_tra').length;
 
-                // Tạo danh sách các cuốn sách con
                 let subItemsHtml = '';
                 u.books.forEach((b, idx) => {
                     let badge = '';
@@ -1014,7 +1076,6 @@
                     `;
                 });
 
-                // Hàng cha
                 tbody.innerHTML += `
                     <tr onclick="toggleUserExpand('${u.mssv}')" class="hover:bg-orange-50/60 transition border-b border-slate-100 cursor-pointer select-none">
                         <td class="p-3.5 align-middle">
@@ -1038,7 +1099,6 @@
                     </tr>
                 `;
 
-                // Hàng con (hiển thị khi bấm mở)
                 if (isExpanded) {
                     tbody.innerHTML += `
                         <tr class="bg-slate-50/80">
@@ -1055,14 +1115,16 @@
                 }
             });
         }
+
         // ================= TAB 3: KHO SÁCH =================
         function loadLibrarianBooks() {
-            if (booksListening) return; booksListening = true;
+            if (booksListening) return; 
+            booksListening = true;
             App.listen('books', db.collection('books'), applyBooksSnapshot);
         }
+
         function applyBooksSnapshot(snapshot) {
             try {
-                
                 const grouped = {};
                 snapshot.forEach(doc => {
                     const b = { id: doc.id, ...doc.data() };
@@ -1118,8 +1180,10 @@
                 return a.so_luong_co_san - b.so_luong_co_san;
             });
 
-            document.getElementById('bookCountBadge').innerText = `${filtered.length}/${allGroupedBooks.length} đầu sách`;
+            const badge = document.getElementById('bookCountBadge');
+            if (badge) badge.innerText = `${filtered.length}/${allGroupedBooks.length} đầu sách`;
             const grid = document.getElementById('librarianBooksGrid');
+            if (!grid) return;
             grid.innerHTML = '';
 
             filtered.forEach((b, index) => {
@@ -1158,48 +1222,6 @@
             });
         }
 
-        function openEditBookModal(title, author, shelf) {
-            document.getElementById('editOldTitle').value = title;
-            document.getElementById('editNewTitle').value = title;
-            document.getElementById('editAuthor').value = author;
-            document.getElementById('editShelf').value = shelf;
-            document.getElementById('editBookModal').classList.remove('hidden');
-        }
-
-        function closeEditBookModal() {
-            document.getElementById('editBookModal').classList.add('hidden');
-        }
-
-        async function submitEditBook(event) {
-            if (event) event.preventDefault();
-            try {
-                const oldTitle = document.getElementById('editOldTitle').value.trim();
-                const newTitle = document.getElementById('editNewTitle').value.trim();
-                const author = document.getElementById('editAuthor').value.trim();
-                const shelf = document.getElementById('editShelf').value.trim();
-
-                const snapshot = await db.collection('books').where('ten_sach', '==', oldTitle).get();
-                if (snapshot.empty) return alert("Không tìm thấy sách!");
-
-                const batch = db.batch();
-                snapshot.forEach(doc => {
-                    batch.update(db.collection('books').doc(doc.id), {
-                        ten_sach: newTitle,
-                        tac_gia: author,
-                        vi_tri_ke: shelf
-                    });
-                });
-
-                await batch.commit();
-                alert("Cập nhật thông tin sách thành công!");
-                closeEditBookModal();
-                loadLibrarianBooks();
-            } catch (err) {
-                console.error("Lỗi cập nhật sách:", err);
-                alert("Lỗi khi cập nhật!");
-            }
-        }
-
         async function saveStock(title, inputId) {
             const qty = parseInt(document.getElementById(inputId).value);
             if (isNaN(qty) || qty < 0) return alert("Vui lòng nhập số lượng nguyên hợp lệ!");
@@ -1210,7 +1232,7 @@
                     const total = snapshot.docs.reduce((t, d) => t + (Number(d.data().so_luong) || 0), 0);
                     if (qty > total) return alert(`Số lượng có sẵn (${qty}) không được vượt tổng số sách (${total})!`);
                     let left = qty; const batch = db.batch();
-                    snapshot.docs.forEach(d => { // phân bổ, mỗi bản ghi tối đa bằng tổng của chính nó
+                    snapshot.docs.forEach(d => {
                         const give = Math.min(left, Number(d.data().so_luong) || 0); left -= give;
                         batch.update(d.ref, { so_luong_con: give });
                     });
@@ -1270,62 +1292,6 @@
                 loadLibrarianBooks();
             } catch (err) {
                 alert("Lỗi khi thêm sách!");
-            }
-        }
-        // Cấu hình API SePAY để đối soát thật
-const SEPAY_CONFIG = {
-    apiToken: 'YOUR_SEPAY_API_TOKEN', // Lấy tại SePAY.vn -> Cài đặt -> API Token
-    accountNumber: '0905673987'
-};
-
-let currentReturnId = null;
-let currentReturnData = null;
-
-// Hàm thủ thư bấm kiểm tra biến động giao dịch thực tế từ SePAY
-// Mở Pop-up modal đối soát chính giữa màn hình
-        function openReconcileModal(borrowId, mssv, name, bookTitle, amount) {
-            document.getElementById('recBorrowId').value = borrowId;
-            document.getElementById('recMssv').innerText = mssv;
-            document.getElementById('recStudentName').innerText = name;
-            document.getElementById('recBookTitle').innerText = bookTitle;
-            document.getElementById('recAmount').innerText = (amount || 0).toLocaleString('vi-VN') + ' đ';
-            document.getElementById('recSyntax').innerText = `PHAT ${mssv}`;
-            document.getElementById('reconcileModal').classList.remove('hidden');
-        }
-
-        function closeReconcileModal() {
-            document.getElementById('reconcileModal').classList.add('hidden');
-        }
-
-        // Thủ thư nhấn nút duyệt trong Modal
-        async function submitConfirmPayment() {
-            const borrowId = document.getElementById('recBorrowId').value;
-            if (!borrowId) return;
-
-            const btn = document.getElementById('btnConfirmPay');
-            btn.disabled = true;
-            btn.innerText = 'Đang xử lý...';
-
-            try {
-                // Cập nhật trạng thái đã thu tiền vào bảng borrowings
-                await db.collection('borrowings').doc(borrowId).update({
-                    da_thu_phi: true,
-                    ngay_thu_phi: firebase.firestore.FieldValue.serverTimestamp(),
-                    nguoi_thu_phi: 'Thủ thư trực'
-                });
-
-                closeReconcileModal();
-                if (window.showToast) {
-                    showToast.success('Thành công', 'Đã ghi nhận thu phạt thành công vào hệ thống!');
-                } else {
-                    alert('Đã ghi nhận thu phạt thành công!');
-                }
-            } catch (err) {
-                console.error("Lỗi cập nhật thu phí:", err);
-                alert("Lỗi khi cập nhật thu phí: " + err.message);
-            } finally {
-                btn.disabled = false;
-                btn.innerHTML = '<i class="fa-solid fa-check"></i> Xác nhận Đã Thu';
             }
         }
     </script>
