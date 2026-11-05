@@ -190,7 +190,23 @@
                         <input type="search" id="borrowSearchInput" oninput="renderActiveBorrowsTable()" placeholder="Nhập MSSV, Họ tên hoặc Tên sách để tìm..." 
                                class="w-full pl-10 pr-4 py-2 bg-white border border-slate-200 rounded-none text-xs sm:text-sm outline-none focus:ring-2 focus:ring-orange-500">
                     </div>
-
+                    <!-- ================= XỬ LÝ PHẠT & THU PHÍ ================= -->
+                    <div id="libTabContentFines" class="hidden space-y-4">
+                        <section class="bg-white p-5 rounded-none border border-slate-200 shadow-sm overflow-x-auto">
+                            <table class="w-full text-left text-sm">
+                                <thead>
+                                    <tr class="text-xs text-slate-500 font-bold border-b bg-slate-50">
+                                        <th class="p-3">MSSV</th>
+                                        <th class="p-3">Sách</th>
+                                        <th class="p-3">Lý do</th>
+                                        <th class="p-3">Số tiền</th>
+                                        <th class="p-3 text-right">Thu phí</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="finesTableBody" class="divide-y divide-slate-100"></tbody>
+                            </table>
+                        </section>
+                    </div>
                     <div class="flex items-center gap-2">
                         <div class="flex items-center gap-1.5 bg-white border border-slate-200 px-3 py-2 rounded-none text-xs">
                             <i class="fa-solid fa-filter text-orange-600"></i>
@@ -1312,32 +1328,6 @@ let currentReturnData = null;
                 btn.innerHTML = '<i class="fa-solid fa-check"></i> Xác nhận Đã Thu';
             }
         }
-// Hàm thủ thư duyệt tay khi thấy tiền đã vào MB Bank
-async function confirmPaymentManual() {
-    if (!confirm('Xác nhận đã nhận đủ tiền phạt của sinh viên vào tài khoản?')) return;
-    await applyPaymentSuccess('THU_THU_XAC_NHAN');
-}
-
-// Cập nhật trạng thái vào Firestore
-async function applyPaymentSuccess(refCode) {
-    if (!currentReturnId) return;
-    try {
-        await db.collection('returns').doc(currentReturnId).update({
-            da_thu_phi: true,
-            ma_giao_dich_sepay: refCode,
-            ngay_xac_nhan_thu_phi: firebase.firestore.FieldValue.serverTimestamp(),
-            nguoi_xac_nhan: 'Thu_Thu_Truc'
-        });
-        
-        $('reconcileBadge').className = 'px-2.5 py-0.5 text-xs font-medium rounded-full bg-emerald-500/20 text-emerald-300';
-        $('reconcileBadge').innerText = 'Đã đối soát & Thu tiền thành công';
-        $('btnManualConfirm').disabled = true;
-        $('btnManualConfirm').classList.add('opacity-50');
-        showToast.success('Thành công', 'Đã hoàn tất đối soát đơn trả sách!');
-    } catch (err) {
-        showToast.error('Lỗi', err.message);
-    }
-}
     </script>
 </body>
 </html>
