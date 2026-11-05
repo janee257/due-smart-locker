@@ -283,7 +283,10 @@
                 const out = await db.runTransaction(async tx => {
                     const s = await tx.get(oref), o = s.data(), name = o.so_hoc;
                     if (o.trang_thai_don !== 'da_soan_xong') return { err: (BLOCK[o.trang_thai_don] || (() => 'Đơn không hợp lệ để nhận sách.'))(name) };
-                    const dueStr = App.addMonths(App.today(), App.LOAN.months); // mượn 2 tháng
+                    // Tự động nhận diện loại sách: nếu thuộc diện tham khảo thì 15 ngày, giáo trình 70 ngày
+                    const isRefBook = (books) => books.some(b => (b.category || '').toLowerCase().includes('tham khảo') || (b.the_loai || '').toLowerCase().includes('tham khảo'));
+                    const loanDays = isRefBook(o.books || []) ? App.LOAN.daysRef : App.LOAN.daysTextbook;
+                    const dueStr = App.addDays(App.today(), loanDays);
                     const books = o.books || [];
                     books.forEach((b, i) => tx.set(db.collection('borrowings').doc(`${s.id}_${i}`), {
                         order_id: s.id, mssv: o.mssv, ho_ten: o.ho_ten || 'Sinh viên DUE', book_id: b.book_id || null,
@@ -304,7 +307,7 @@
 
         // ================= TRẢ SÁCH (BPMN R1 → Gate 2 → R2a → R2b) =================
         const WAIT_DROP = ['cho_bo_sach', 'cho_tra_tai_kiosk'];
-        const FINE_PER_DAY = 5000;
+        const FINE_PER_DAY = 1000;
         // Cấu hình nhận tiền phạt (R2a) qua VietQR
         const FINE_PAYMENT_CONFIG = {
             bankId: 'mbbank', bankName: 'MB Bank', accountNo: '0905673987', accountName: 'PHAM NHAT HA', template: 'compact',

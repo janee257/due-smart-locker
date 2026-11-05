@@ -68,8 +68,13 @@
     const d = parseD(s), day = d.getDate(); d.setDate(1); d.setMonth(d.getMonth() + n);
     d.setDate(Math.min(day, new Date(d.getFullYear(), d.getMonth() + 1, 0).getDate())); return fmtD(d);
   };
-  // Quy định mượn: 2 tháng; được gia hạn trong 10 ngày cuối của thời hạn (mỗi lần thêm 2 tháng, tối đa 1 lần)
-  const LOAN = { months: 2, extendWindowDays: 10, extendMonths: 2, maxExtensions: 1 };
+  // Quy định mượn Thư viện DUE: Giáo trình 70 ngày, Sách tham khảo 15 ngày; gia hạn tối đa 1 lần
+  const LOAN = { 
+    daysTextbook: 70, 
+    daysRef: 15, 
+    extendWindowDays: 10, 
+    maxExtensions: 1 
+  };
 
   // Tìm doc sách: book_id -> ma_vach (doc id) -> where ma_vach -> where ten_sach
   async function resolveBookRef(b) {

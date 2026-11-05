@@ -390,7 +390,7 @@
     <!-- KHUNG GIỜ NHẬN -->
     <div>
         <label class="block text-xs font-bold text-slate-700 mb-1">
-            Khung giờ nhận sách (8h - 17h):
+            Khung giờ nhận sách (8h - 20h):
         </label>
 
         <select id="bookSlot"
@@ -402,6 +402,7 @@
             <option value="09:30 - 11:30">09:30 - 11:30</option>
             <option value="13:30 - 15:30">13:30 - 15:30</option>
             <option value="15:30 - 17:00">15:30 - 17:00</option>
+            <option value="17:00 - 19:30">17:00 - 19:30</option>
         </select>
     </div>
 
@@ -558,7 +559,7 @@
         function extendHtml(b) {
             if (!b.han_tra) return '';
             const e = extendState(b);
-            return e.ok ? `<button onclick="extendLoan('${esc(b.id)}')" class="mt-2 w-full py-2 bg-orange-600 hover:bg-orange-700 text-white text-xs font-bold rounded-none transition">Gia hạn thêm ${App.LOAN.extendMonths} tháng</button>`
+            return e.ok ? `<button onclick="extendLoan('${esc(b.id)}')" class="mt-2 w-full py-2 bg-orange-600 hover:bg-orange-700 text-white text-xs font-bold rounded-none transition">Gia hạn thêm (${(b.the_loai || b.category || '').toLowerCase().includes('tham khảo') ? App.LOAN.daysRef : App.LOAN.daysTextbook} ngày)</button>`
                 : `<p class="mt-2 text-[11px] text-slate-400">${esc(e.msg)}</p>`;
         }
         async function extendLoan(id) {
@@ -569,7 +570,9 @@
                         const b = (await tx.get(ref)).data();
                         if (!b || b.trang_thai !== 'dang_muon') throw new Error('Cuốn sách này không còn ở trạng thái đang mượn.');
                         const e = extendState(b); if (!e.ok) throw new Error(e.msg + '.');
-                        const nd = App.addMonths(b.han_tra, App.LOAN.extendMonths);
+                        const isRef = (b.the_loai || b.category || '').toLowerCase().includes('tham khảo');
+                        const extendDays = isRef ? App.LOAN.daysRef : App.LOAN.daysTextbook;
+                        const nd = App.addDays(b.han_tra, extendDays);
                         tx.update(ref, { han_tra: nd, so_lan_gia_han: (Number(b.so_lan_gia_han) || 0) + 1, ngay_gia_han: App.today() });
                         return nd;
                     });
