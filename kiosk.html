@@ -391,18 +391,33 @@
             showToast.success('Đã đối soát', row.fine ? `${row.ma_vach}: trễ ${row.days} ngày.` : `${row.ma_vach}: đúng hạn.`);
             if (ret.rows.every(r => r.scanned)) finishScan();
         }
+        let unsubFineListener = null;
 
         function finishScan() {
             ret.total = ret.rows.reduce((t, r) => t + r.fine, 0);
-            if (!ret.total) return completeReturn();                       // Gate 2 = không trễ → R2b
-            const late = ret.rows.filter(r => r.fine), memoCode = late[0].ma_vach + (late.length > 1 ? '+' + (late.length - 1) : '');   // R2a
+            if (!ret.total) return completeReturn(); // Gate 2 = đúng hạn -> mở tủ luôn
+
+            const late = ret.rows.filter(r => r.fine), memoCode = late[0].ma_vach + (late.length > 1 ? '+' + (late.length - 1) : '');
             $('fineQr').src = FINE_PAYMENT_CONFIG.generateQrUrl(ret.total, ret.mssv, memoCode);
             $('fineAmount').innerText = vnd(ret.total);
             $('fineInfo').innerHTML = [['Ngân hàng', FINE_PAYMENT_CONFIG.bankName], ['Số tài khoản', FINE_PAYMENT_CONFIG.accountNo], ['Chủ tài khoản', FINE_PAYMENT_CONFIG.accountName],
                 ['Nội dung CK', FINE_PAYMENT_CONFIG.memo(ret.mssv, memoCode)], ['Cách tính', late.map(r => `${r.days} ngày × ${vnd(FINE_PER_DAY)}`).join(' + ')]]
                 .map(([k, v]) => `<div class="flex justify-between gap-3"><span class="text-slate-400">${k}</span><b class="text-right text-white">${escH(v)}</b></div>`).join('');
+            
             $('finePanel').classList.remove('hidden');
             backToQrCam();
+
+            // 🚀 REAL-TIME AUTO-TRIGGER: Lắng nghe biến động từ Webhook/Ngân hàng
+            if (unsubFineListener) unsubFineListener();
+            unsubFineListener = ret.ref.onSnapshot(doc => {
+                const data = doc.data();
+                // Khi phát hiện đơn này đã được xác nhận tiền về (qua Webhook SePAY/n8n)
+                if (data && (data.da_thu_phi === true || data.trang_thai === 'cho_kiem_tra')) {
+                    if (unsubFineListener) { unsubFineListener(); unsubFineListener = null; }
+                    showToast.success('Thanh toán thành công', 'Hệ thống đã nhận được tiền phạt từ Ngân hàng!');
+                    completeReturn(); // Tự động đóng modal và mở tủ ngay lập tức!
+                }
+            });
         }
         function confirmPayment() { if (ret && ret.total) completeReturn(); }   // giả lập webhook "đã nhận thanh toán"
 
@@ -429,8 +444,14 @@
             } catch (err) { console.error(err); s.busy = false; pay.disabled = false; showNotice("Lỗi trả sách: " + err.message, "error"); }
         }
 
-        function closeReturnSession() { backToQrCam(); ret = null; $('returnSession').classList.add('hidden'); $('finePanel').classList.add('hidden'); $('payBtn').disabled = false; }
-
+        function closeReturnSession() { 
+            if (unsubFineListener) { unsubFineListener(); unsubFineListener = null; }
+            backToQrCam(); 
+            ret = null; 
+            $('returnSession').classList.add('hidden'); 
+            $('finePanel').classList.add('hidden'); 
+            $('payBtn').disabled = false; 
+        }
         // ---------- Thông báo trạng thái: tiêu đề + mô tả + hướng dẫn bước tiếp theo ----------
         const NOTICE_MAP = [
             [/camera/i, 'Camera không hoạt động', 'Bạn vẫn có thể nhập mã thủ công vào ô bên dưới.'],
