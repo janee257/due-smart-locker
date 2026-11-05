@@ -790,6 +790,41 @@
             });
         }
 
+        <!-- Bổ sung khối Đối soát Thanh toán Phạt vào modal hoặc bảng chi tiết đơn trả -->
+<div id="reconcileSection" class="mt-4 p-4 rounded-xl bg-slate-800 border border-slate-700">
+    <div class="flex items-center justify-between mb-3">
+        <h4 class="font-semibold text-white flex items-center gap-2">
+            <span class="w-2.5 h-2.5 rounded-full bg-amber-400"></span>
+            Đối soát Thanh toán Phạt (SePAY / MB Bank)
+        </h4>
+        <span id="reconcileBadge" class="px-2.5 py-0.5 text-xs font-medium rounded-full bg-amber-500/20 text-amber-300">
+            Chờ thủ thư xác nhận
+        </span>
+    </div>
+    
+    <div class="grid grid-cols-2 gap-3 text-sm mb-4 bg-slate-900/50 p-3 rounded-lg border border-slate-800">
+        <div>
+            <span class="text-slate-400 block text-xs">Số tiền cần thu</span>
+            <b id="recAmount" class="text-rose-400 font-mono text-base">5.000 đ</b>
+        </div>
+        <div>
+            <span class="text-slate-400 block text-xs">Cú pháp tra cứu</span>
+            <code id="recSyntax" class="text-emerald-400 font-mono text-xs">PHAT 251121514110</code>
+        </div>
+    </div>
+
+    <div class="flex gap-2">
+        <button id="btnCheckSepay" onclick="checkSepayAuto()" class="flex-1 py-2 px-3 bg-indigo-600 hover:bg-indigo-500 text-white text-xs font-semibold rounded-lg flex items-center justify-center gap-1.5 transition">
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/></svg>
+            Kiểm tra SePAY tự động
+        </button>
+        <button id="btnManualConfirm" onclick="confirmPaymentManual()" class="flex-1 py-2 px-3 bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-semibold rounded-lg flex items-center justify-center gap-1.5 transition">
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>
+            Thủ thư duyệt đã thu tiền
+        </button>
+    </div>
+</div>
+
        // NGHIỆM THU / LẬP BIÊN BẢN PHẠT dùng chung 1 hàm: trạng thái đơn trả + hộc + borrowings + tồn kho (chỉ khi sách tốt) cùng 1 transaction
         async function finishReturn(returnId, penalty) {
             const rref = db.collection('returns').doc(returnId);
@@ -1195,6 +1230,78 @@
                 alert("Lỗi khi thêm sách!");
             }
         }
+        // Cấu hình API SePAY để đối soát thật
+const SEPAY_CONFIG = {
+    apiToken: 'YOUR_SEPAY_API_TOKEN', // Lấy tại SePAY.vn -> Cài đặt -> API Token
+    accountNumber: '0905673987'
+};
+
+let currentReturnId = null;
+let currentReturnData = null;
+
+// Hàm thủ thư bấm kiểm tra biến động giao dịch thực tế từ SePAY
+async function checkSepayAuto() {
+    const btn = $('btnCheckSepay');
+    btn.disabled = true;
+    btn.innerText = 'Đang tra cứu SePAY...';
+
+    try {
+        // Cú pháp cần tìm trong nội dung chuyển khoản
+        const searchPattern = `PHAT ${currentReturnData.mssv}`;
+        
+        // Gọi API SePAY lấy danh sách giao dịch gần nhất
+        const res = await fetch(`https://my.sepay.vn/userapi/transactions/list?account_number=${SEPAY_CONFIG.accountNumber}&limit=20`, {
+            headers: { 'Authorization': `Bearer ${SEPAY_CONFIG.apiToken}` }
+        });
+        const data = await res.json();
+        
+        // Tìm giao dịch khớp cú pháp và khớp số tiền phạt
+        const match = data.transactions?.find(tx => 
+            tx.transaction_content.includes(searchPattern) && 
+            parseFloat(tx.amount_in) >= (currentReturnData.tien_phat_thu || 0)
+        );
+
+        if (match) {
+            showToast.success('Tìm thấy giao dịch!', `Mã GD: ${match.reference_number} (+${vnd(match.amount_in)})`);
+            await applyPaymentSuccess(match.reference_number);
+        } else {
+            showToast.warning('Chưa thấy giao dịch', 'Chưa có biến động số dư khớp cú pháp trên tài khoản.');
+        }
+    } catch (e) {
+        console.warn('Lỗi gọi API SePAY trực tiếp (CORS), chuyển sang duyệt bằng tay:', e);
+        showToast.info('Thông báo', 'Bạn có thể kiểm tra tin nhắn ngân hàng và bấm "Thủ thư duyệt đã thu tiền".');
+    } finally {
+        btn.disabled = false;
+        btn.innerText = 'Kiểm tra SePAY tự động';
+    }
+}
+
+// Hàm thủ thư duyệt tay khi thấy tiền đã vào MB Bank
+async function confirmPaymentManual() {
+    if (!confirm('Xác nhận đã nhận đủ tiền phạt của sinh viên vào tài khoản?')) return;
+    await applyPaymentSuccess('THU_THU_XAC_NHAN');
+}
+
+// Cập nhật trạng thái vào Firestore
+async function applyPaymentSuccess(refCode) {
+    if (!currentReturnId) return;
+    try {
+        await db.collection('returns').doc(currentReturnId).update({
+            da_thu_phi: true,
+            ma_giao_dich_sepay: refCode,
+            ngay_xac_nhan_thu_phi: firebase.firestore.FieldValue.serverTimestamp(),
+            nguoi_xac_nhan: 'Thu_Thu_Truc'
+        });
+        
+        $('reconcileBadge').className = 'px-2.5 py-0.5 text-xs font-medium rounded-full bg-emerald-500/20 text-emerald-300';
+        $('reconcileBadge').innerText = 'Đã đối soát & Thu tiền thành công';
+        $('btnManualConfirm').disabled = true;
+        $('btnManualConfirm').classList.add('opacity-50');
+        showToast.success('Thành công', 'Đã hoàn tất đối soát đơn trả sách!');
+    } catch (err) {
+        showToast.error('Lỗi', err.message);
+    }
+}
     </script>
 </body>
 </html>
