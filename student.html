@@ -688,7 +688,7 @@
                                     ${isAvailable ? `Còn: ${b.so_luong_con} cuốn` : 'Tạm hết'}
                                 </span>
                             </div>
-                            <button type="button" data-book-detail="${esc(b.id)}" class="block w-full text-left font-bold text-slate-800 text-xs sm:text-sm leading-snug hover:text-orange-600 hover:underline" title="Xem thông tin sách">${esc(b.ten_sach)}</button>
+                            <button type="button" onclick="openBookDetails('${b.id}')" class="block w-full text-left font-bold text-slate-800 text-xs sm:text-sm leading-snug hover:text-orange-600 hover:underline" title="Xem thông tin sách">${esc(b.ten_sach)}</button>
                             <p class="text-[11px] text-slate-400">${b.tac_gia} • <span class="text-orange-600 font-semibold">${b.vi_tri_ke}</span></p>
                         </div>
 
@@ -706,41 +706,27 @@
                     </div>
                 `;
             });
-            list.querySelectorAll('[data-book-detail]').forEach(btn => {
-                btn.addEventListener('click', () => {
-                    openBookDetails(btn.dataset.bookDetail);
-                });
-            });
         }
         function openBookDetails(bookId) {
-            const book = allBooks.find(b => b.id === bookId);
-            if (!book) return;
+            const book = allBooks.find(b => String(b.id) === String(bookId) || b.ma_vach === bookId || b.ten_sach === bookId);
+            if (!book) {
+                console.warn("Không tìm thấy thông tin sách:", bookId);
+                return;
+            }
 
-            document.getElementById('bookDetailsTitle').textContent =
-                book.ten_sach;
-
-            document.getElementById('bookDetailsAuthor').textContent =
-                book.tac_gia || 'Đang cập nhật';
-
-            document.getElementById('bookDetailsBarcode').textContent =
-                book.ma_vach || '—';
-
-            document.getElementById('bookDetailsShelf').textContent =
-                book.vi_tri_ke || 'Đang cập nhật';
-
-            document.getElementById('bookDetailsStock').textContent =
-                book.so_luong_con > 0
-                    ? `Còn ${book.so_luong_con} cuốn`
-                    : 'Tạm hết';
-
-            document.getElementById('bookDetailsDescription').textContent =
-                book.mo_ta || 'Chưa cập nhật mô tả cho cuốn sách này.';
+            document.getElementById('bookDetailsTitle').textContent = book.ten_sach || 'Chi tiết sách';
+            document.getElementById('bookDetailsAuthor').textContent = book.tac_gia || 'Đang cập nhật';
+            document.getElementById('bookDetailsBarcode').textContent = book.ma_vach || '—';
+            document.getElementById('bookDetailsShelf').textContent = book.vi_tri_ke || 'Đang cập nhật';
+            document.getElementById('bookDetailsStock').textContent = book.so_luong_con > 0 ? `Còn ${book.so_luong_con} cuốn` : 'Tạm hết';
+            document.getElementById('bookDetailsDescription').textContent = book.mo_ta || 'Chưa cập nhật mô tả cho cuốn sách này.';
 
             const dialog = document.getElementById('bookDetailsDialog');
-            dialog.classList.remove('hidden');
-            dialog.classList.add('flex');
+            if (dialog) {
+                dialog.classList.remove('hidden');
+                dialog.classList.add('flex');
+            }
         }
-
         function closeBookDetails() {
             const dialog = document.getElementById('bookDetailsDialog');
             dialog.classList.add('hidden');
