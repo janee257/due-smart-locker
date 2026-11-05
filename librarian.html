@@ -229,7 +229,40 @@
             </div>
             <div id="lockerGrid" class="grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-5 gap-3"></div>
         </div>
+        <!-- Bổ sung khối Đối soát Thanh toán Phạt vào modal hoặc bảng chi tiết đơn trả -->
+    <div id="reconcileSection" class="mt-4 p-4 rounded-xl bg-slate-800 border border-slate-700">
+        <div class="flex items-center justify-between mb-3">
+            <h4 class="font-semibold text-white flex items-center gap-2">
+                <span class="w-2.5 h-2.5 rounded-full bg-amber-400"></span>
+                Đối soát Thanh toán Phạt (SePAY / MB Bank)
+            </h4>
+            <span id="reconcileBadge" class="px-2.5 py-0.5 text-xs font-medium rounded-full bg-amber-500/20 text-amber-300">
+                Chờ thủ thư xác nhận
+            </span>
+        </div>
+        
+        <div class="grid grid-cols-2 gap-3 text-sm mb-4 bg-slate-900/50 p-3 rounded-lg border border-slate-800">
+            <div>
+                <span class="text-slate-400 block text-xs">Số tiền cần thu</span>
+                <b id="recAmount" class="text-rose-400 font-mono text-base">5.000 đ</b>
+            </div>
+            <div>
+                <span class="text-slate-400 block text-xs">Cú pháp tra cứu</span>
+                <code id="recSyntax" class="text-emerald-400 font-mono text-xs">PHAT 251121514110</code>
+            </div>
+        </div>
 
+        <div class="flex gap-2">
+            <button id="btnCheckSepay" onclick="checkSepayAuto()" class="flex-1 py-2 px-3 bg-indigo-600 hover:bg-indigo-500 text-white text-xs font-semibold rounded-lg flex items-center justify-center gap-1.5 transition">
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/></svg>
+                Kiểm tra SePAY tự động
+            </button>
+            <button id="btnManualConfirm" onclick="confirmPaymentManual()" class="flex-1 py-2 px-3 bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-semibold rounded-lg flex items-center justify-center gap-1.5 transition">
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>
+                Thủ thư duyệt đã thu tiền
+            </button>
+        </div>
+    </div>
         <!-- ================= XỬ LÝ PHẠT & THU PHÍ ================= -->
         <div id="libTabContentFines" class="hidden space-y-4">
             <section class="bg-white p-5 rounded-none border border-slate-200 shadow-sm overflow-x-auto">
@@ -790,40 +823,6 @@
             });
         }
 
-        <!-- Bổ sung khối Đối soát Thanh toán Phạt vào modal hoặc bảng chi tiết đơn trả -->
-<div id="reconcileSection" class="mt-4 p-4 rounded-xl bg-slate-800 border border-slate-700">
-    <div class="flex items-center justify-between mb-3">
-        <h4 class="font-semibold text-white flex items-center gap-2">
-            <span class="w-2.5 h-2.5 rounded-full bg-amber-400"></span>
-            Đối soát Thanh toán Phạt (SePAY / MB Bank)
-        </h4>
-        <span id="reconcileBadge" class="px-2.5 py-0.5 text-xs font-medium rounded-full bg-amber-500/20 text-amber-300">
-            Chờ thủ thư xác nhận
-        </span>
-    </div>
-    
-    <div class="grid grid-cols-2 gap-3 text-sm mb-4 bg-slate-900/50 p-3 rounded-lg border border-slate-800">
-        <div>
-            <span class="text-slate-400 block text-xs">Số tiền cần thu</span>
-            <b id="recAmount" class="text-rose-400 font-mono text-base">5.000 đ</b>
-        </div>
-        <div>
-            <span class="text-slate-400 block text-xs">Cú pháp tra cứu</span>
-            <code id="recSyntax" class="text-emerald-400 font-mono text-xs">PHAT 251121514110</code>
-        </div>
-    </div>
-
-    <div class="flex gap-2">
-        <button id="btnCheckSepay" onclick="checkSepayAuto()" class="flex-1 py-2 px-3 bg-indigo-600 hover:bg-indigo-500 text-white text-xs font-semibold rounded-lg flex items-center justify-center gap-1.5 transition">
-            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/></svg>
-            Kiểm tra SePAY tự động
-        </button>
-        <button id="btnManualConfirm" onclick="confirmPaymentManual()" class="flex-1 py-2 px-3 bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-semibold rounded-lg flex items-center justify-center gap-1.5 transition">
-            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>
-            Thủ thư duyệt đã thu tiền
-        </button>
-    </div>
-</div>
 
        // NGHIỆM THU / LẬP BIÊN BẢN PHẠT dùng chung 1 hàm: trạng thái đơn trả + hộc + borrowings + tồn kho (chỉ khi sách tốt) cùng 1 transaction
         async function finishReturn(returnId, penalty) {
