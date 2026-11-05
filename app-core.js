@@ -69,12 +69,11 @@
     d.setDate(Math.min(day, new Date(d.getFullYear(), d.getMonth() + 1, 0).getDate())); return fmtD(d);
   };
   // Quy định mượn Thư viện DUE: Giáo trình 70 ngày, Sách tham khảo 15 ngày; gia hạn tối đa 1 lần
-  const LOAN = { 
-    daysTextbook: 70, 
-    daysRef: 15, 
-    extendWindowDays: 10, 
-    maxExtensions: 1 
-  };
+  // => Muốn đổi số ngày mượn chỉ cần sửa 2 số dưới đây (kiosk và student đều đọc từ đây).
+  const LOAN = { daysTextbook: 70, daysRef: 15, extendWindowDays: 10, maxExtensions: 1 };
+  // Sách tham khảo khi trường loai_sach của sách = 'tham_khao'; mặc định (không có trường) = giáo trình
+  const isRefBook = (b) => { const t = String((b && (b.loai_sach || b.the_loai || b.category)) || '').toLowerCase(); return t === 'tham_khao' || t.includes('tham khảo'); };
+  const loanDaysFor = (b) => isRefBook(b) ? LOAN.daysRef : LOAN.daysTextbook;
 
   // Tìm doc sách: book_id -> ma_vach (doc id) -> where ma_vach -> where ten_sach
   async function resolveBookRef(b) {
@@ -192,5 +191,5 @@
     finally { locks.delete(key); if (btn && btn.isConnected) { btn.disabled = false; btn.style.opacity = ""; btn.innerHTML = html; } }
   }
 
-  window.App = { addDays, addMonths, LOAN, mssvOf, restockPlan, guard, notify, confirm: confirmBox, auth, db, FV, PAGE, login, watchAuth, listen, stopAll, lockerName, lockerId, lockerRef, today, resolveBookRef, stockRefs, allocate };
+  window.App = { addDays, addMonths, LOAN, isRefBook, loanDaysFor, mssvOf, restockPlan, guard, notify, confirm: confirmBox, auth, db, FV, PAGE, login, watchAuth, listen, stopAll, lockerName, lockerId, lockerRef, today, resolveBookRef, stockRefs, allocate };
 })();

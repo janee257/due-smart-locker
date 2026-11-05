@@ -559,7 +559,7 @@
         function extendHtml(b) {
             if (!b.han_tra) return '';
             const e = extendState(b);
-            return e.ok ? `<button onclick="extendLoan('${esc(b.id)}')" class="mt-2 w-full py-2 bg-orange-600 hover:bg-orange-700 text-white text-xs font-bold rounded-none transition">Gia hạn thêm (${(b.the_loai || b.category || '').toLowerCase().includes('tham khảo') ? App.LOAN.daysRef : App.LOAN.daysTextbook} ngày)</button>`
+            return e.ok ? `<button onclick="extendLoan('${esc(b.id)}')" class="mt-2 w-full py-2 bg-orange-600 hover:bg-orange-700 text-white text-xs font-bold rounded-none transition">Gia hạn thêm (${App.loanDaysFor(b)} ngày)</button>`
                 : `<p class="mt-2 text-[11px] text-slate-400">${esc(e.msg)}</p>`;
         }
         async function extendLoan(id) {
@@ -570,9 +570,7 @@
                         const b = (await tx.get(ref)).data();
                         if (!b || b.trang_thai !== 'dang_muon') throw new Error('Cuốn sách này không còn ở trạng thái đang mượn.');
                         const e = extendState(b); if (!e.ok) throw new Error(e.msg + '.');
-                        const isRef = (b.the_loai || b.category || '').toLowerCase().includes('tham khảo');
-                        const extendDays = isRef ? App.LOAN.daysRef : App.LOAN.daysTextbook;
-                        const nd = App.addDays(b.han_tra, extendDays);
+                        const nd = App.addDays(b.han_tra, App.loanDaysFor(b));
                         tx.update(ref, { han_tra: nd, so_lan_gia_han: (Number(b.so_lan_gia_han) || 0) + 1, ngay_gia_han: App.today() });
                         return nd;
                     });
@@ -616,7 +614,7 @@
                     const name = b.ten_sach || "Sách chưa đặt tên";
                     const left = Number(b.so_luong_con !== undefined ? b.so_luong_con : (b.so_luong || 1));
                     const g = grouped[name] || (grouped[name] = { id: doc.id, ten_sach: name, tac_gia: b.tac_gia || "Đang cập nhật",
-                        vi_tri_ke: b.vi_tri_ke || "Kệ chính", ma_vach: b.ma_vach || doc.id, tong_so_luong: 0, so_luong_con: 0, _best: -1 });
+                        vi_tri_ke: b.vi_tri_ke || "Kệ chính", ma_vach: b.ma_vach || doc.id, loai_sach: b.loai_sach || 'giao_trinh', tong_so_luong: 0, so_luong_con: 0, _best: -1 });
                     if (left > g._best) { g._best = left; g.id = doc.id; g.ma_vach = b.ma_vach || doc.id; }
                     g.tong_so_luong += Number(b.so_luong || 1);
                     g.so_luong_con += left;
@@ -762,7 +760,7 @@
             bookingBusy = true;
             try {
                 const token = "QR-" + Math.random().toString(36).substring(2, 8).toUpperCase();
-                const items = cart.map(b => ({ book_id: b.id, ten_sach: b.ten_sach, vi_tri_ke: b.vi_tri_ke, ma_vach: b.ma_vach }));
+                const items = cart.map(b => ({ book_id: b.id, ten_sach: b.ten_sach, vi_tri_ke: b.vi_tri_ke, ma_vach: b.ma_vach, loai_sach: b.loai_sach || 'giao_trinh' }));
                 const { refs, missing } = await App.stockRefs(items);
                 if (missing.length) throw new Error("Không tìm thấy sách trong kho: " + missing.join(", "));
                 const locker = await App.allocate({ state: 'cho_nhan', token, reads: refs, build: (tx, hoc, snaps) => {

@@ -283,15 +283,12 @@
                 const out = await db.runTransaction(async tx => {
                     const s = await tx.get(oref), o = s.data(), name = o.so_hoc;
                     if (o.trang_thai_don !== 'da_soan_xong') return { err: (BLOCK[o.trang_thai_don] || (() => 'Đơn không hợp lệ để nhận sách.'))(name) };
-                    // Tự động nhận diện loại sách: nếu thuộc diện tham khảo thì 15 ngày, giáo trình 70 ngày
-                    const isRefBook = (books) => books.some(b => (b.category || '').toLowerCase().includes('tham khảo') || (b.the_loai || '').toLowerCase().includes('tham khảo'));
-                    const loanDays = isRefBook(o.books || []) ? App.LOAN.daysRef : App.LOAN.daysTextbook;
-                    const dueStr = App.addDays(App.today(), 70);
+                    // Hạn trả tính theo từng cuốn: giáo trình 70 ngày, sách tham khảo 15 ngày (cấu hình ở App.LOAN)
                     const books = o.books || [];
                     books.forEach((b, i) => tx.set(db.collection('borrowings').doc(`${s.id}_${i}`), {
                         order_id: s.id, mssv: o.mssv, ho_ten: o.ho_ten || 'Sinh viên DUE', book_id: b.book_id || null,
                         ten_sach: b.ten_sach, ma_vach: b.ma_vach || 'DUE-BOOK', vi_tri_ke: b.vi_tri_ke || 'Kệ chính',
-                        ngay_muon: App.today(), han_tra: dueStr, trang_thai: 'dang_muon', ngay_tao: FV()
+                        ngay_muon: App.today(), han_tra: App.addDays(App.today(), App.loanDaysFor(b)), loai_sach: b.loai_sach || 'giao_trinh', trang_thai: 'dang_muon', ngay_tao: FV()
                     }));
                     tx.update(oref, { trang_thai_don: 'da_nhan', thoi_gian_nhan: FV() });
                     tx.set(App.lockerRef(name), { so_hoc: name, trang_thai: 'dang_mo', cap_nhat_luc: FV() }, { merge: true });
