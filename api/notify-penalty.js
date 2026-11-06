@@ -30,16 +30,27 @@ module.exports = async (req,res) => {
     const snap = await ref.get();
     if (!snap.exists) return res.status(404).json({success:false,error:'Không tìm thấy biên bản.'});
     const p = snap.data();
-    if (p.email_status === 'sent') return res.status(200).json({success:true,already_sent:true});
+    if (p.email_status === 'sent' || p.email_status === 'test_sent') return res.status(200).json({success:true,already_sent:true});
     const mssv = String(p.mssv || '');
     if (!/^\d{8,15}$/.test(mssv)) return res.status(400).json({success:false,error:'MSSV không hợp lệ.'});
-    // Dùng email đăng nhập đã đăng ký trong Firebase Auth, KHÔNG gửi đến địa chỉ nhập tự do từ client.
-    const user = await firebase.auth().getUserByEmail(`${mssv}@due.udn.vn`);
-    const to = user.email;
+    // TEST MODE: Chỉ gửi đến hộp thư kiểm thử do quản trị viên đặt ở Vercel.
+    // Không nhận địa chỉ người nhận từ trình duyệt, tránh gửi tùy ý.
+    const testMode = process.env.PENALTY_EMAIL_TEST_MODE === 'true';
+    let to;
+    if (testMode) {
+      to = String(process.env.PENALTY_TEST_EMAIL || '').trim().toLowerCase();
+      if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(to)) {
+        return res.status(503).json({success:false,error:'Chưa cấu hình PENALTY_TEST_EMAIL hợp lệ.'});
+      }
+    } else {
+      // Production: Chỉ gửi tới địa chỉ đăng ký trong Firebase Auth.
+      const user = await firebase.auth().getUserByEmail(`${mssv}@due.udn.vn`);
+      to = user.email;
+    }
     const amount = Number(p.so_tien_phat || 0).toLocaleString('vi-VN');
     const description = `${p.ly_do || 'Bồi thường tài liệu'} (${p.ten_sach || 'Tài liệu'})`;
     const payload = {
-      from, to: [to], subject: `[DUE Smart Locker] Biên bản bồi thường ${penaltyId}`,
+      from, to: [to], subject: `${testMode ? '[THỬ NGHIỆM - KHÔNG GỬI SINH VIÊN] ' : ''}[DUE Smart Locker] Biên bản bồi thường ${penaltyId}`,
       html: `<p>Kính gửi sinh viên ${htmlEscape(mssv)},</p><p>Thủ thư đã nghiệm thu tài liệu bạn trả tại DUE Smart Locker và lập biên bản:</p><ul><li>Mã biên bản: <b>${htmlEscape(penaltyId)}</b></li><li>Nội dung: ${htmlEscape(description)}</li><li>Số tiền: <b>${amount} VNĐ</b></li></ul><p>Bạn vui lòng đăng nhập DUE Smart Locker, vào mục <b>Nợ phạt & Thông báo</b> để xem biên bản và thanh toán bằng VietQR. Không chuyển khoản lần nữa nếu trạng thái đã là Đã thanh toán.</p><p>Thư viện DUE Smart Locker</p>`
     };
     // Idempotency key giữ nguyên để các lần nhấn lại không vô tình gửi nhiều email cùng sự kiện.
@@ -53,8 +64,14 @@ module.exports = async (req,res) => {
       await ref.update({email_status:'failed',email_last_attempt_at:firebase.firestore.FieldValue.serverTimestamp()});
       return res.status(502).json({success:false,error:'Nhà cung cấp email từ chối yêu cầu. Kiểm tra domain gửi và Resend Logs.'});
     }
-    await ref.update({email_status:'sent',email_to:to,email_provider_id:String(out.id || ''),email_sent_at:firebase.firestore.FieldValue.serverTimestamp()});
-    return res.status(200).json({success:true});
+    await ref.update({
+      email_status: testMode ? 'test_sent' : 'sent',
+      email_to:to,
+      email_test_mode:testMode,
+      email_provider_id:String(out.id || ''),
+      email_sent_at:firebase.firestore.FieldValue.serverTimestamp()
+    });
+    return res.status(200).json({success:true,test_mode:testMode});
   } catch(e) {
     console.error('Penalty email error:',e.message);
     return res.status(500).json({success:false,error:'Lỗi gửi email. Kiểm tra cấu hình hoặc tài khoản sinh viên.'});
