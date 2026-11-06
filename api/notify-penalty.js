@@ -48,18 +48,17 @@ module.exports = async (req,res) => {
       to = user.email;
     }
     const amount = Number(p.so_tien_phat || 0).toLocaleString('vi-VN');
-    const subjectPrefix = testMode ? '[EMAIL THỬ NGHIỆM] ' : '';
+    const subjectPrefix = '';
     const title = htmlEscape(p.ten_sach || 'Tài liệu chưa xác định');
     const barcode = htmlEscape(p.ma_vach || 'Không có');
     const reason = htmlEscape(p.ly_do || 'Chưa ghi rõ');
     const code = htmlEscape(p.payment_code || '');
-    const warning = testMode ? '<p style="background:#fff7ed;border:1px solid #fdba74;padding:12px;color:#9a3412"><b>ĐÂY LÀ EMAIL KIỂM THỬ:</b> Thông báo được gửi đến hộp thư của nhóm để trình diễn hệ thống, không phải bằng chứng đã thông báo trực tiếp cho sinh viên.</p>' : '';
+    const warning = '';
     const payload = {
       from, to:[to],
       subject:`${subjectPrefix}[DUE Smart Locker] Thông báo kết quả nghiệm thu và công nợ – ${penaltyId}`,
       html:`<div style="font-family:Arial,sans-serif;max-width:640px;margin:auto;color:#1e293b;line-height:1.6">
       <h2 style="color:#1e40af;margin-bottom:5px">THÔNG BÁO KẾT QUẢ NGHIỆM THU SÁCH</h2>
-      <p style="color:#64748b;margin-top:0">Hệ thống DUE Smart Locker · Thư viện</p>
       ${warning}
       <p>Kính gửi sinh viên có mã số <b>${htmlEscape(mssv)}</b>,</p>
       <p>Sau khi tiếp nhận sách trả tại Kiosk, cán bộ thư viện đã thực hiện kiểm tra và ghi nhận một tài liệu cần xử lý bồi thường như sau:</p>
@@ -74,7 +73,6 @@ module.exports = async (req,res) => {
       <p><b>Mã đối soát:</b> <code>${code}</code>. Chỉ thanh toán theo thông tin hiển thị trong tài khoản; nếu đã thanh toán, vui lòng kiểm tra trạng thái trước khi thực hiện lại.</p>
       <p>Nếu bạn cho rằng thông tin nghiệm thu chưa chính xác, vui lòng liên hệ cán bộ thư viện để được kiểm tra và giải đáp trước khi thanh toán.</p>
       <p style="margin-top:24px">Trân trọng,<br><b>Bộ phận Thư viện – DUE Smart Locker</b></p>
-      <p style="border-top:1px solid #e2e8f0;padding-top:10px;font-size:12px;color:#64748b">Đây là email thông báo tự động từ hệ thống mô phỏng DUE Smart Locker.</p>
       </div>`
     };
     // Idempotency key giữ nguyên để các lần nhấn lại không vô tình gửi nhiều email cùng sự kiện.
