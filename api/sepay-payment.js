@@ -30,15 +30,16 @@ module.exports = async (req, res) => {
   const content = String(body.content || '');
   const code = String(body.code || '').trim().toUpperCase();
   // Nếu SePay chưa cấu hình tách code, nhận diện mã trong nội dung CK.
-  const match = content.toUpperCase().match(/(?:^|[^A-Z0-9])(DUEP[A-Z0-9]{20})(?![A-Z0-9])/);
-  const paymentCode = /^DUEP[A-Z0-9]{20}$/.test(code) ? code : (match ? match[1] : '');
+  const match = content.toUpperCase().match(/(?:^|[^A-Z0-9])(DUE[PF][A-Z0-9]{20})(?![A-Z0-9])/);
+  const paymentCode = /^DUE[PF][A-Z0-9]{20}$/.test(code) ? code : (match ? match[1] : '');
   if (!/^\d+$/.test(sepayId) || !paymentCode || body.transferType !== 'in' ||
       String(body.accountNumber) !== String(account) ||
       !Number.isSafeInteger(Number(body.transferAmount)) || Number(body.transferAmount) <= 0)
     return res.status(200).json({success:true, matched:false});
   try {
     const db = getDb();
-    const matches = await db.collection('returns').where('payment_code','==',paymentCode).limit(2).get();
+    const isCompensation = paymentCode.startsWith('DUEF');
+    const matches = await db.collection(isCompensation ? 'penalties' : 'returns').where('payment_code','==',paymentCode).limit(2).get();
     if (matches.size !== 1) return res.status(200).json({success:true, matched:false});
     const docRef = matches.docs[0].ref;
     const eventRef = db.collection('sepay_events').doc(sepayId);
@@ -47,11 +48,11 @@ module.exports = async (req, res) => {
       const [event, order] = await Promise.all([tx.get(eventRef),tx.get(docRef)]);
       if (event.exists) return 'duplicate';
       const r = order.data();
-      if (!r || !['cho_bo_sach','cho_tra_tai_kiosk'].includes(r.trang_thai) ||
+      if (!r || (!isCompensation && !['cho_bo_sach','cho_tra_tai_kiosk'].includes(r.trang_thai)) ||
           r.payment_code !== paymentCode || r.payment_status !== 'pending' ||
           Number(r.payment_amount) !== amount) return 'unmatched';
       tx.create(eventRef, {
-        payment_code:paymentCode, return_id:docRef.id, amount,
+        payment_code:paymentCode, [isCompensation ? 'penalty_id' : 'return_id']:docRef.id, amount,
         account_number:String(body.accountNumber), received_at:admin.firestore.FieldValue.serverTimestamp()
       });
       tx.update(docRef, {

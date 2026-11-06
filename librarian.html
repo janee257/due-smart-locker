@@ -84,8 +84,8 @@
             <button onclick="switchLibTab('inspect')" id="libTabBtnInspect" class="dash-nav"><span>Nghiệm thu trả sách</span><span id="navInspect" class="badge zero">0</span></button>
             <button onclick="switchLibTab('lockers')" id="libTabBtnLockers" class="dash-nav"><span>Giám sát hộc tủ</span></button>
             <button onclick="switchLibTab('warehouse')" id="libTabBtnWarehouse" class="dash-nav"><span>Quản lý kho sách</span></button>
-            <button onclick="switchLibTab('fines')" id="libTabBtnFines" class="dash-nav"><span>Xử lý phạt & Thu phí</span><span id="navFines" class="badge zero">0</span></button>
             <button onclick="switchLibTab('borrows')" id="libTabBtnBorrows" class="dash-nav"><span>Danh sách mượn trả</span></button>
+            <button onclick="switchLibTab('fines')" id="libTabBtnFines" class="dash-nav"><span>Xử lý phạt & Thu phí</span><span id="navFines" class="badge zero">0</span></button>
             <span id="totalOrdersBadge" class="hidden"></span>
         </nav>
     </aside>
@@ -239,8 +239,12 @@
                         <h2 class="text-base font-bold flex items-center gap-2 text-rose-600">
                             <i class="fa-solid fa-file-invoice-dollar"></i> DANH SÁCH VI PHẠM & ĐỐI SOÁT PHẠT
                         </h2>
-                        <p class="text-xs text-slate-400 mt-0.5">Xác nhận thu tiền phạt quá hạn hoặc vi phạm quy chế mượn trả</p>
+                        <p class="text-xs text-slate-400 mt-0.5">Lịch sử biên bản độc lập · công nợ sau nghiệm thu · trạng thái đối soát ngân hàng</p>
                     </div>
+                </div>
+                <div class="bg-slate-50 border border-slate-200 p-3 flex flex-col sm:flex-row gap-2 mb-3">
+                    <input type="search" id="fineSearch" oninput="finePage=1;renderFines()" placeholder="Tìm MSSV, sách, lý do, mã biên bản..." class="flex-1 p-2 border text-xs">
+                    <select id="fineStatusFilter" onchange="finePage=1;renderFines()" class="p-2 border text-xs"><option value="all">Tất cả trạng thái</option><option value="pending">Chưa thanh toán</option><option value="paid">Đã thanh toán</option></select>
                 </div>
                 <table class="w-full text-left text-sm">
                     <thead>
@@ -254,6 +258,7 @@
                     </thead>
                     <tbody id="finesTableBody" class="divide-y divide-slate-100"></tbody>
                 </table>
+                <div id="finesPager" class="flex items-center justify-between pt-3 text-xs text-slate-500"></div>
             </section>
         </div>
 
@@ -521,8 +526,8 @@
             inspect: 'Nghiệm thu trả sách', 
             lockers: 'Giám sát hộc tủ (Smart Lockers)', 
             warehouse: 'Quản lý kho sách', 
-            fines: 'Xử lý phạt & Thu phí', 
-            borrows: 'Danh sách mượn trả' 
+            borrows: 'Danh sách mượn trả',
+            fines: 'Xử lý phạt & Thu phí' 
         };
 
         function switchLibTab(tab) {
@@ -539,12 +544,14 @@
         }
 
         // ---------- KPI, hộc tủ, nợ phạt: listener realtime riêng cho Dashboard ----------
-        let dashOrders = [], dashBorrows = [], dashLockers = [];
+        let dashOrders = [], dashBorrows = [], dashLockers = [], allPenalties = [];
+        let finePage = 1; const FINE_PAGE_SIZE = 10;
         function startDashboard(user) {
             document.getElementById('libAdminEmail').innerText = user.email;
             App.listen('dOrders', db.collection('orders'), s => { dashOrders = s.docs.map(d => d.data()); renderKpi(); });
             App.listen('dInspect', db.collection('returns').where('trang_thai', '==', 'cho_kiem_tra'), s => setBadge('navInspect', s.size));
-            App.listen('dBorrows', db.collection('borrowings'), s => { dashBorrows = s.docs.map(d => ({ id: d.id, ...d.data() })); renderKpi(); renderFines(); });
+            App.listen('dBorrows', db.collection('borrowings'), s => { dashBorrows = s.docs.map(d => ({ id: d.id, ...d.data() })); renderKpi(); });
+            App.listen('dPenalties', db.collection('penalties'), s => { allPenalties = s.docs.map(d => ({ id: d.id, ...d.data() })); renderKpi(); renderFines(); }, e => console.error('Lỗi đọc biên bản:', e));
             App.listen('dLockers', db.collection('lockers'), s => { dashLockers = s.docs.map(d => d.data()); renderKpi(); renderLockers(); });
             switchLibTab('orders');
         }
@@ -553,7 +560,7 @@
             const need = dashOrders.filter(o => o.trang_thai_don === 'cho_soan').length;
             const out = dashBorrows.filter(b => b.trang_thai === 'dang_muon').length;
             const busy = dashLockers.filter(x => x.trang_thai && x.trang_thai !== 'trong').length;
-            const owed = dashBorrows.filter(b => Number(b.tien_phat) > 0 && !b.da_thu_phi).reduce((t, b) => t + Number(b.tien_phat), 0);
+            const owed = allPenalties.filter(p => p.payment_status !== 'paid').reduce((t, p) => t + (Number(p.so_tien_phat) || 0), 0);
             document.getElementById('kpiOrders').innerText = need; 
             document.getElementById('kpiBorrow').innerText = out;
             document.getElementById('kpiLockers').innerText = Math.max(0, 20 - busy) + ' / 20'; 
@@ -577,70 +584,52 @@
             }).join('');
         }
 
+        // Mỗi biên bản thuộc một document trong penalties; không đọc phí từ borrowings.
         function renderFines() {
             const tbody = document.getElementById('finesTableBody');
             if (!tbody) return;
-            const rows = dashBorrows.filter(b => Number(b.tien_phat) > 0).sort((a, b) => (a.da_thu_phi ? 1 : 0) - (b.da_thu_phi ? 1 : 0));
-            setBadge('navFines', rows.filter(b => !b.da_thu_phi).length);
-            
-            tbody.innerHTML = rows.length ? rows.map(b => `<tr>
-                <td class="p-3 font-mono text-xs">${esc(b.mssv)}</td>
-                <td class="p-3 font-semibold text-xs">${esc(b.ten_sach)}</td>
-                <td class="p-3 text-xs text-slate-500">${esc(b.ghi_chu_phat || 'Quá hạn trả sách')}</td>
-                <td class="p-3 font-black text-rose-600 font-mono">${money(b.tien_phat)}</td>
-                <td class="p-3 text-right">
-                    ${b.da_thu_phi 
-                        ? '<span class="inline-flex items-center gap-1 text-xs font-bold text-emerald-600 bg-emerald-50 px-2 py-1 border border-emerald-200"><i class="fa-solid fa-check-double"></i> Đã thu</span>'
-                        : `<button onclick="openReconcileModal('${esc(b.id)}', '${esc(b.mssv)}', '${esc(b.ho_ten || 'Sinh viên')}', '${esc(b.ten_sach)}', ${b.tien_phat})" class="px-3 py-1.5 bg-orange-600 hover:bg-orange-700 text-white text-xs font-bold rounded-none shadow-sm transition flex items-center gap-1 ml-auto">
-                            <i class="fa-solid fa-file-invoice-dollar"></i> Đối soát & Thu phí
-                           </button>`}
-                </td></tr>`).join('')
-                : '<tr><td colspan="5" class="p-8 text-center text-sm text-slate-400">Không có khoản phạt nào.</td></tr>';
+            const q = (document.getElementById('fineSearch')?.value || '').trim().toLowerCase();
+            const filter = document.getElementById('fineStatusFilter')?.value || 'all';
+            const rows = allPenalties.filter(p => {
+                const status = p.payment_status === 'paid' ? 'paid' : 'pending';
+                return (filter === 'all' || filter === status) && [p.mssv,p.ten_sach,p.ly_do,p.id,p.payment_code].some(v => String(v || '').toLowerCase().includes(q));
+            }).sort((a,b) => {
+                const ta = a.ngay_lap?.toMillis?.() || 0, tb = b.ngay_lap?.toMillis?.() || 0;
+                return tb - ta;
+            });
+            setBadge('navFines', allPenalties.filter(p => p.payment_status !== 'paid').length);
+            const pages = Math.max(1, Math.ceil(rows.length / FINE_PAGE_SIZE));
+            finePage = Math.max(1, Math.min(finePage, pages));
+            const current = rows.slice((finePage - 1) * FINE_PAGE_SIZE, finePage * FINE_PAGE_SIZE);
+            tbody.innerHTML = current.length ? current.map(p => `<tr class="border-b border-slate-100 hover:bg-slate-50">
+                <td class="p-3 font-mono text-xs">${esc(p.mssv)}<br><span class="text-slate-400">${esc(p.id)}</span></td>
+                <td class="p-3 font-semibold text-xs">${esc(p.ten_sach)}</td>
+                <td class="p-3 text-xs text-slate-500">${esc(p.ly_do)}</td>
+                <td class="p-3 font-black text-rose-600 font-mono">${money(p.so_tien_phat)}</td>
+                <td class="p-3 text-right text-xs">
+                    ${p.payment_status === 'paid' ? `<span class="font-bold text-emerald-600">Đã thanh toán</span><br><span class="text-slate-400">${esc(p.payment_txn_id || '')}</span>` : `<span class="font-bold text-amber-600">Chưa thanh toán</span><br><span class="text-slate-400 font-mono">${esc(p.payment_code || '')}</span>${p.email_status === 'sent' ? '' : `<br><button onclick="sendPenaltyEmail('${p.id}')" class="mt-1 text-blue-600 underline">Gửi email biên bản</button>`}`}
+                    <p class="text-[10px] text-slate-400 mt-1">Email: ${esc(p.email_status || 'chưa gửi')}</p>
+                </td></tr>`).join('') : '<tr><td colspan="5" class="p-8 text-center text-sm text-slate-400">Không có biên bản phù hợp.</td></tr>';
+            document.getElementById('finesPager').innerHTML = `<span>${rows.length} biên bản · Trang ${finePage}/${pages}</span><div class="space-x-2"><button class="px-2 py-1 border" onclick="fineGo(-1)" ${finePage === 1 ? 'disabled' : ''}>Trước</button><button class="px-2 py-1 border" onclick="fineGo(1)" ${finePage === pages ? 'disabled' : ''}>Sau</button></div>`;
         }
+        function fineGo(d) { finePage += d; renderFines(); }
 
-        // Pop-up modal đối soát chính giữa màn hình
-        function openReconcileModal(borrowId, mssv, name, bookTitle, amount) {
-            document.getElementById('recBorrowId').value = borrowId;
-            document.getElementById('recMssv').innerText = mssv;
-            document.getElementById('recStudentName').innerText = name;
-            document.getElementById('recBookTitle').innerText = bookTitle;
-            document.getElementById('recAmount').innerText = (amount || 0).toLocaleString('vi-VN') + ' đ';
-            document.getElementById('recSyntax').innerText = `PHAT ${mssv}`;
-            document.getElementById('reconcileModal').classList.remove('hidden');
-        }
-
-        function closeReconcileModal() {
-            document.getElementById('reconcileModal').classList.add('hidden');
-        }
-
-        // Thủ thư nhấn duyệt trên Modal
-        async function submitConfirmPayment() {
-            const borrowId = document.getElementById('recBorrowId').value;
-            if (!borrowId) return;
-
-            const btn = document.getElementById('btnConfirmPay');
-            btn.disabled = true;
-            btn.innerText = 'Đang xử lý...';
-
+        // Gửi email từ backend có xác thực; lỗi email không hủy biên bản/công nợ.
+        async function sendPenaltyEmail(penaltyId) {
             try {
-                await db.collection('borrowings').doc(borrowId).update({
-                    da_thu_phi: true,
-                    ngay_thu_phi: firebase.firestore.FieldValue.serverTimestamp(),
-                    nguoi_thu_phi: 'Thủ thư trực'
+                const user = auth.currentUser;
+                if (!user) throw new Error('Phiên đăng nhập đã hết hạn.');
+                const token = await user.getIdToken();
+                const response = await fetch('/api/notify-penalty', {
+                    method: 'POST', headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
+                    body: JSON.stringify({ penaltyId })
                 });
-
-                closeReconcileModal();
-                if (window.showToast) {
-                    showToast.success('Thành công', 'Đã ghi nhận thu phạt thành công vào hệ thống!');
-                } else {
-                    alert('Đã ghi nhận thu phạt thành công!');
-                }
-            } catch (err) {
-                console.error("Lỗi cập nhật thu phí:", err);
-                alert("Lỗi khi cập nhật thu phí: " + err.message);
-            } finally {
-                btn.disabled = false;
-                btn.innerHTML = '<i class="fa-solid fa-check"></i> Xác nhận Đã Thu';
+                const result = await response.json();
+                if (!response.ok || !result.success) throw new Error(result.error || 'Không gửi được email.');
+                showToast.success('Đã gửi thông báo', 'Email biên bản đã gửi đến sinh viên.');
+            } catch (error) {
+                console.error('Gửi email thất bại:', error);
+                alert('Biên bản đã được lưu, nhưng email chưa gửi: ' + error.message + '\nKiểm tra RESEND_API_KEY và PENALTY_MAIL_FROM trên Vercel.');
             }
         }
 
@@ -932,17 +921,24 @@
             const items = pre.items || [];
             const { refs, missing } = await App.stockRefs(penalty ? [] : items);
             const ts = App.FV.serverTimestamp();
+            const penaltyRef = penalty ? db.collection('penalties').doc() : null;
             await db.runTransaction(async tx => {
                 if ((await tx.get(rref)).data().trang_thai !== 'cho_kiem_tra') throw new Error("Đơn trả này đã được xử lý.");
                 const restock = await App.restockPlan(tx, refs);
                 tx.update(rref, penalty ? { trang_thai: 'hoan_tat_phat', tien_phat: penalty.fine, ly_do_phat: penalty.reason, ngay_xu_ly: ts } : { trang_thai: 'hoan_tat', thoi_gian_duyet: ts });
                 if (pre.so_hoc) tx.set(App.lockerRef(pre.so_hoc), { so_hoc: pre.so_hoc, trang_thai: 'trong', qr_token: null, cap_nhat_luc: ts }, { merge: true });
                 items.forEach(it => it.borrow_id && tx.set(db.collection('borrowings').doc(it.borrow_id),
-                    Object.assign({ trang_thai: 'hoan_tat', ngay_tra_thuc_te: App.today() }, penalty ? { tien_phat: penalty.fine, ghi_chu_phat: penalty.reason } : {}), { merge: true }));
+                    { trang_thai: 'hoan_tat', ngay_nghiem_thu: App.today() }, { merge: true }));
                 restock();
-                if (penalty) tx.set(db.collection('penalties').doc(), { mssv: penalty.mssv, ten_sach: penalty.tenSach, so_tien_phat: penalty.fine, ly_do: penalty.reason, ngay_lap: ts, nguoi_lap: "Thủ thư DUE" });
+                if (penalty) tx.set(penaltyRef, {
+                    return_id: returnId, borrow_ids: items.map(x => x.borrow_id).filter(Boolean),
+                    mssv: penalty.mssv, ten_sach: penalty.tenSach, so_tien_phat: penalty.fine,
+                    payment_amount: penalty.fine, payment_code: 'DUEF' + penaltyRef.id.toUpperCase(),
+                    payment_status: 'pending', email_status: 'pending',
+                    ly_do: penalty.reason, ngay_lap: ts, nguoi_lap: auth.currentUser?.email || 'Thủ thư DUE'
+                });
             });
-            return { pre, items, missing };
+            return { pre, items, missing, penaltyId: penaltyRef?.id };
         }
 
         async function approveReturnOrder(returnId) {
@@ -984,9 +980,11 @@
             if (!reason) return alert("Vui lòng nhập lý do lập biên bản phạt!");
             return App.guard('penalty:' + returnId, async () => { 
                 try {
-                    await finishReturn(returnId, { fine, reason, mssv, tenSach });
-                    alert(`Đã lập biên bản phạt ${fine.toLocaleString()} đ cho MSSV ${mssv} và giải phóng hộc tủ!`);
+                    if (fine <= 0) throw new Error('Số tiền bồi thường phải lớn hơn 0.');
+                    const result = await finishReturn(returnId, { fine, reason, mssv, tenSach });
                     closeReportModal();
+                    alert(`Đã lưu biên bản ${result.penaltyId} và ghi công nợ ${fine.toLocaleString()}đ cho MSSV ${mssv}. Sinh viên sẽ thanh toán sau trên tài khoản.`);
+                    await sendPenaltyEmail(result.penaltyId);
                 } catch (err) { 
                     console.error("Lỗi lập biên bản:", err); 
                     alert(err.message || "Không thể lưu biên bản!"); 

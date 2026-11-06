@@ -497,7 +497,7 @@
         }
 
         // ---------- Dữ liệu realtime bổ sung: đơn hẹn & đơn trả của sinh viên ----------
-        let myOrders = [], myReturns = [], orderStates = {}, returnStates = {};
+        let myOrders = [], myReturns = [], myPenalties = [], orderStates = {}, returnStates = {};
         const tms = o => (o.ngay_tao && o.ngay_tao.toMillis) ? o.ngay_tao.toMillis() : Date.now(); // đơn vừa tạo chưa có timestamp server
         function startExtraListeners() {
             const mssv = String(currentUser.mssv).trim();
@@ -512,6 +512,10 @@
                 });
                 renderQrTab();
             });
+            App.listen('myPenalties', db.collection('penalties').where('mssv', '==', mssv), snap => {
+                myPenalties = snap.docs.map(d => ({ id: d.id, ...d.data() }));
+                afterBorrowings();
+            }, err => console.error('Không đọc được công nợ:', err));
             App.listen('myReturns', db.collection('returns').where('mssv', '==', mssv), snap => {
                 myReturns = pick(snap);
                 myReturns.forEach(r => {
@@ -590,17 +594,26 @@
                     <p class="text-xs text-slate-500">Mượn: ${esc(b.ngay_muon)} · Hạn trả: <b class="${late ? 'text-rose-600' : 'text-slate-700'}">${esc(b.han_tra)}</b></p>
                     <p class="text-[11px] text-slate-400">${esc(b.vi_tri_ke)}</p>${extendHtml(b)}</div>`;
             }).join('') : '<p class="col-span-full text-center text-sm text-slate-400 py-10">Hiện bạn không giữ cuốn sách nào.</p>';
-            const fines = currentHistoryRawList.filter(b => Number(b.tien_phat) > 0), unpaid = fines.filter(b => !b.da_thu_phi);
-            const owed = unpaid.reduce((t, b) => t + Number(b.tien_phat), 0);
+            // Công nợ độc lập từ biên bản penalties; không dùng trường tien_phat trên borrowings.
+            const fines = myPenalties.slice().sort((a,b) => (b.ngay_lap?.toMillis?.() || 0) - (a.ngay_lap?.toMillis?.() || 0));
+            const unpaid = fines.filter(p => p.payment_status !== 'paid');
+            const owed = unpaid.reduce((sum, p) => sum + (Number(p.so_tien_phat) || 0), 0);
             document.getElementById('userDisplayDebt').innerText = money(owed);
             document.getElementById('finesTotal').innerText = money(owed);
             const notes = hold.filter(b => b.han_tra && b.han_tra <= today).map(b => `<div class="p-3 rounded-none text-xs ${b.han_tra < today ? 'bg-rose-50 text-rose-700 border border-rose-200' : 'bg-amber-50 text-amber-800 border border-amber-200'}">${b.han_tra < today ? 'Quá hạn trả' : 'Hôm nay là hạn trả'}: <b>${esc(b.ten_sach)}</b></div>`);
             document.getElementById('noticeList').innerHTML = notes.join('');
             setBadge('finesCount', unpaid.length + notes.length);
-            document.getElementById('finesList').innerHTML = fines.length ? fines.map(b => `<div class="bg-white rounded-none border border-slate-200 p-4 flex items-center justify-between gap-3">
-                <div class="min-w-0"><p class="font-bold text-sm text-slate-800 truncate">${esc(b.ten_sach)}</p><p class="text-xs text-slate-500">${esc(b.ghi_chu_phat || 'Biên bản phạt')}</p></div>
-                <div class="text-right shrink-0"><p class="font-black text-rose-600 text-sm">${money(b.tien_phat)}</p><span class="text-[11px] font-bold ${b.da_thu_phi ? 'text-emerald-600' : 'text-amber-600'}">${b.da_thu_phi ? 'Đã thu' : 'Chưa thu'}</span></div></div>`).join('')
-                : '<p class="text-center text-sm text-slate-400 py-6">Bạn không có khoản phạt nào. 🎉</p>';
+            document.getElementById('finesList').innerHTML = fines.length ? fines.map(p => {
+                const pending = p.payment_status !== 'paid';
+                const amount = Number(p.so_tien_phat) || 0;
+                const code = p.payment_code || '';
+                const qrUrl = `https://img.vietqr.io/image/mbbank-0905673987-compact.png?amount=${amount}&addInfo=${encodeURIComponent(code)}&accountName=${encodeURIComponent('PHAM NHAT HA')}`;
+                return `<div class="bg-white rounded-none border border-slate-200 p-4 space-y-2">
+                    <div class="flex items-center justify-between gap-2"><div class="min-w-0"><p class="font-bold text-sm text-slate-800">${esc(p.ten_sach)}</p><p class="text-xs text-slate-500">${esc(p.ly_do || 'Biên bản nghiệm thu')}</p><p class="text-[10px] text-slate-400">Biên bản: ${esc(p.id)}</p></div>
+                    <div class="text-right shrink-0"><p class="font-black text-rose-600 text-sm">${money(amount)}</p><span class="text-[11px] font-bold ${pending ? 'text-amber-600' : 'text-emerald-600'}">${pending ? 'Chưa thanh toán' : 'Đã thanh toán'}</span></div></div>
+                    ${pending && code ? `<details class="border-t pt-2 text-xs"><summary class="cursor-pointer font-bold text-orange-600">Thanh toán bồi thường bằng VietQR</summary><div class="mt-3 flex flex-col items-center gap-2"><img src="${qrUrl}" alt="VietQR bồi thường" class="w-48 h-48 object-contain"><p>Chuyển khoản đúng <b>${money(amount)}</b> và giữ nguyên nội dung:</p><p class="font-mono break-all font-bold text-slate-800">${esc(code)}</p><p class="text-slate-400">SePay sẽ đối soát và tự đổi trạng thái sau khi nhận tiền.</p></div></details>` : ''}
+                </div>`;
+            }).join('') : '<p class="text-center text-sm text-slate-400 py-6">Bạn không có biên bản bồi thường.</p>';
         }
 
         // TẢI KHO SÁCH REALTIME TỪ FIRESTORE
@@ -739,7 +752,7 @@
         let eligToast = null;
         function ensureEligible(extra = 1) {
             const raw = currentHistoryRawList || [];
-            const debt = raw.filter(b => Number(b.tien_phat) > 0 && !b.da_thu_phi).length;
+            const debt = myPenalties.filter(p => p.payment_status !== 'paid').length;
             const held = raw.filter(b => b.trang_thai === 'dang_muon' || b.trang_thai === 'cho_kiem_tra').length
                 + myOrders.filter(o => o.trang_thai_don === 'cho_soan' || o.trang_thai_don === 'da_soan_xong').reduce((t, o) => t + (o.books || []).length, 0);
             if (debt === 0 && held + cart.length + extra <= 3) return true;

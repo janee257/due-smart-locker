@@ -44,6 +44,18 @@ service cloud.firestore {
           && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['trang_thai', 'thoi_gian_huy']))
       );
     }
-    match /penalties/{id}  { allow read, write: if isLib(); }
+    match /penalties/{id} {
+      allow read: if isLib() || isMine();
+      allow create: if isLib() && request.resource.data.payment_status == 'pending'
+        && request.resource.data.payment_code is string
+        && request.resource.data.payment_code.matches('DUEF[A-Z0-9]{20}')
+        && request.resource.data.so_tien_phat > 0;
+      // Chỉ Firebase Admin từ API SePay được xác nhận paid.
+      allow update: if isLib() && !request.resource.data.diff(resource.data).affectedKeys().hasAny([
+        'payment_status', 'paid_amount', 'payment_txn_id', 'paid_at',
+        'payment_amount', 'payment_code', 'so_tien_phat', 'mssv', 'return_id'
+      ]);
+      allow delete: if false;
+    }
   }
 }
