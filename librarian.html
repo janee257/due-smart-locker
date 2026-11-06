@@ -213,7 +213,10 @@ body.due-librarian-ui{background:#F8FAFC;color:#26364B;font-family:'Be Vietnam P
 .due-librarian-ui .due-kpi-label,.due-librarian-ui .due-kpi-card p.text-\[11px\]{font-size:12px;color:#60738B;}
 .due-stat-caption{font-size:10px;color:#94A3B8;line-height:1.4;margin-top:6px;display:block;}
 /* Full width orders workspace: no mini locker */
-.due-librarian-ui #libTabContentOrders,.due-librarian-ui #libTabContentOrders .due-orders-layout,.due-librarian-ui #libTabContentOrders .due-orders-card{width:100%;max-width:none;min-width:0;display:block;}
+/* Do not force the tab container to display:block: switchLibTab() toggles its hidden class. */
+.due-librarian-ui #libTabContentOrders{width:100%;max-width:none;min-width:0;}
+.due-librarian-ui #libTabContentOrders.hidden{display:none!important;}
+.due-librarian-ui #libTabContentOrders .due-orders-layout,.due-librarian-ui #libTabContentOrders .due-orders-card{width:100%;max-width:none;min-width:0;display:block;}
 .due-librarian-ui #libTabContentOrders .due-orders-card{padding:clamp(18px,1.8vw,28px)!important;background:white;border:1px solid #E2E8F0!important;border-radius:18px!important;box-shadow:0 4px 20px rgba(0,0,0,.04)!important;}
 .due-librarian-ui #libTabContentOrders .due-orders-card>div:first-child{display:flex;flex-wrap:wrap;gap:14px;padding-bottom:16px;border-color:#E2E8F0;}
 .due-librarian-ui #libTabContentOrders .due-orders-card h2{font-size:15px;letter-spacing:.01em;color:#003B7A;font-weight:850;}
