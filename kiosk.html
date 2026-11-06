@@ -122,6 +122,84 @@
       @media(max-width:900px) { .due-kiosk-ui .kiosk-header { flex-wrap:wrap; } .due-kiosk-ui .kiosk-main { gap:16px; } }
       @media(max-width:520px) { .due-kiosk-ui .kiosk-header { padding:16px!important; } .due-kiosk-ui .kiosk-action { min-height:115px; padding:13px!important; font-size:15px!important; } .due-kiosk-ui .kiosk-action i { font-size:22px; } .due-kiosk-ui .kiosk-action small { font-size:10px; } .due-kiosk-ui #lockersGrid { gap:5px!important; } .due-kiosk-ui #lockersGrid > div { border-radius:10px!important; min-height:83px; padding:7px 2px!important; } .due-kiosk-ui #lockersGrid > div > i { font-size:20px!important; } .due-kiosk-ui #lockersGrid > div > span:nth-of-type(1) { font-size:10px!important; } .due-kiosk-ui #lockersGrid > div > span:last-child { font-size:8px!important; padding:2px!important; } .due-kiosk-ui .kiosk-lockers-panel,.due-kiosk-ui .kiosk-scan-panel { padding:14px!important; } .due-kiosk-ui #finePanel > div { padding:17px!important; } }
       @media(prefers-reduced-motion:reduce) { .due-kiosk-ui #lockersGrid > div.ring-emerald-400 { animation:none!important; box-shadow:0 0 0 4px rgba(6,182,212,.37); } .due-kiosk-ui .kiosk-action, .due-kiosk-ui .kiosk-key { transition:none; } }
+
+      /* KIOSK UI UPGRADE 06: Compact laptop layout (1366–1920px), no business changes. */
+      .due-kiosk-ui { --kiosk-panel-gap:14px; }
+      .due-kiosk-ui .kiosk-header { padding:10px clamp(16px,2vw,30px)!important; min-height:72px; box-shadow:0 5px 20px rgba(0,59,122,.12); }
+      .due-kiosk-ui .kiosk-header img { height:42px!important; width:auto; }
+      .due-kiosk-ui .kiosk-header h1 { font-size:clamp(15px,1.35vw,19px)!important; }
+      .due-kiosk-ui .kiosk-header p { font-size:10px!important; }
+      .due-kiosk-ui .kiosk-header .kiosk-mark { font-size:9px!important; padding:4px 8px!important; }
+      .due-kiosk-ui .kiosk-legend { gap:5px; justify-content:center; }
+      .due-kiosk-ui .kiosk-legend-item { font-size:10px!important; padding:5px 8px!important; gap:5px; }
+      .due-kiosk-ui .kiosk-legend-dot { width:8px; height:8px; }
+      .due-kiosk-ui .kiosk-main { max-width:1580px!important; padding:14px 18px!important; gap:14px!important; }
+      .due-kiosk-ui .kiosk-main > div:first-child { gap:12px; }
+      .due-kiosk-ui .kiosk-panel { border-radius:17px!important; box-shadow:0 8px 24px rgba(18,48,82,.055)!important; }
+      .due-kiosk-ui .kiosk-scan-panel,.due-kiosk-ui .kiosk-lockers-panel { padding:15px!important; }
+      .due-kiosk-ui .kiosk-scan-panel { gap:11px!important; }
+      .due-kiosk-ui .kiosk-panel h2 { font-size:clamp(15px,1.2vw,18px)!important; line-height:1.4!important; }
+      .due-kiosk-ui .kiosk-camera-frame { min-height:0!important; aspect-ratio: 16 / 7.1!important; border-radius:12px!important; }
+      .due-kiosk-ui #camModeBadge { font-size:9px!important; padding:6px 9px!important; }
+      .due-kiosk-ui .kiosk-field-label { font-size:11px!important; }
+      .due-kiosk-ui #manualInput { min-height:46px!important; height:46px!important; font-size:15px!important; border-radius:11px!important; padding:8px!important; }
+      .due-kiosk-ui #manualInput::placeholder { font-size:10px!important; }
+      .due-kiosk-ui .kiosk-clear { min-width:46px!important; height:46px!important; border-radius:11px!important; }
+      .due-kiosk-ui .kiosk-input-shell { gap:7px; }
+      .due-kiosk-ui .kiosk-action-grid { gap:9px!important; padding-top:0!important; }
+      .due-kiosk-ui .kiosk-action { min-height:79px!important; padding:12px 15px!important; border-radius:13px!important; font-size:15px!important; gap:4px!important; flex-direction:row!important; align-items:center!important; flex-wrap:wrap; justify-content:flex-start!important; }
+      .due-kiosk-ui .kiosk-action i { font-size:22px!important; width:27px; }
+      .due-kiosk-ui .kiosk-action span { font-size:15px!important; }
+      .due-kiosk-ui .kiosk-action small { font-size:10px!important; flex-basis:100%; margin-left:29px; margin-top:-5px; }
+      .due-kiosk-ui .kiosk-keypad { margin-top:7px!important; padding:8px 10px!important; border-radius:12px!important; }
+      .due-kiosk-ui .kiosk-keypad-head { margin-bottom:0!important; font-size:11px!important; }
+      .due-kiosk-ui .kiosk-keypad-head > span:last-child { display:none; }
+      .due-kiosk-ui .kiosk-keypad-toggle { border:1px solid #bcd3e7; background:#fff; color:#003B7A; border-radius:9px; padding:5px 10px; font-weight:700; font-size:11px; cursor:pointer; }
+      .due-kiosk-ui .kiosk-keypad-toggle:hover { background:#e7f2fe; }
+      .due-kiosk-ui .kiosk-keypad.is-collapsed .kiosk-keys,
+      .due-kiosk-ui .kiosk-keypad.is-collapsed .kiosk-keypad-help { display:none!important; }
+      .due-kiosk-ui .kiosk-keypad:not(.is-collapsed) .kiosk-keys { margin-top:10px; }
+      .due-kiosk-ui .kiosk-keys { gap:6px!important; }
+      .due-kiosk-ui .kiosk-key { min-height:43px!important; font-size:16px!important; border-radius:9px!important; }
+      .due-kiosk-ui .kiosk-key--submit { min-height:46px!important; font-size:13px!important; }
+      .due-kiosk-ui .kiosk-lockers-title { margin-bottom:11px!important; gap:8px; }
+      .due-kiosk-ui #connStatus { padding:6px 10px!important; font-size:10px!important; }
+      .due-kiosk-ui #lockersGrid { gap:8px!important; }
+      .due-kiosk-ui #lockersGrid > div { min-height:88px!important; height:88px; border-width:1.5px!important; border-radius:12px!important; padding:7px 3px!important; }
+      .due-kiosk-ui #lockersGrid > div > i { font-size:21px!important; }
+      .due-kiosk-ui #lockersGrid > div > span:nth-of-type(1) { font-size:13px!important; }
+      .due-kiosk-ui #lockersGrid > div > span:nth-of-type(2) { font-size:9px!important; padding:2px 6px!important; }
+      .due-kiosk-ui #lockersGrid > div.ring-emerald-400 > i { font-size:26px!important; }
+      .due-kiosk-ui #kioskSteps { padding:9px!important; font-size:11px!important; }
+      .due-kiosk-ui #kioskLogoutBtnContainer button { font-size:11px!important; padding:8px 11px!important; }
+      /* Adjust on short laptop viewports, without changing the 5 x 4 cabinet layout. */
+      @media (min-width:1024px) and (max-height:850px) {
+        .due-kiosk-ui .kiosk-header { min-height:62px; padding-top:7px!important; padding-bottom:7px!important; }
+        .due-kiosk-ui .kiosk-main { padding:10px 14px!important; }
+        .due-kiosk-ui .kiosk-camera-frame { aspect-ratio:16/6.3!important; }
+        .due-kiosk-ui #lockersGrid > div { height:78px; min-height:78px!important; }
+        .due-kiosk-ui .kiosk-lockers-title { margin-bottom:8px!important; }
+        .due-kiosk-ui .kiosk-action { min-height:71px!important; }
+      }
+      @media (max-width:1023px) {
+        .due-kiosk-ui .kiosk-header { flex-wrap:wrap; }
+        .due-kiosk-ui .kiosk-main { padding:12px!important; }
+        .due-kiosk-ui .kiosk-camera-frame { aspect-ratio:16/8!important; }
+      }
+      @media (max-width:600px) {
+        .due-kiosk-ui .kiosk-header { padding:11px!important; }
+        .due-kiosk-ui .kiosk-legend { justify-content:flex-start; }
+        .due-kiosk-ui .kiosk-legend-item { padding:4px 7px!important; }
+        .due-kiosk-ui .kiosk-scan-panel,.due-kiosk-ui .kiosk-lockers-panel { padding:12px!important; }
+        .due-kiosk-ui #lockersGrid { gap:5px!important; }
+        .due-kiosk-ui #lockersGrid > div { height:72px; min-height:72px!important; padding:4px 1px!important; border-radius:9px!important; }
+        .due-kiosk-ui #lockersGrid > div > i { font-size:17px!important; }
+        .due-kiosk-ui #lockersGrid > div > span:nth-of-type(1) { font-size:10px!important; }
+        .due-kiosk-ui #lockersGrid > div > span:nth-of-type(2) { font-size:7px!important; }
+        .due-kiosk-ui .kiosk-action { min-height:75px!important; font-size:12px!important; padding:10px!important; }
+        .due-kiosk-ui .kiosk-action span { font-size:12px!important; }
+        .due-kiosk-ui .kiosk-action small { font-size:9px!important; }
+      }
     </style>
 </head>
 <body class="bg-slate-900 text-white min-h-screen flex flex-col font-sans due-kiosk-ui">
@@ -203,8 +281,8 @@
                         <button class="kiosk-clear" type="button" id="dueClearCode" aria-label="Xóa toàn bộ mã"><i class="fa-solid fa-xmark"></i></button>
                     </div>
                     <!-- KIOSK UI UPGRADE 03: Touch keypad. Original #manualInput and handlePickup / handleReturn are unchanged. -->
-                    <div class="kiosk-keypad" id="dueKeypadPanel">
-                      <div class="kiosk-keypad-head"><span><i class="fa-solid fa-keyboard mr-1"></i> Bàn phím cảm ứng</span><span>Nhập mã trên phiếu</span></div>
+                    <div class="kiosk-keypad is-collapsed" id="dueKeypadPanel">
+                      <div class="kiosk-keypad-head"><span><i class="fa-solid fa-keyboard mr-1"></i> Bàn phím cảm ứng</span><button type="button" class="kiosk-keypad-toggle" id="dueKeypadToggle" aria-controls="dueKeypadKeys" aria-expanded="false">Mở bàn phím <i class="fa-solid fa-chevron-down"></i></button></div>
                       <div class="kiosk-keys" id="dueKeypadKeys">
                         <button type="button" class="kiosk-key" data-due-key="1">1</button><button type="button" class="kiosk-key" data-due-key="2">2</button><button type="button" class="kiosk-key" data-due-key="3">3</button>
                         <button type="button" class="kiosk-key" data-due-key="4">4</button><button type="button" class="kiosk-key" data-due-key="5">5</button><button type="button" class="kiosk-key" data-due-key="6">6</button>
@@ -213,7 +291,7 @@
                         <button type="button" class="kiosk-key kiosk-key--erase" data-due-erase="1" aria-label="Xóa ký tự cuối"><i class="fa-solid fa-delete-left"></i></button>
                         <button type="button" class="kiosk-key kiosk-key--submit" id="dueKeypadSubmit"><i class="fa-solid fa-check mr-2"></i> XÁC NHẬN MÃ</button>
                       </div>
-                      <p style="font-size:11px;color:#57738b;margin-top:10px;line-height:1.5">Mã có chữ: chạm vào ô phía trên để dùng bàn phím thiết bị. Khi đang đối soát sách trả, nút Xác nhận sẽ kiểm tra mã vạch.</p>
+                      <p class="kiosk-keypad-help" style="font-size:11px;color:#57738b;margin-top:10px;line-height:1.5">Mã có chữ: chạm vào ô phía trên để dùng bàn phím thiết bị. Khi đang đối soát sách trả, nút Xác nhận sẽ kiểm tra mã vạch.</p>
                     </div>
                     <div class="grid grid-cols-2 gap-3 pt-2 kiosk-action-grid">
                         <button onclick="handlePickup()" class="py-3 bg-orange-600 hover:bg-orange-500 font-bold text-sm rounded-none transition flex items-center justify-center gap-2 shadow-sm kiosk-action kiosk-action--pickup">
@@ -783,6 +861,20 @@
       }
       if(finePanel) new MutationObserver(resetPaymentTimer).observe(finePanel,{attributes:true,attributeFilter:['class']});
       // Audible notice on barcode scans is derived from visible confirmation only; no business handlers are patched.
+    })();
+    </script>
+
+    <!-- KIOSK UI UPGRADE 07: Toggle touch keypad; DOM-only enhancement, no business logic changes. -->
+    <script id="due-kiosk-keypad-toggle">
+    (() => {
+      const panel = document.getElementById('dueKeypadPanel');
+      const toggle = document.getElementById('dueKeypadToggle');
+      if (!panel || !toggle) return;
+      toggle.addEventListener('click', () => {
+        const collapsed = panel.classList.toggle('is-collapsed');
+        toggle.setAttribute('aria-expanded', String(!collapsed));
+        toggle.innerHTML = collapsed ? 'Mở bàn phím <i class="fa-solid fa-chevron-down"></i>' : 'Thu gọn <i class="fa-solid fa-chevron-up"></i>';
+      });
     })();
     </script>
 </body>
