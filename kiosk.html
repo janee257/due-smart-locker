@@ -23,8 +23,108 @@
     <script src="ui.js" defer></script>
     <script src="app-core.js"></script>
     <script>const { auth, db } = App; const loginWithFirebase = App.login;</script>
+    <!-- KIOSK UI UPGRADE 01: Visual design only; all original business scripts retained. -->
+    <style id="due-kiosk-ui-upgrade">
+      :root { --due-navy:#003B7A; --due-blue:#0284C7; --due-orange:#EA580C; --due-ink:#123052; --due-bg:#eef4fa; --due-line:#d9e5f1; }
+      body.due-kiosk-ui { font-family:'Be Vietnam Pro',sans-serif; color:var(--due-ink); background:radial-gradient(circle at top right,#e5f3ff 0%,#f6f9fc 50%,#edf3fa 100%)!important; }
+      .due-kiosk-ui .kiosk-header { background:linear-gradient(118deg,#003B7A,#0B4EA2 65%,#1264a7)!important; color:white; border:0!important; padding:19px clamp(18px,3vw,45px)!important; box-shadow:0 10px 32px rgba(0,59,122,.16); gap:12px; }
+      .due-kiosk-ui .kiosk-header h1 { font-size:clamp(16px,1.75vw,24px)!important; letter-spacing:.01em; }
+      .due-kiosk-ui .kiosk-header p { color:#bfdcfb!important; font-size:12px!important; margin-top:4px; }
+      .due-kiosk-ui .kiosk-header img { border-radius:12px!important; height:52px; padding:5px; }
+      .due-kiosk-ui .kiosk-header .kiosk-mark { background:#fff!important; color:#003B7A!important; border-radius:999px!important; padding:5px 10px!important; font-size:10px!important; }
+      .due-kiosk-ui .kiosk-main { max-width:1530px; gap:22px; align-items:start; padding:clamp(14px,2vw,28px)!important; }
+      .due-kiosk-ui .kiosk-panel { background:#fff!important; color:var(--due-ink); border:1px solid var(--due-line)!important; border-radius:24px!important; box-shadow:0 15px 45px rgba(18,48,82,.08)!important; }
+      .due-kiosk-ui .kiosk-panel h2 { color:var(--due-navy)!important; font-size:clamp(16px,1.5vw,21px)!important; }
+      .due-kiosk-ui .kiosk-scan-panel { padding:22px!important; }
+      .due-kiosk-ui .kiosk-camera-frame { border-radius:18px!important; border:2px solid #d3e5f6!important; background:#071b34!important; min-height:200px; }
+      .due-kiosk-ui #reader { color:white; }
+      .due-kiosk-ui #reader video { object-fit:cover; border-radius:14px; }
+      .due-kiosk-ui #camModeBadge { background:#003B7A!important; border-radius:10px; padding:8px 11px!important; font-size:11px!important; box-shadow:0 5px 12px rgba(0,0,0,.2); }
+      .due-kiosk-ui .kiosk-field-label { color:#486784!important; font-size:13px!important; font-weight:700; display:block; }
+      .due-kiosk-ui .kiosk-input-shell { display:flex; gap:10px; align-items:center; }
+      .due-kiosk-ui #manualInput { min-height:60px; background:#f7fafc!important; color:#003B7A!important; border:2px solid #d6e5f4!important; border-radius:15px!important; font-size:19px!important; text-align:center; font-weight:700; letter-spacing:.07em; padding:12px 10px!important; text-transform:uppercase; width:100%; min-width:0; }
+      .due-kiosk-ui #manualInput:focus { outline:none; border-color:#0284C7!important; box-shadow:0 0 0 4px rgba(2,132,199,.13); }
+      .due-kiosk-ui #manualInput::placeholder { color:#8da4b8; font-size:13px; letter-spacing:0; }
+      .due-kiosk-ui .kiosk-clear { flex-shrink:0; min-width:60px; height:60px; border:1px solid #cfdfef; border-radius:14px; color:#28547d; background:#ecf4fb; font-weight:800; font-size:17px; }
+      .due-kiosk-ui .kiosk-clear:active { transform:scale(.95); }
+      .due-kiosk-ui .kiosk-keypad { border:1px solid #dbe6f1; background:#f4f8fd; border-radius:19px; padding:13px; margin-top:14px; }
+      .due-kiosk-ui .kiosk-keypad-head { display:flex; align-items:center; justify-content:space-between; gap:10px; color:#416584; font-weight:700; font-size:12px; margin-bottom:11px; }
+      .due-kiosk-ui .kiosk-keys { display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); gap:9px; }
+      .due-kiosk-ui .kiosk-key { min-height:52px; border:1px solid #ccdaeb; background:#fff; border-radius:13px; font-size:19px; font-weight:800; color:#003B7A; box-shadow:0 2px 0 #dce8f3; transition:background .15s,transform .12s; touch-action:manipulation; }
+      .due-kiosk-ui .kiosk-key:active { background:#d8ecfc; transform:scale(.95); box-shadow:none; }
+      .due-kiosk-ui .kiosk-key--prefix { background:#e4f1ff; font-size:16px; }
+      .due-kiosk-ui .kiosk-key--erase { background:#fce9e7; color:#a93225; }
+      .due-kiosk-ui .kiosk-key--submit { grid-column:span 3; min-height:60px; color:white; background:#003B7A; border-color:#003B7A; font-size:16px; }
+      .due-kiosk-ui .kiosk-key--submit:active { background:#0B4EA2; }
+      .due-kiosk-ui .kiosk-action-grid { display:grid!important; grid-template-columns:repeat(2,minmax(0,1fr)); gap:13px!important; padding-top:5px!important; }
+      .due-kiosk-ui .kiosk-action { border-radius:20px!important; min-height:125px; display:flex!important; flex-direction:column!important; align-items:flex-start!important; justify-content:center!important; text-align:left; padding:20px!important; gap:8px!important; font-size:19px!important; font-weight:800!important; line-height:1.3!important; color:white; box-shadow:0 12px 24px rgba(0,59,122,.14)!important; transition:transform .14s,box-shadow .14s,filter .14s; touch-action:manipulation; }
+      .due-kiosk-ui .kiosk-action i { font-size:28px; }
+      .due-kiosk-ui .kiosk-action span { display:block; }
+      .due-kiosk-ui .kiosk-action small { font-size:11px; font-weight:500; opacity:.88; }
+      .due-kiosk-ui .kiosk-action--pickup { background:linear-gradient(145deg,#EA580C,#f58220)!important; }
+      .due-kiosk-ui .kiosk-action--return { background:linear-gradient(145deg,#003B7A,#0284C7)!important; }
+      .due-kiosk-ui .kiosk-action:hover { transform:translateY(-2px); filter:brightness(1.04); }
+      .due-kiosk-ui .kiosk-action:active { transform:scale(.95); box-shadow:0 3px 8px rgba(0,59,122,.2)!important; }
+      .due-kiosk-ui .kiosk-legend { display:flex; flex-wrap:wrap; gap:9px; align-items:center; }
+      .due-kiosk-ui .kiosk-legend-item { display:inline-flex; align-items:center; gap:7px; color:#d9ecff; font-size:12px; font-weight:600; background:rgba(255,255,255,.12); padding:8px 11px; border:1px solid rgba(255,255,255,.17); border-radius:999px; }
+      .due-kiosk-ui .kiosk-legend-dot { width:10px; height:10px; display:inline-block; border-radius:50%; flex-shrink:0; }
+      .due-kiosk-ui .kiosk-lockers-panel { padding:22px!important; }
+      .due-kiosk-ui .kiosk-lockers-title { display:flex; gap:12px; align-items:center; justify-content:space-between; flex-wrap:wrap; margin-bottom:20px; }
+      .due-kiosk-ui #connStatus { background:#e5f9ed; color:#087d55!important; border-radius:999px; padding:8px 12px; font-weight:700; font-size:12px!important; }
+      .due-kiosk-ui #lockersGrid { display:grid!important; grid-template-columns:repeat(5,minmax(0,1fr))!important; gap:clamp(7px,1vw,14px)!important; }
+      .due-kiosk-ui #lockersGrid > div { min-height:clamp(91px,10vw,133px); padding:10px 5px!important; border-width:2px!important; border-radius:17px!important; background:#f3f7fb; color:#496680; border-color:#9aaabc; box-shadow:0 3px 9px rgba(0,40,86,.045); transition:transform .2s,box-shadow .2s; }
+      .due-kiosk-ui #lockersGrid > div > i { font-size:25px!important; }
+      .due-kiosk-ui #lockersGrid > div > span:nth-of-type(1) { font-size:clamp(12px,1.35vw,16px)!important; font-weight:800; letter-spacing:.01em; white-space:nowrap; }
+      .due-kiosk-ui #lockersGrid > div > span:nth-of-type(2) { font-size:clamp(9px,.85vw,11px)!important; border-radius:999px; font-weight:800; padding:4px 7px; line-height:1.3; background:rgba(16,185,129,.11); color:#047857; white-space:nowrap; }
+      .due-kiosk-ui #lockersGrid > div.bg-slate-700 { border-color:#9aabbc!important; }
+      .due-kiosk-ui #lockersGrid > div.bg-amber-500\/20 { background:#fffbeb!important; color:#b45309!important; border-color:#f59e0b!important; }
+      .due-kiosk-ui #lockersGrid > div.bg-amber-500\/20 > span:last-child { background:#fef3c7; color:#92400e; }
+      .due-kiosk-ui #lockersGrid > div.bg-blue-500\/20 { background:#eff6ff!important; color:#1d4ed8!important; border-color:#3b82f6!important; }
+      .due-kiosk-ui #lockersGrid > div.bg-blue-500\/20 > span:last-child { background:#dbeafe; color:#1d4ed8; }
+      .due-kiosk-ui #lockersGrid > div.bg-violet-500\/20 { background:#eef6ff!important; color:#1d4ed8!important; border-color:#60a5fa!important; }
+      .due-kiosk-ui #lockersGrid > div.bg-violet-500\/20 > span:last-child { background:#dbeafe; color:#1d4ed8; }
+      .due-kiosk-ui #lockersGrid > div.ring-emerald-400 { background:#e6fbff!important; color:#036b80!important; border-color:#06b6d4!important; animation:due-cyan-pulse 1.15s ease-in-out infinite!important; }
+      .due-kiosk-ui #lockersGrid > div.ring-emerald-400 > i { font-size:34px!important; color:#0891b2!important; }
+      .due-kiosk-ui #lockersGrid > div.ring-emerald-400 > span:last-child { color:#056d81; background:#bff4fd; }
+      @keyframes due-cyan-pulse { 0%,100% {box-shadow:0 0 0 3px rgba(6,182,212,.12),0 0 10px rgba(6,182,212,.28);} 50% {box-shadow:0 0 0 6px rgba(6,182,212,.29),0 0 26px rgba(6,182,212,.65);} }
+      .due-kiosk-ui #returnSession { border-radius:22px; background:#fff!important; color:#123052!important; border:1px solid #d6e5f2!important; box-shadow:0 10px 34px rgba(18,48,82,.08); }
+      .due-kiosk-ui #returnSession h2 { color:#003B7A!important; }
+      .due-kiosk-ui #returnSession > p { color:#375d7c!important; }
+      .due-kiosk-ui #returnSession .bg-slate-900\/60 { background:#f1f6fb!important; color:#123052!important; }
+      .due-kiosk-ui #returnSession #retRows .text-slate-300 { color:#385775!important; }
+      .due-kiosk-ui #returnSession #retRows .text-blue-300 { color:#07549d!important; }
+      .due-kiosk-ui #returnSession #simChips button { border-radius:10px; }
+      .due-kiosk-ui #barcodeInput { min-height:48px; border-radius:12px; }
+      .due-kiosk-ui #statusBox { border-radius:18px!important; }
+      .due-kiosk-ui #kioskSteps { flex-wrap:wrap; background:#fff; border:1px solid #dce7f1; border-radius:15px; padding:13px; }
+      .due-kiosk-ui #kioskSteps .text-slate-500 { color:#64748b!important; }
+      .due-kiosk-ui #finePanel { background:rgba(2,20,43,.84)!important; }
+      .due-kiosk-ui #finePanel > div { background:#fff!important; border:0!important; color:#123052!important; max-width:530px!important; max-height:calc(100vh - 36px); overflow-y:auto; border-radius:26px; padding:clamp(18px,3vw,30px)!important; box-shadow:0 25px 100px rgba(0,0,0,.32); }
+      .due-kiosk-ui #finePanel .text-slate-300 { color:#456078!important; }
+      .due-kiosk-ui #finePanel .text-slate-400 { color:#5b6e84!important; }
+      .due-kiosk-ui #finePanel .border-slate-700 { border-color:#e1e9f3!important; }
+      .due-kiosk-ui #finePanel #fineQr { width:min(64vw,285px)!important; height:min(64vw,285px)!important; max-width:285px; max-height:285px; }
+      .due-kiosk-ui #finePanel #fineAmount { color:#b91c1c!important; }
+      .due-kiosk-ui #finePanel #fineInfo { background:#f1f7ff!important; border:1px solid #d9e6f3!important; color:#18486f!important; border-radius:15px; font-size:12px!important; }
+      .due-kiosk-ui #finePanel #fineInfo b { color:#003B7A!important; overflow-wrap:anywhere; }
+      .due-kiosk-ui #paymentWaiting { color:#003B7A!important; background:#eaf5ff!important; border:1px solid #bfdcf5!important; border-radius:14px; margin-bottom:0; }
+      .due-kiosk-ui .due-payment-progress { background:#d8eafd; height:8px; border-radius:999px; overflow:hidden; margin-top:10px; }
+      .due-kiosk-ui .due-payment-progress > span { display:block; background:linear-gradient(90deg,#06b6d4,#0284c7); height:100%; width:100%; transform-origin:left; transition:transform .95s linear; }
+      .due-kiosk-ui #duePaymentCountdown { text-align:center; color:#49667d; font-size:11px; margin-top:6px; }
+      .due-kiosk-ui #kioskLoginSection { background:linear-gradient(145deg,#082c57,#003B7A 60%,#0B4EA2)!important; }
+      .due-kiosk-ui #kioskLoginSection > div { background:white!important; color:#143e69!important; border:none!important; border-radius:24px!important; max-width:415px; padding:32px!important; box-shadow:0 18px 65px rgba(0,0,0,.27); }
+      .due-kiosk-ui #kioskLoginSection h2 { color:#003B7A!important; font-size:20px!important; }
+      .due-kiosk-ui #kioskLoginSection p,.due-kiosk-ui #kioskLoginSection label { color:#416382!important; }
+      .due-kiosk-ui #kioskLoginSection input { background:#f5f8fc!important; color:#123052!important; border:1px solid #d5e2f0!important; border-radius:12px!important; min-height:48px; }
+      .due-kiosk-ui #kioskLoginSection button[type=submit] { background:#003B7A!important; border-radius:13px!important; min-height:48px; }
+      .due-kiosk-ui #kioskLogoutBtnContainer button { border-radius:12px!important; }
+      .due-kiosk-ui button:focus-visible { outline:3px solid #38bdf8!important; outline-offset:2px; }
+      @media(max-width:900px) { .due-kiosk-ui .kiosk-header { flex-wrap:wrap; } .due-kiosk-ui .kiosk-main { gap:16px; } }
+      @media(max-width:520px) { .due-kiosk-ui .kiosk-header { padding:16px!important; } .due-kiosk-ui .kiosk-action { min-height:115px; padding:13px!important; font-size:15px!important; } .due-kiosk-ui .kiosk-action i { font-size:22px; } .due-kiosk-ui .kiosk-action small { font-size:10px; } .due-kiosk-ui #lockersGrid { gap:5px!important; } .due-kiosk-ui #lockersGrid > div { border-radius:10px!important; min-height:83px; padding:7px 2px!important; } .due-kiosk-ui #lockersGrid > div > i { font-size:20px!important; } .due-kiosk-ui #lockersGrid > div > span:nth-of-type(1) { font-size:10px!important; } .due-kiosk-ui #lockersGrid > div > span:last-child { font-size:8px!important; padding:2px!important; } .due-kiosk-ui .kiosk-lockers-panel,.due-kiosk-ui .kiosk-scan-panel { padding:14px!important; } .due-kiosk-ui #finePanel > div { padding:17px!important; } }
+      @media(prefers-reduced-motion:reduce) { .due-kiosk-ui #lockersGrid > div.ring-emerald-400 { animation:none!important; box-shadow:0 0 0 4px rgba(6,182,212,.37); } .due-kiosk-ui .kiosk-action, .due-kiosk-ui .kiosk-key { transition:none; } }
+    </style>
 </head>
-<body class="bg-slate-900 text-white min-h-screen flex flex-col font-sans">
+<body class="bg-slate-900 text-white min-h-screen flex flex-col font-sans due-kiosk-ui">
 
     <!-- ================= MÀN HÌNH ĐĂNG NHẬP KIOSK QUA FIREBASE ================= -->
     <div id="kioskLoginSection" class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950">
@@ -62,51 +162,65 @@
     </div>
 
     <!-- Thanh header -->
-    <header class="bg-slate-800 border-b border-slate-700 p-3.5 flex justify-between items-center shadow-md">
+    <header class="bg-slate-800 border-b border-slate-700 p-3.5 flex justify-between items-center shadow-md kiosk-header">
         <div class="flex items-center gap-3">
             <img src="/logo_due.png" alt="DUE Logo" class="h-11 w-auto bg-white p-1 rounded-none shadow-sm object-contain" onerror="this.onerror=null; this.src='https://due.udn.vn/Portals/0/logo-due.png';">
             <div>
                 <h1 class="text-base sm:text-lg font-bold leading-tight flex items-center gap-2">
-                    TRẠM TỦ THÔNG MINH <span class="bg-orange-600 text-white text-[10px] px-2 py-0.5 rounded-sm uppercase tracking-wider font-bold">Kiosk</span>
+                    TRẠM TỦ THÔNG MINH <span class="bg-orange-600 text-white text-[10px] px-2 py-0.5 rounded-sm uppercase tracking-wider font-bold kiosk-mark">Kiosk</span>
                 </h1>
                 <p class="text-xs text-slate-400">Thư viện DUE • Tủ 20 ngăn • Đồng bộ Firestore Realtime</p>
             </div>
         </div>
-        <div class="flex items-center gap-3 sm:gap-4 text-xs font-semibold">
-            <span class="flex items-center gap-1.5"><span class="w-2.5 h-2.5 rounded-full bg-slate-500"></span> Trống</span>
-            <span class="flex items-center gap-1.5"><span class="w-2.5 h-2.5 rounded-full bg-amber-500"></span> Chờ lấy</span>
-            <span class="flex items-center gap-1.5"><span class="w-2.5 h-2.5 rounded-full bg-blue-500"></span> Sách trả</span>
-            <span class="flex items-center gap-1.5"><span class="w-2.5 h-2.5 rounded-full bg-violet-500"></span> Chờ trả</span>
-            <span class="flex items-center gap-1.5"><span class="w-2.5 h-2.5 rounded-full bg-emerald-400 animate-ping"></span> 🔓 Đang mở</span>
+        <!-- KIOSK UI UPGRADE 02: Readable legend; 20-cell data still rendered by original onSnapshot. -->
+        <div class="kiosk-legend" aria-label="Chú thích trạng thái hộc">
+            <span class="kiosk-legend-item"><i class="kiosk-legend-dot" style="background:#10B981"></i>Trống</span>
+            <span class="kiosk-legend-item"><i class="kiosk-legend-dot" style="background:#F59E0B"></i>Chờ lấy</span>
+            <span class="kiosk-legend-item"><i class="kiosk-legend-dot" style="background:#3B82F6"></i>Sách trả / Chờ trả</span>
+            <span class="kiosk-legend-item"><i class="kiosk-legend-dot" style="background:#06B6D4"></i>🔓 Đang mở</span>
         </div>
     </header>
 
-    <div class="flex-1 grid grid-cols-1 lg:grid-cols-12 gap-6 p-4 sm:p-6 max-w-7xl mx-auto w-full">
+    <div class="flex-1 grid grid-cols-1 lg:grid-cols-12 gap-6 p-4 sm:p-6 max-w-7xl mx-auto w-full kiosk-main">
         <!-- Khung quét mã & Thao tác (Cột trái) -->
         <div class="lg:col-span-5 space-y-5">
-            <div class="bg-slate-800 p-5 rounded-none border border-slate-700 shadow-md space-y-4">
+            <div class="bg-slate-800 p-5 rounded-none border border-slate-700 shadow-md space-y-4 kiosk-panel kiosk-scan-panel">
                 <h2 class="text-base font-bold flex items-center gap-2 text-orange-400">
                     <i class="fa-solid fa-qrcode"></i> QUÉT MÃ NHẬN / TRẢ SÁCH
                 </h2>
                 
                 <!-- Khung camera -->
-                <div class="relative bg-black rounded-none overflow-hidden aspect-video border border-slate-600 flex items-center justify-center">
+                <div class="relative bg-black rounded-none overflow-hidden aspect-video border border-slate-600 flex items-center justify-center kiosk-camera-frame">
                     <div id="camModeBadge" class="absolute top-2 left-2 z-10 px-2.5 py-1 text-[11px] font-bold text-white bg-orange-600">CHẾ ĐỘ: QUÉT MÃ QR</div>
                     <div id="reader" class="w-full h-full"></div>
                 </div>
 
                 <div class="space-y-3">
-                    <label class="text-xs font-semibold text-slate-300">Hoặc nhập mã Token / Barcode thủ công:</label>
-                    <div class="flex gap-2">
+                    <label class="text-xs font-semibold text-slate-300 kiosk-field-label">Hoặc nhập mã Token / Barcode thủ công:</label>
+                    <div class="flex gap-2 kiosk-input-shell">
                         <input type="text" id="manualInput" placeholder="Ví dụ: QR-A1B2C3 hoặc TRA-X9Y8Z7" 
-                               class="flex-1 bg-slate-900 border border-slate-600 rounded-none px-4 py-3 text-sm font-mono text-white outline-none focus:border-orange-500 uppercase">
+                               class="flex-1 bg-slate-900 border border-slate-600 rounded-none px-4 py-3 text-sm font-mono text-white outline-none focus:border-orange-500 uppercase" aria-label="Mã mượn hoặc mã trả sách">
+                        <button class="kiosk-clear" type="button" id="dueClearCode" aria-label="Xóa toàn bộ mã"><i class="fa-solid fa-xmark"></i></button>
                     </div>
-                    <div class="grid grid-cols-2 gap-3 pt-2">
-                        <button onclick="handlePickup()" class="py-3 bg-orange-600 hover:bg-orange-500 font-bold text-sm rounded-none transition flex items-center justify-center gap-2 shadow-sm">
-                            <i class="fa-solid fa-box-open"></i> Nhận Sách (Mở Hộc)
+                    <!-- KIOSK UI UPGRADE 03: Touch keypad. Original #manualInput and handlePickup / handleReturn are unchanged. -->
+                    <div class="kiosk-keypad" id="dueKeypadPanel">
+                      <div class="kiosk-keypad-head"><span><i class="fa-solid fa-keyboard mr-1"></i> Bàn phím cảm ứng</span><span>Nhập mã trên phiếu</span></div>
+                      <div class="kiosk-keys" id="dueKeypadKeys">
+                        <button type="button" class="kiosk-key" data-due-key="1">1</button><button type="button" class="kiosk-key" data-due-key="2">2</button><button type="button" class="kiosk-key" data-due-key="3">3</button>
+                        <button type="button" class="kiosk-key" data-due-key="4">4</button><button type="button" class="kiosk-key" data-due-key="5">5</button><button type="button" class="kiosk-key" data-due-key="6">6</button>
+                        <button type="button" class="kiosk-key" data-due-key="7">7</button><button type="button" class="kiosk-key" data-due-key="8">8</button><button type="button" class="kiosk-key" data-due-key="9">9</button>
+                        <button type="button" class="kiosk-key kiosk-key--prefix" data-due-prefix="QR-">QR-</button><button type="button" class="kiosk-key" data-due-key="0">0</button><button type="button" class="kiosk-key kiosk-key--prefix" data-due-prefix="TRA-">TRA-</button>
+                        <button type="button" class="kiosk-key kiosk-key--erase" data-due-erase="1" aria-label="Xóa ký tự cuối"><i class="fa-solid fa-delete-left"></i></button>
+                        <button type="button" class="kiosk-key kiosk-key--submit" id="dueKeypadSubmit"><i class="fa-solid fa-check mr-2"></i> XÁC NHẬN MÃ</button>
+                      </div>
+                      <p style="font-size:11px;color:#57738b;margin-top:10px;line-height:1.5">Mã có chữ: chạm vào ô phía trên để dùng bàn phím thiết bị. Khi đang đối soát sách trả, nút Xác nhận sẽ kiểm tra mã vạch.</p>
+                    </div>
+                    <div class="grid grid-cols-2 gap-3 pt-2 kiosk-action-grid">
+                        <button onclick="handlePickup()" class="py-3 bg-orange-600 hover:bg-orange-500 font-bold text-sm rounded-none transition flex items-center justify-center gap-2 shadow-sm kiosk-action kiosk-action--pickup">
+                            <i class="fa-solid fa-box-open"></i><span>NHẬN SÁCH</span><small>Quét QR để lấy sách</small>
                         </button>
-                        <button onclick="handleReturn()" class="py-3 bg-blue-600 hover:bg-blue-500 font-bold text-sm rounded-none transition flex items-center justify-center gap-2 shadow-sm">
-                            <i class="fa-solid fa-rotate-left"></i> Trả Sách (Mở Hộc)
+                        <button onclick="handleReturn()" class="py-3 bg-blue-600 hover:bg-blue-500 font-bold text-sm rounded-none transition flex items-center justify-center gap-2 shadow-sm kiosk-action kiosk-action--return">
+                            <i class="fa-solid fa-arrow-right-to-bracket"></i><span>TRẢ SÁCH</span><small>Quét mã để gửi trả</small>
                         </button>
                     </div>
                 </div>
@@ -154,8 +268,13 @@
                     <div id="fineInfo" class="text-[11px] text-left text-slate-300 space-y-1 bg-slate-950/80 p-3.5 border border-slate-800"></div>
 
                     <p id="paymentWaiting" class="w-full py-3.5 bg-slate-800 border border-slate-600 text-slate-200 text-sm font-bold">
-                        <i class="fa-solid fa-spinner fa-spin mr-2"></i> Đang chờ ngân hàng xác nhận thanh toán...
+                        <i class="fa-solid fa-spinner fa-spin mr-2"></i> Hệ thống đang tự động xác nhận chuyển khoản từ ngân hàng qua SePay...
                     </p>
+                    <!-- KIOSK UI UPGRADE 04: Informational countdown only; payment continues to be verified by the original Firestore onSnapshot. -->
+                    <div aria-label="Tiến trình chờ xác nhận" role="status">
+                      <div class="due-payment-progress"><span id="duePaymentProgressBar"></span></div>
+                      <p id="duePaymentCountdown">Bắt đầu theo dõi giao dịch...</p>
+                    </div>
                 </div>
             </div>
         </div>
@@ -166,8 +285,8 @@
         </div>
 
         <!-- Lưới 20 Hộc Tủ (Cột phải) -->
-        <div class="lg:col-span-7 bg-slate-800/60 p-5 rounded-none border border-slate-700">
-            <h2 class="text-base font-bold mb-4 flex items-center justify-between text-slate-300">
+        <div class="lg:col-span-7 bg-slate-800/60 p-5 rounded-none border border-slate-700 kiosk-panel kiosk-lockers-panel">
+            <h2 class="text-base font-bold mb-4 flex items-center justify-between text-slate-300 kiosk-lockers-title">
                 <span><i class="fa-solid fa-table-cells mr-2"></i>TRẠNG THÁI 20 HỘC TỦ</span>
                 <span id="connStatus" class="text-xs font-normal text-emerald-400">Firestore Trực tuyến</span>
             </h2>
@@ -566,6 +685,105 @@
         }
         function startCamera() { if (cameraStarted || camBusy) return; setCamMode('qr'); }
         function backToQrCam() { if (camMode === 'barcode') setCamMode('qr'); }
+    </script>
+    <!-- KIOSK UI UPGRADE 05: Presentation-only keypad, Web Audio feedback, and progress timer. -->
+    <script id="due-kiosk-ui-interaction">
+    (() => {
+      'use strict';
+      const input = document.getElementById('manualInput');
+      const keys = document.getElementById('dueKeypadKeys');
+      if (!input || !keys) return;
+      const setValue = (value) => {
+        input.value = String(value).toUpperCase();
+        input.dispatchEvent(new Event('input', { bubbles:true }));
+        input.focus({ preventScroll:true });
+      };
+      const notify = (msg) => { if (typeof showNotice === 'function') showNotice(msg,'error'); };
+      keys.addEventListener('click', (evt) => {
+        const b = evt.target.closest('button');
+        if (!b || !keys.contains(b)) return;
+        if (b.hasAttribute('data-due-key')) setValue(input.value + b.dataset.dueKey);
+        else if (b.hasAttribute('data-due-prefix')) {
+          const prefix = b.dataset.duePrefix;
+          const cur = input.value.toUpperCase();
+          if (/^(QR-|TRA-)/.test(cur)) setValue(prefix + cur.replace(/^(QR-|TRA-)/,''));
+          else setValue(prefix + cur);
+        } else if (b.hasAttribute('data-due-erase')) setValue(input.value.slice(0,-1));
+      });
+      document.getElementById('dueClearCode').addEventListener('click', () => setValue(''));
+      document.getElementById('dueKeypadSubmit').addEventListener('click', () => {
+        const code = input.value.trim().toUpperCase();
+        if (!code) return notify('Vui lòng nhập mã QR hoặc mã trả sách.');
+        if (typeof ret !== 'undefined' && ret && typeof camMode !== 'undefined' && camMode === 'barcode') {
+          if (typeof onBarcode === 'function') onBarcode(code);
+          setValue(''); return;
+        }
+        if (code.startsWith('TRA-')) { if (typeof handleReturn === 'function') handleReturn(); }
+        else if (code.startsWith('QR-')) { if (typeof handlePickup === 'function') handlePickup(); }
+        else notify('Mã giao dịch cần bắt đầu bằng QR- hoặc TRA-.');
+      });
+      // Audio is a noncritical enhancement. Browsers may block sound before a user gesture.
+      let ctx = null;
+      function enableSound() {
+        try { const AC = window.AudioContext || window.webkitAudioContext; if (!AC) return;
+          if (!ctx) ctx = new AC(); if (ctx.state === 'suspended') ctx.resume().catch(()=>{});
+        } catch(_) { ctx=null; }
+      }
+      document.addEventListener('pointerdown',enableSound,{passive:true});
+      document.addEventListener('keydown',enableSound,{passive:true});
+      const tone = (freq,duration,delay=0) => {
+        try { if (!ctx || ctx.state !== 'running') return;
+          const t = ctx.currentTime + delay;
+          const oscillator = ctx.createOscillator(), gain=ctx.createGain();
+          oscillator.type='sine'; oscillator.frequency.setValueAtTime(freq,t);
+          gain.gain.setValueAtTime(0.0001,t);
+          gain.gain.exponentialRampToValueAtTime(0.09,t+.015);
+          gain.gain.exponentialRampToValueAtTime(0.0001,t+duration);
+          oscillator.connect(gain); gain.connect(ctx.destination);
+          oscillator.start(t); oscillator.stop(t+duration+.012);
+        } catch(_) {}
+      };
+      const beep = () => tone(800,.1);
+      const doorChime = () => {tone(660,.15);tone(880,.18,.18);};
+      let lastNotice = '', lastScan = '', lastOpen = false;
+      const status = document.getElementById('statusBox');
+      if (status) new MutationObserver(() => {
+        if (status.classList.contains('hidden')) {lastNotice='';return;}
+        const message = status.textContent || '';
+        if (message === lastNotice) return;
+        lastNotice = message;
+        if (/ĐANG MỞ/i.test(message) && !/không thể xử lý/i.test(message)) { doorChime();return; }
+        if (/Thành công/i.test(message)) beep();
+      }).observe(status,{childList:true,subtree:true,attributes:true,attributeFilter:['class']});
+      const retRows=document.getElementById('retRows');
+      if(retRows) new MutationObserver(() => {
+        const scans=retRows.querySelectorAll('.text-emerald-300, .text-rose-300').length;
+        const sig=retRows.textContent+':'+scans;
+        if(sig===lastScan) return; const old=lastScan; lastScan=sig;
+        if(old && scans>0) beep();
+      }).observe(retRows,{childList:true,subtree:true});
+      const finePanel=document.getElementById('finePanel');
+      const bar=document.getElementById('duePaymentProgressBar');
+      const countdown=document.getElementById('duePaymentCountdown');
+      let timer=null;
+      function stopTimer(){if(timer){clearInterval(timer);timer=null;}}
+      function resetPaymentTimer(){
+        stopTimer();if(!finePanel||finePanel.classList.contains('hidden')) return;
+        const start=Date.now(), visualWindow=180;
+        const tick=()=>{
+          if(finePanel.classList.contains('hidden')){stopTimer();return;}
+          const elapsed=Math.floor((Date.now()-start)/1000),remain=Math.max(0,visualWindow-elapsed);
+          if(bar)bar.style.transform=`scaleX(${remain/visualWindow})`;
+          if(countdown) countdown.textContent=remain>0
+            ? `Thời gian theo dõi gợi ý: ${Math.floor(remain/60)}:${String(remain%60).padStart(2,'0')} • Tự cập nhật khi ngân hàng xác nhận`
+            : 'Đã hết thời gian gợi ý; hệ thống vẫn tiếp tục theo dõi thanh toán. Không chuyển khoản lại.';
+          if(remain===0)stopTimer();
+        };
+        tick();timer=setInterval(tick,1000);
+      }
+      if(finePanel) new MutationObserver(resetPaymentTimer).observe(finePanel,{attributes:true,attributeFilter:['class']});
+      // Audible notice on barcode scans is derived from visible confirmation only; no business handlers are patched.
+    })();
     </script>
 </body>
 </html>
