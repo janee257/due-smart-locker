@@ -296,6 +296,187 @@
       }
       @media (prefers-reduced-motion:reduce) { .due-kiosk-ui .due-scan-laser { animation:none; } }
     </style>
+    <style id="due-kiosk-cyber-dark-v5">
+
+/* ============================================================================
+   KIOSK CYBER DARK UI UPGRADE v5  |  2026-11-07
+   Chỉ bổ sung lớp giao diện. KHÔNG thay đổi JS, ID, class hoặc data-attribute gốc.
+   Bảo toàn camera, Firestore onSnapshot, SePay và Web Audio.
+   ============================================================================ */
+:root { color-scheme:dark; --cyber-bg:#0b132b; --cyber-panel:#121f37; --cyber-panel-2:#192941;
+  --cyber-line:rgba(100,139,175,.27); --cyber-text:#edf6ff; --cyber-muted:#a9bfd5;
+  --cyber-cyan:#38bdf8; --cyber-neon:#00f0ff; --cyber-navy:#002b5c; }
+html, body.due-kiosk-ui { background:#0b132b!important; }
+body.due-kiosk-ui { color:var(--cyber-text)!important;
+  background:radial-gradient(ellipse at 78% 7%,rgba(4,74,127,.24),transparent 38%),
+  radial-gradient(ellipse at 0 96%,rgba(8,48,84,.18),transparent 48%),#0b132b!important;
+  font-family:'Be Vietnam Pro',sans-serif!important; }
+.due-kiosk-ui .kiosk-header {
+  background:linear-gradient(108deg,#002b5c 0%,#003b7a 49%,#0a3559 100%)!important;
+  border-bottom:2px solid #00d8ec!important; color:#f8fbff!important;
+  box-shadow:0 5px 24px rgba(0,209,244,.1), inset 0 -1px 0 rgba(255,255,255,.09)!important;
+}
+.due-kiosk-ui .kiosk-header h1 { color:#f5faff!important; letter-spacing:.035em; }
+.due-kiosk-ui .kiosk-header p { color:#a8d4f1!important; }
+.due-kiosk-ui .kiosk-header .kiosk-mark { background:rgba(0,240,255,.13)!important; color:#8ff5ff!important; border:1px solid rgba(0,240,255,.35)!important; }
+.due-kiosk-ui .kiosk-legend-item { background:rgba(3,27,62,.44)!important; border:1px solid rgba(161,204,238,.21)!important; color:#e2f4ff!important; }
+.due-kiosk-ui .kiosk-main { background:transparent!important; }
+.due-kiosk-ui .kiosk-panel, .due-kiosk-ui .kiosk-scan-panel, .due-kiosk-ui .kiosk-lockers-panel {
+  background:linear-gradient(145deg,rgba(22,37,61,.98),rgba(14,27,48,.98))!important;
+  color:var(--cyber-text)!important; border:1px solid var(--cyber-line)!important;
+  box-shadow:0 12px 44px rgba(0,0,0,.19),inset 0 1px 0 rgba(176,220,255,.065)!important;
+  border-radius:18px!important;
+}
+.due-kiosk-ui .kiosk-panel h2, .due-kiosk-ui .kiosk-lockers-title { color:#edf6ff!important; }
+.due-kiosk-ui .kiosk-scan-panel h2 > i { color:#38bdf8!important; }
+/* KIOSK CYBER 01: Mode-switch, keep original onclick handlePickup/handleReturn. */
+.due-kiosk-ui .kiosk-action {
+  min-height:60px!important; height:60px!important; border-radius:13px!important;
+  box-shadow:0 5px 16px rgba(0,0,0,.23),inset 0 1px 0 rgba(255,255,255,.24)!important;
+  border:1px solid rgba(255,255,255,.14)!important; color:#fff!important;
+}
+.due-kiosk-ui .kiosk-action--pickup { background:linear-gradient(135deg,#c94805,#ea580c 70%,#fb852d)!important; }
+.due-kiosk-ui .kiosk-action--return { background:linear-gradient(135deg,#00518c,#0284c7 75%,#0ba6e1)!important; }
+.due-kiosk-ui .kiosk-action:hover { filter:brightness(1.13); transform:translateY(-1px); }
+.due-kiosk-ui .kiosk-action:active { transform:scale(.96)!important; }
+.due-kiosk-ui .kiosk-action i { filter:drop-shadow(0 2px 4px rgba(0,0,0,.22)); }
+/* KIOSK CYBER 02: Camera; square target is always centered and never squeezed. */
+.due-kiosk-ui .kiosk-camera-frame {
+  isolation:isolate; background:linear-gradient(135deg,#020b18,#0a2239)!important;
+  border:1px solid rgba(56,189,248,.56)!important;
+  box-shadow:inset 0 0 40px rgba(5,33,56,.65),0 0 18px rgba(0,240,255,.075)!important;
+  border-radius:16px!important; aspect-ratio:16/9!important;
+}
+.due-kiosk-ui .due-scan-target {
+  width:180px!important; height:180px!important; min-width:180px!important; min-height:180px!important;
+  aspect-ratio:1/1!important; position:absolute!important; top:50%!important; left:50%!important;
+  transform:translate(-50%,-50%)!important; z-index:4; pointer-events:none;
+}
+.due-kiosk-ui .due-scan-corner { border-color:#e7fdff!important; border-width:0; filter:drop-shadow(0 0 7px rgba(0,240,255,.64)); }
+.due-kiosk-ui .due-scan-corner.tl { border-top-width:4px!important; border-left-width:4px!important; }
+.due-kiosk-ui .due-scan-corner.tr { border-top-width:4px!important; border-right-width:4px!important; }
+.due-kiosk-ui .due-scan-corner.bl { border-bottom-width:4px!important; border-left-width:4px!important; }
+.due-kiosk-ui .due-scan-corner.br { border-bottom-width:4px!important; border-right-width:4px!important; }
+.due-kiosk-ui .due-scan-laser { background:#00f0ff!important; box-shadow:0 0 12px rgba(0,240,255,.9),0 0 2px #fff!important; }
+.due-kiosk-ui .due-scan-placeholder { color:#b9e9fa!important; opacity:.8; }
+.due-kiosk-ui #camModeBadge { background:rgba(1,51,86,.89)!important; border:1px solid rgba(0,240,255,.47)!important;
+  color:#d1faff!important; border-radius:9px!important; box-shadow:0 2px 14px rgba(0,0,0,.3)!important; }
+.due-kiosk-ui #reader, .due-kiosk-ui #reader video { background:transparent; }
+/* KIOSK CYBER 03: Manual code and bottom-sheet keypad. */
+.due-kiosk-ui .kiosk-field-label, .due-kiosk-ui .kiosk-keypad-head { color:#b9d0e5!important; }
+.due-kiosk-ui #manualInput, .due-kiosk-ui #barcodeInput {
+  background:#07182d!important; color:#e6faff!important;
+  border:1px solid rgba(90,152,199,.43)!important; border-radius:12px!important;
+  font-family:ui-monospace,SFMono-Regular,Consolas,monospace!important;
+}
+.due-kiosk-ui #manualInput { height:48px!important; min-height:48px!important; font-size:18px!important; }
+.due-kiosk-ui #manualInput::placeholder { color:#7698b5!important; }
+.due-kiosk-ui #manualInput:focus, .due-kiosk-ui #barcodeInput:focus { border-color:#38bdf8!important; box-shadow:0 0 0 3px rgba(56,189,248,.2)!important; }
+.due-kiosk-ui .kiosk-clear { background:#233851!important; color:#deedfb!important; border:1px solid rgba(122,170,207,.26)!important; border-radius:12px!important; }
+.due-kiosk-ui .kiosk-keypad.is-collapsed { color:#c8e4fa!important; }
+.due-kiosk-ui #dueKeypadToggle { background:rgba(21,69,105,.37); color:#90e6ff!important; border:1px solid rgba(53,174,232,.23); border-radius:9px; padding:7px 12px; }
+.due-kiosk-ui:has(#dueKeypadPanel:not(.is-collapsed)) .due-keypad-backdrop { background:rgba(2,9,23,.77)!important; backdrop-filter:blur(4px); }
+.due-kiosk-ui .kiosk-keypad:not(.is-collapsed) { background:#14233b!important; color:#e8f6ff!important; border:1px solid rgba(56,189,248,.45)!important; box-shadow:0 20px 90px rgba(0,0,0,.66)!important; }
+.due-kiosk-ui .kiosk-key { background:#223650!important; color:#f0f7ff!important; border-color:#385271!important; box-shadow:0 2px 0 #07172b!important; border-radius:11px!important; }
+.due-kiosk-ui .kiosk-key--prefix { background:#12385b!important; color:#93e5ff!important; }
+.due-kiosk-ui .kiosk-key--erase { background:#522c3a!important; color:#ffb6b6!important; }
+.due-kiosk-ui .kiosk-key--submit { background:#03699f!important; color:#fff!important; }
+.due-kiosk-ui .kiosk-keypad-help { color:#b4cce0!important; }
+/* KIOSK CYBER 04: Metallic 5×4 lockers, styles keyed to classes emitted by unmodified renderLockers(). */
+.due-kiosk-ui .kiosk-lockers-panel { overflow:hidden; }
+.due-kiosk-ui #connStatus { background:rgba(16,185,129,.14)!important; border:1px solid rgba(16,185,129,.3);
+  color:#65f0b5!important; border-radius:100px!important; }
+.due-kiosk-ui #lockersGrid { grid-template-columns:repeat(5,minmax(0,1fr))!important; grid-template-rows:repeat(4,minmax(0,1fr)); gap:clamp(6px,.7vw,11px)!important; }
+.due-kiosk-ui #lockersGrid > div {
+  position:relative; background:linear-gradient(156deg,#26344a 0%,#1e293b 42%,#172237 100%)!important;
+  border:1px solid rgba(122,150,177,.43)!important; border-radius:13px!important;
+  color:#e6f0fc!important;
+  box-shadow:inset 0 1px 0 rgba(214,237,255,.09), inset 0 -4px 10px rgba(0,0,0,.13),0 5px 12px rgba(0,0,0,.18)!important;
+  transition:transform .16s,box-shadow .18s,border-color .18s;
+}
+.due-kiosk-ui #lockersGrid > div::before { content:""; position:absolute; top:7px; left:9px; right:9px; height:1px; background:linear-gradient(90deg,transparent,rgba(228,247,255,.15),transparent); }
+.due-kiosk-ui #lockersGrid > div > span:nth-of-type(1) {
+  color:#fff!important; font-family:'Be Vietnam Pro',sans-serif!important; font-size:clamp(12px,1.05vw,16px)!important; font-weight:800!important;
+  line-height:1.2!important; text-shadow:0 1px 2px rgba(0,0,0,.35);
+}
+.due-kiosk-ui #lockersGrid > div > span:nth-of-type(2) { background:rgba(16,185,129,.13)!important;
+  color:#6ee7b7!important; border:1px solid rgba(16,185,129,.18); font-size:clamp(9px,.78vw,11px)!important;
+  padding:3px 7px!important; letter-spacing:.02em; }
+.due-kiosk-ui #lockersGrid > div > i { color:#8ea8c3!important; }
+.due-kiosk-ui #lockersGrid > div.bg-amber-500\/20 {
+  background:linear-gradient(145deg,#3d3023,#2a2b36 75%)!important; border-color:rgba(245,158,11,.83)!important;
+  box-shadow:inset 0 1px 0 rgba(255,222,153,.13),0 0 16px rgba(245,158,11,.13)!important;
+}
+.due-kiosk-ui #lockersGrid > div.bg-amber-500\/20 > i { color:#fbbf24!important; }
+.due-kiosk-ui #lockersGrid > div.bg-amber-500\/20 > span:nth-of-type(2) { background:rgba(245,158,11,.17)!important; color:#ffcf70!important; border-color:rgba(245,158,11,.2)!important; }
+.due-kiosk-ui #lockersGrid > div.bg-blue-500\/20,
+.due-kiosk-ui #lockersGrid > div.bg-violet-500\/20 {
+  background:linear-gradient(145deg,#193954,#172c46)!important; border-color:rgba(56,189,248,.75)!important;
+  box-shadow:inset 0 1px 0 rgba(125,214,255,.11),0 0 14px rgba(56,189,248,.1)!important;
+}
+.due-kiosk-ui #lockersGrid > div.bg-blue-500\/20 > i,
+.due-kiosk-ui #lockersGrid > div.bg-violet-500\/20 > i { color:#71d2ff!important; }
+.due-kiosk-ui #lockersGrid > div.bg-blue-500\/20 > span:nth-of-type(2),
+.due-kiosk-ui #lockersGrid > div.bg-violet-500\/20 > span:nth-of-type(2) { background:rgba(56,189,248,.18)!important; color:#9cddff!important; border-color:rgba(56,189,248,.26)!important; }
+.due-kiosk-ui #lockersGrid > div.ring-emerald-400 {
+  background:linear-gradient(145deg,#10455c,#102e49)!important; border:2px solid #06b6d4!important;
+  animation:due-cyber-neon-pulse 1.55s ease-in-out infinite!important;
+  box-shadow:0 0 20px rgba(6,182,212,.6),inset 0 0 18px rgba(6,182,212,.18)!important;
+}
+.due-kiosk-ui #lockersGrid > div.ring-emerald-400 > i { color:#ffe18c!important; filter:drop-shadow(0 0 6px rgba(255,209,90,.65)); }
+.due-kiosk-ui #lockersGrid > div.ring-emerald-400 > span:nth-of-type(2) { background:rgba(0,240,255,.15)!important; color:#abfaff!important; border-color:rgba(0,240,255,.42)!important; }
+@keyframes due-cyber-neon-pulse { 0%,100% { box-shadow:0 0 8px rgba(6,182,212,.28),inset 0 0 12px rgba(6,182,212,.13); }
+  50% { box-shadow:0 0 23px rgba(6,182,212,.7),inset 0 0 21px rgba(6,182,212,.24); } }
+/* KIOSK CYBER 05: Dark stepper and discreet logout. */
+.due-kiosk-ui .due-kiosk-footer { background:#0d1b30!important; border-top:1px solid rgba(56,189,248,.3)!important; }
+.due-kiosk-ui .due-step-label { color:#86b6d6!important; }
+.due-kiosk-ui #kioskSteps { background:rgba(21,40,64,.97)!important; border:1px solid rgba(92,150,189,.25)!important; border-radius:13px!important; }
+.due-kiosk-ui #kioskSteps .text-slate-500 { color:#a9c5d9!important; }
+.due-kiosk-ui #kioskLogoutBtnContainer { z-index:41; }
+.due-kiosk-ui #kioskLogoutBtnContainer button { font-size:0!important; width:38px; height:38px; padding:0!important;
+  justify-content:center; background:#152a42!important; border:1px solid rgba(94,153,191,.28)!important; color:#b9d8ee!important;
+  border-radius:11px!important; box-shadow:0 4px 16px rgba(0,0,0,.28); }
+.due-kiosk-ui #kioskLogoutBtnContainer button i { font-size:15px!important; }
+.due-kiosk-ui #kioskLogoutBtnContainer button:hover { background:#743244!important; color:#fff!important; }
+/* Auxiliary states are dark too; keep originals' IDs and behavior. */
+.due-kiosk-ui #returnSession { background:#15263d!important; color:#e7f2fc!important; border:1px solid var(--cyber-line)!important; }
+.due-kiosk-ui #returnSession h2 { color:#7ad7ff!important; }
+.due-kiosk-ui #returnSession > p,.due-kiosk-ui #returnSession #retRows .text-slate-300 { color:#bfd2e4!important; }
+.due-kiosk-ui #returnSession .bg-slate-900\/60 { background:#1b304c!important; color:#ddebff!important; }
+.due-kiosk-ui #returnSession #retRows .text-blue-300 { color:#87d6ff!important; }
+.due-kiosk-ui #finePanel { background:rgba(0,4,15,.85)!important; }
+.due-kiosk-ui #finePanel > div { background:#122139!important; color:#eff8ff!important; border:1px solid rgba(56,189,248,.33)!important; border-radius:23px!important; }
+.due-kiosk-ui #finePanel .text-slate-300 { color:#c5dae9!important; }
+.due-kiosk-ui #finePanel .text-slate-400 { color:#afc9dd!important; }
+.due-kiosk-ui #finePanel .border-slate-700 { border-color:rgba(120,170,201,.23)!important; }
+.due-kiosk-ui #finePanel #fineQr { background:#fff!important; border-radius:12px; padding:5px; }
+.due-kiosk-ui #finePanel #fineInfo { background:#1b304c!important; border-color:#325475!important; color:#cee7f6!important; }
+.due-kiosk-ui #finePanel #fineInfo b { color:#8ddfff!important; }
+.due-kiosk-ui #finePanel #fineAmount { color:#ff879e!important; }
+.due-kiosk-ui #paymentWaiting { background:rgba(4,107,146,.2)!important; color:#aff3ff!important; border-color:rgba(0,240,255,.3)!important; }
+.due-kiosk-ui #duePaymentCountdown { color:#adcee4!important; }
+.due-kiosk-ui .due-payment-progress { background:#233e59!important; }
+.due-kiosk-ui #kioskLoginSection { background:radial-gradient(ellipse at top,#083665,#070d1f 70%)!important; }
+.due-kiosk-ui #kioskLoginSection > div { background:#14253e!important; color:#f1f8ff!important; border:1px solid rgba(56,189,248,.3)!important; border-radius:22px!important; }
+.due-kiosk-ui #kioskLoginSection h2 { color:#8be6ff!important; }
+.due-kiosk-ui #kioskLoginSection p,.due-kiosk-ui #kioskLoginSection label { color:#c1d8e8!important; }
+.due-kiosk-ui #kioskLoginSection input { background:#09182e!important; border-color:#375473!important; color:#effbff!important; }
+.due-kiosk-ui #kioskLoginSection button[type=submit] { background:#00699f!important; color:white!important; }
+.due-kiosk-ui #statusBox { background:#1b314a!important; color:#d8edfa!important; border-color:#426c8e!important; }
+.due-kiosk-ui button:focus-visible { outline:2px solid #00f0ff!important; outline-offset:2px; }
+@media (min-width:1024px) {
+  body.due-kiosk-ui { height:100dvh!important; overflow:hidden!important; }
+  .due-kiosk-ui .kiosk-main { overflow:hidden!important; }
+  .due-kiosk-ui #lockersGrid > div { min-height:0!important; }
+}
+@media (max-width:1023px) { .due-kiosk-ui .kiosk-main { overflow-y:auto!important; } }
+@media (max-width:620px) { .due-kiosk-ui #lockersGrid > div > span:nth-of-type(1) { font-size:11px!important; } }
+@media (prefers-reduced-motion:reduce) {
+  .due-kiosk-ui #lockersGrid > div.ring-emerald-400 { animation:none!important; box-shadow:0 0 0 3px rgba(6,182,212,.45)!important; }
+  .due-kiosk-ui .due-scan-laser { animation:none!important; }
+}
+
+    </style>
 </head>
 <body class="bg-slate-900 text-white min-h-screen flex flex-col font-sans due-kiosk-ui">
 
