@@ -48,10 +48,34 @@ module.exports = async (req,res) => {
       to = user.email;
     }
     const amount = Number(p.so_tien_phat || 0).toLocaleString('vi-VN');
-    const description = `${p.ly_do || 'Bồi thường tài liệu'} (${p.ten_sach || 'Tài liệu'})`;
+    const subjectPrefix = testMode ? '[EMAIL THỬ NGHIỆM] ' : '';
+    const title = htmlEscape(p.ten_sach || 'Tài liệu chưa xác định');
+    const barcode = htmlEscape(p.ma_vach || 'Không có');
+    const reason = htmlEscape(p.ly_do || 'Chưa ghi rõ');
+    const code = htmlEscape(p.payment_code || '');
+    const warning = testMode ? '<p style="background:#fff7ed;border:1px solid #fdba74;padding:12px;color:#9a3412"><b>ĐÂY LÀ EMAIL KIỂM THỬ:</b> Thông báo được gửi đến hộp thư của nhóm để trình diễn hệ thống, không phải bằng chứng đã thông báo trực tiếp cho sinh viên.</p>' : '';
     const payload = {
-      from, to: [to], subject: `${testMode ? '[THỬ NGHIỆM - KHÔNG GỬI SINH VIÊN] ' : ''}[DUE Smart Locker] Biên bản bồi thường ${penaltyId}`,
-      html: `<p>Kính gửi sinh viên ${htmlEscape(mssv)},</p><p>Thủ thư đã nghiệm thu tài liệu bạn trả tại DUE Smart Locker và lập biên bản:</p><ul><li>Mã biên bản: <b>${htmlEscape(penaltyId)}</b></li><li>Nội dung: ${htmlEscape(description)}</li><li>Số tiền: <b>${amount} VNĐ</b></li></ul><p>Bạn vui lòng đăng nhập DUE Smart Locker, vào mục <b>Nợ phạt & Thông báo</b> để xem biên bản và thanh toán bằng VietQR. Không chuyển khoản lần nữa nếu trạng thái đã là Đã thanh toán.</p><p>Thư viện DUE Smart Locker</p>`
+      from, to:[to],
+      subject:`${subjectPrefix}[DUE Smart Locker] Thông báo kết quả nghiệm thu và công nợ – ${penaltyId}`,
+      html:`<div style="font-family:Arial,sans-serif;max-width:640px;margin:auto;color:#1e293b;line-height:1.6">
+      <h2 style="color:#1e40af;margin-bottom:5px">THÔNG BÁO KẾT QUẢ NGHIỆM THU SÁCH</h2>
+      <p style="color:#64748b;margin-top:0">Hệ thống DUE Smart Locker · Thư viện</p>
+      ${warning}
+      <p>Kính gửi sinh viên có mã số <b>${htmlEscape(mssv)}</b>,</p>
+      <p>Sau khi tiếp nhận sách trả tại Kiosk, cán bộ thư viện đã thực hiện kiểm tra và ghi nhận một tài liệu cần xử lý bồi thường như sau:</p>
+      <table style="border-collapse:collapse;width:100%;font-size:14px">
+        <tr><td style="border:1px solid #e2e8f0;padding:9px">Mã biên bản</td><td style="border:1px solid #e2e8f0;padding:9px"><b>${htmlEscape(penaltyId)}</b></td></tr>
+        <tr><td style="border:1px solid #e2e8f0;padding:9px">Tên tài liệu</td><td style="border:1px solid #e2e8f0;padding:9px">${title}</td></tr>
+        <tr><td style="border:1px solid #e2e8f0;padding:9px">Mã sách</td><td style="border:1px solid #e2e8f0;padding:9px">${barcode}</td></tr>
+        <tr><td style="border:1px solid #e2e8f0;padding:9px">Tình trạng ghi nhận</td><td style="border:1px solid #e2e8f0;padding:9px">${reason}</td></tr>
+        <tr><td style="border:1px solid #e2e8f0;padding:9px">Khoản bồi thường</td><td style="border:1px solid #e2e8f0;padding:9px;color:#be123c"><b>${amount} VNĐ</b></td></tr>
+      </table>
+      <p><b>Hướng dẫn xử lý:</b> Truy cập <a href="https://due-smart-locker.vercel.app/student.html">DUE Smart Locker – Sinh viên</a>, mở mục <b>Nợ phạt &amp; Thông báo</b>, xem biên bản và thanh toán bằng VietQR được cấp riêng cho khoản này.</p>
+      <p><b>Mã đối soát:</b> <code>${code}</code>. Chỉ thanh toán theo thông tin hiển thị trong tài khoản; nếu đã thanh toán, vui lòng kiểm tra trạng thái trước khi thực hiện lại.</p>
+      <p>Nếu bạn cho rằng thông tin nghiệm thu chưa chính xác, vui lòng liên hệ cán bộ thư viện để được kiểm tra và giải đáp trước khi thanh toán.</p>
+      <p style="margin-top:24px">Trân trọng,<br><b>Bộ phận Thư viện – DUE Smart Locker</b></p>
+      <p style="border-top:1px solid #e2e8f0;padding-top:10px;font-size:12px;color:#64748b">Đây là email thông báo tự động từ hệ thống mô phỏng DUE Smart Locker.</p>
+      </div>`
     };
     // Idempotency key giữ nguyên để các lần nhấn lại không vô tình gửi nhiều email cùng sự kiện.
     const response = await fetch('https://api.resend.com/emails', {

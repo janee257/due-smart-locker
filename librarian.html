@@ -445,37 +445,23 @@
         </div>
     </div>
 
-    <!-- Modal 3: Viết Biên Bản Phạt / Báo Hỏng Sách -->
+    <!-- Nghiệm thu từng cuốn trong một đơn trả -->
     <div id="reportModal" class="hidden fixed inset-0 bg-black/60 z-50 flex items-center justify-center p-4 backdrop-blur-sm">
-        <div class="bg-white w-full max-w-md rounded-none p-6 space-y-4 shadow-md">
+        <div class="bg-white w-full max-w-2xl max-h-[90vh] overflow-y-auto p-6 space-y-4 shadow-md">
             <div class="flex justify-between items-center border-b pb-3">
-                <h3 class="font-bold text-slate-800 text-sm flex items-center gap-2">
-                    <i class="fa-solid fa-file-invoice-dollar text-rose-600"></i> Lập Biên Bản Vi Phạm & Phạt Sách
-                </h3>
-                <button onclick="closeReportModal()" class="text-slate-400 hover:text-slate-600"><i class="fa-solid fa-xmark text-lg"></i></button>
+                <div>
+                    <h3 class="font-bold text-slate-800 text-base">Nghiệm thu từng cuốn sách</h3>
+                    <p class="text-xs text-slate-500 mt-1">Sách tốt nhập kho; chỉ sách hư hỏng mới lập biên bản và ghi công nợ.</p>
+                </div>
+                <button onclick="closeReportModal()" class="text-slate-400 hover:text-slate-600" aria-label="Đóng"><i class="fa-solid fa-xmark text-lg"></i></button>
             </div>
-            <div class="space-y-3 text-xs">
-                <input type="hidden" id="reportReturnId">
-                <div>
-                    <label class="block font-bold text-slate-700 mb-1">Tài liệu vi phạm:</label>
-                    <input type="text" id="reportBookTitle" readonly class="w-full p-2.5 bg-slate-100 border rounded-none font-semibold text-slate-800">
-                </div>
-                <div>
-                    <label class="block font-bold text-slate-700 mb-1">Mã số sinh viên (MSSV):</label>
-                    <input type="text" id="reportMssv" readonly class="w-full p-2.5 bg-slate-100 border rounded-none font-mono text-slate-800">
-                </div>
-                <div>
-                    <label class="block font-bold text-slate-700 mb-1">Số tiền phạt (VNĐ):</label>
-                    <input type="number" id="reportFineAmount" value="50000" step="10000" min="0" class="w-full p-2.5 bg-slate-50 border rounded-none font-bold text-rose-600 outline-none focus:ring-2 focus:ring-rose-500">
-                </div>
-                <div>
-                    <label class="block font-bold text-slate-700 mb-1">Lý do / Nội dung biên bản:</label>
-                    <textarea id="reportReason" rows="3" placeholder="Ví dụ: Sách bị rách trang 15, mất mã vạch, thấm nước..." class="w-full p-2.5 bg-slate-50 border rounded-none outline-none focus:ring-2 focus:ring-rose-500"></textarea>
-                </div>
-                <div class="pt-2 flex justify-end gap-2">
-                    <button type="button" onclick="closeReportModal()" class="px-4 py-2.5 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-none font-bold">Hủy</button>
-                    <button type="button" onclick="submitReportPenalty()" class="px-4 py-2.5 bg-rose-600 hover:bg-rose-700 text-white rounded-none font-bold shadow-md">Lưu Biên Bản & Phạt</button>
-                </div>
+            <input type="hidden" id="reportReturnId">
+            <p class="text-xs font-semibold">MSSV: <span id="reportMssvLabel" class="font-mono"></span></p>
+            <div id="reportBookRows" class="space-y-3"></div>
+            <p class="text-xs text-slate-500">Chọn “Hư hỏng” cho cuốn cần xử lý. Mỗi cuốn hư hỏng sẽ tạo một biên bản, một mã công nợ và một email riêng.</p>
+            <div class="flex justify-end gap-2 pt-2 border-t">
+                <button type="button" onclick="closeReportModal()" class="px-4 py-2.5 bg-slate-100 text-slate-700 text-xs font-bold">Hủy</button>
+                <button type="button" onclick="submitReportPenalty()" class="px-4 py-2.5 bg-rose-600 text-white text-xs font-bold">Xác nhận nghiệm thu</button>
             </div>
         </div>
     </div>
@@ -607,7 +593,7 @@
                 <td class="p-3 text-xs text-slate-500">${esc(p.ly_do)}</td>
                 <td class="p-3 font-black text-rose-600 font-mono">${money(p.so_tien_phat)}</td>
                 <td class="p-3 text-right text-xs">
-                    ${p.payment_status === 'paid' ? `<span class="font-bold text-emerald-600">Đã thanh toán</span><br><span class="text-slate-400">${esc(p.payment_txn_id || '')}</span>` : `<span class="font-bold text-amber-600">Chưa thanh toán</span><br><span class="text-slate-400 font-mono">${esc(p.payment_code || '')}</span>${p.email_status === 'sent' ? '' : `<br><button onclick="sendPenaltyEmail('${p.id}')" class="mt-1 text-blue-600 underline">Gửi email biên bản</button>`}`}
+                    ${p.payment_status === 'paid' ? `<span class="font-bold text-emerald-600">Đã thanh toán</span><br><span class="text-slate-400">${esc(p.payment_txn_id || '')}</span>` : `<span class="font-bold text-amber-600">Chưa thanh toán</span><br><span class="text-slate-400 font-mono">${esc(p.payment_code || '')}</span>${['sent','test_sent'].includes(p.email_status) ? '' : `<br><button onclick="sendPenaltyEmail('${p.id}')" class="mt-1 text-blue-600 underline">Gửi email biên bản</button>`}`}
                     <p class="text-[10px] text-slate-400 mt-1">Email: ${esc(p.email_status || 'chưa gửi')}</p>
                 </td></tr>`).join('') : '<tr><td colspan="5" class="p-8 text-center text-sm text-slate-400">Không có biên bản phù hợp.</td></tr>';
             document.getElementById('finesPager').innerHTML = `<span>${rows.length} biên bản · Trang ${finePage}/${pages}</span><div class="space-x-2"><button class="px-2 py-1 border" onclick="fineGo(-1)" ${finePage === 1 ? 'disabled' : ''}>Trước</button><button class="px-2 py-1 border" onclick="fineGo(1)" ${finePage === pages ? 'disabled' : ''}>Sau</button></div>`;
@@ -626,7 +612,7 @@
                 });
                 const result = await response.json();
                 if (!response.ok || !result.success) throw new Error(result.error || 'Không gửi được email.');
-                showToast.success('Đã gửi thông báo', 'Email biên bản đã gửi đến sinh viên.');
+                showToast.success('Đã gửi thông báo', result.test_mode ? 'Đã gửi email thử đến Gmail được cấu hình trên Vercel.' : 'Đã yêu cầu gửi email biên bản đến sinh viên.');
             } catch (error) {
                 console.error('Gửi email thất bại:', error);
                 alert('Biên bản đã được lưu, nhưng email chưa gửi: ' + error.message + '\nKiểm tra RESEND_API_KEY và PENALTY_MAIL_FROM trên Vercel.');
@@ -906,7 +892,7 @@
                                 <i class="fa-solid fa-check mr-1"></i> Tốt (Nhập kho)
                             </button>
                             <button onclick="openReportModal('${r.id}')" class="px-2.5 py-1.5 bg-rose-50 hover:bg-rose-100 text-rose-600 rounded-sm text-xs font-bold transition">
-                                <i class="fa-solid fa-triangle-exclamation mr-1"></i> Viết biên bản phạt
+                                <i class="fa-solid fa-triangle-exclamation mr-1"></i> Kiểm tra từng cuốn
                             </button>
                         </td>
                     </tr>
@@ -914,81 +900,153 @@
             });
         }
 
-        async function finishReturn(returnId, penalty) {
+        // Nghiệm thu theo từng cuốn. Mỗi cuốn hư được tạo biên bản độc lập,
+        // cuốn tốt mới được cộng tồn kho; không thu bồi thường tại kiosk.
+        async function finishReturn(returnId, inspection = null) {
             const rref = db.collection('returns').doc(returnId);
-            const pre = (await rref.get()).data();
-            if (!pre) throw new Error("Không tìm thấy đơn trả.");
-            const items = pre.items || [];
-            const { refs, missing } = await App.stockRefs(penalty ? [] : items);
-            const ts = App.FV.serverTimestamp();
-            const penaltyRef = penalty ? db.collection('penalties').doc() : null;
-            await db.runTransaction(async tx => {
-                if ((await tx.get(rref)).data().trang_thai !== 'cho_kiem_tra') throw new Error("Đơn trả này đã được xử lý.");
-                const restock = await App.restockPlan(tx, refs);
-                tx.update(rref, penalty ? { trang_thai: 'hoan_tat_phat', tien_phat: penalty.fine, ly_do_phat: penalty.reason, ngay_xu_ly: ts } : { trang_thai: 'hoan_tat', thoi_gian_duyet: ts });
-                if (pre.so_hoc) tx.set(App.lockerRef(pre.so_hoc), { so_hoc: pre.so_hoc, trang_thai: 'trong', qr_token: null, cap_nhat_luc: ts }, { merge: true });
-                items.forEach(it => it.borrow_id && tx.set(db.collection('borrowings').doc(it.borrow_id),
-                    { trang_thai: 'hoan_tat', ngay_nghiem_thu: App.today() }, { merge: true }));
-                restock();
-                if (penalty) tx.set(penaltyRef, {
-                    return_id: returnId, borrow_ids: items.map(x => x.borrow_id).filter(Boolean),
-                    mssv: penalty.mssv, ten_sach: penalty.tenSach, so_tien_phat: penalty.fine,
-                    payment_amount: penalty.fine, payment_code: 'DUEF' + penaltyRef.id.toUpperCase(),
-                    payment_status: 'pending', email_status: 'pending',
-                    ly_do: penalty.reason, ngay_lap: ts, nguoi_lap: auth.currentUser?.email || 'Thủ thư DUE'
-                });
+            const preSnap = await rref.get();
+            if (!preSnap.exists) throw new Error('Không tìm thấy đơn trả.');
+            const pre = preSnap.data();
+            const items = Array.isArray(pre.items) && pre.items.length ? pre.items :
+                [{ten_sach: pre.ten_sach, ma_vach: pre.ma_vach, borrow_id: pre.borrow_id}];
+            const entries = inspection || items.map(() => ({condition: 'good'}));
+            if (entries.length !== items.length) throw new Error('Danh sách nghiệm thu không khớp đơn trả.');
+            const damaged = entries.map((v,i) => ({...v, item: items[i], index:i})).filter(v => v.condition === 'damaged');
+            damaged.forEach(v => {
+                if (!Number.isSafeInteger(v.fine) || v.fine <= 0) throw new Error('Tiền bồi thường không hợp lệ.');
+                if (!v.reason || !v.reason.trim()) throw new Error('Cần ghi rõ lý do hư hỏng cho từng cuốn.');
             });
-            return { pre, items, missing, penaltyId: penaltyRef?.id };
+            const goodItems = items.filter((_,i) => entries[i].condition === 'good');
+            if (entries.some(v => !['good','damaged'].includes(v.condition))) throw new Error('Tình trạng sách không hợp lệ.');
+            const {refs, missing} = await App.stockRefs(goodItems);
+            // Cấp ID trước transaction, không tạo lặp khi Firestore tự retry transaction.
+            const penaltyRefs = damaged.map(() => db.collection('penalties').doc());
+            const ts = App.FV.serverTimestamp();
+            const total = damaged.reduce((sum,d)=>sum+d.fine,0);
+            await db.runTransaction(async tx => {
+                const current = await tx.get(rref);
+                if (!current.exists || current.data().trang_thai !== 'cho_kiem_tra')
+                    throw new Error('Đơn trả này đã được nghiệm thu trước đó.');
+                // Đọc số lượng tồn kho trước mọi ghi, theo yêu cầu Firestore transaction.
+                const restock = await App.restockPlan(tx, refs);
+                tx.update(rref, {
+                    trang_thai: damaged.length ? 'hoan_tat_phat' : 'hoan_tat',
+                    tien_phat: total,
+                    ngay_xu_ly: ts,
+                    nghiem_thu_items: items.map((item,i) => ({
+                        ten_sach: item.ten_sach || '', ma_vach: item.ma_vach || '',
+                        borrow_id: item.borrow_id || '',
+                        tinh_trang: entries[i].condition === 'damaged' ? 'hu_hong' : 'tot',
+                        so_tien_boi_thuong: entries[i].condition === 'damaged' ? entries[i].fine : 0,
+                        ly_do: entries[i].condition === 'damaged' ? entries[i].reason.trim() : ''
+                    }))
+                });
+                if (pre.so_hoc) tx.set(App.lockerRef(pre.so_hoc),
+                    {so_hoc:pre.so_hoc, trang_thai:'trong', qr_token:null, cap_nhat_luc:ts}, {merge:true});
+                items.forEach((item,i) => {
+                    if (item.borrow_id) tx.set(db.collection('borrowings').doc(item.borrow_id), {
+                        trang_thai:'hoan_tat', ngay_nghiem_thu:App.today(),
+                        tinh_trang_nghiem_thu:entries[i].condition === 'damaged' ? 'hu_hong' : 'tot'
+                    }, {merge:true});
+                });
+                restock();
+                damaged.forEach((d,j) => tx.set(penaltyRefs[j], {
+                    return_id:returnId,
+                    borrow_ids:d.item.borrow_id ? [d.item.borrow_id] : [],
+                    mssv:pre.mssv,
+                    ten_sach:d.item.ten_sach || 'Tài liệu',
+                    ma_vach:d.item.ma_vach || '',
+                    so_tien_phat:d.fine,
+                    payment_amount:d.fine,
+                    payment_code:'DUEF' + penaltyRefs[j].id.toUpperCase(),
+                    payment_status:'pending', email_status:'pending',
+                    ly_do:d.reason.trim(), ngay_lap:ts,
+                    nguoi_lap:auth.currentUser?.email || 'Thủ thư DUE'
+                }));
+            });
+            return {pre,items,missing,penaltyIds:penaltyRefs.map(p=>p.id),damagedCount:damaged.length, total};
         }
 
         async function approveReturnOrder(returnId) {
-            return App.guard('approve:' + returnId, async () => { 
+            return App.guard('approve:' + returnId, async () => {
+                const confirmed = await App.confirm('Xác nhận TẤT CẢ cuốn sách trong đơn đều tốt và nhập kho? Nếu có cuốn hư hỏng, chọn “Kiểm tra từng cuốn”.');
+                if (!confirmed) return;
                 try {
                     const r = await finishReturn(returnId);
-                    alert(`Đã nghiệm thu ${r.items.length} cuốn, cộng lại tồn kho và giải phóng ${r.pre.so_hoc}!` + (r.missing.length ? "\nChưa khớp kho: " + r.missing.join(", ") : ""));
-                } catch (err) { 
-                    console.error("Lỗi nghiệm thu sách:", err); 
-                    alert(err.message || "Lỗi khi nghiệm thu sách!"); 
-                } 
+                    alert(`Đã nghiệm thu ${r.items.length} cuốn tốt, cộng tồn kho và giải phóng ${r.pre.so_hoc || 'hộc tủ'}.` + (r.missing.length ? '\nChưa khớp kho: ' + r.missing.join(', ') : ''));
+                } catch (err) {
+                    console.error('Lỗi nghiệm thu:',err);
+                    alert(err.message || 'Không thể nghiệm thu.');
+                }
             });
         }
 
+        let reportItems = [];
         async function openReportModal(returnId) {
-            const returnDoc = await db.collection('returns').doc(returnId).get();
-            if (!returnDoc.exists) return;
-            const rData = returnDoc.data();
-            const items = rData.items || [];
-            const bookNames = items.map(b => b.ten_sach).join(", ") || rData.ten_sach;
-
-            document.getElementById('reportReturnId').value = returnId;
-            document.getElementById('reportBookTitle').value = bookNames;
-            document.getElementById('reportMssv').value = rData.mssv;
-            document.getElementById('reportReason').value = "Sách hư hỏng / rách trang / mất mát vật lý";
-            document.getElementById('reportModal').classList.remove('hidden');
+            try {
+                const snap = await db.collection('returns').doc(returnId).get();
+                if (!snap.exists || snap.data().trang_thai !== 'cho_kiem_tra') throw new Error('Đơn không còn chờ nghiệm thu.');
+                const r = snap.data();
+                reportItems = Array.isArray(r.items) && r.items.length ? r.items :
+                    [{ten_sach:r.ten_sach, ma_vach:r.ma_vach, borrow_id:r.borrow_id}];
+                document.getElementById('reportReturnId').value = returnId;
+                document.getElementById('reportMssvLabel').textContent = r.mssv || '';
+                document.getElementById('reportBookRows').innerHTML = reportItems.map((book,i) => `
+                    <div class="border border-slate-200 bg-slate-50 p-3 space-y-2">
+                        <p class="font-bold text-slate-800 text-sm">${i+1}. ${esc(book.ten_sach || 'Tài liệu')}</p>
+                        <p class="text-xs font-mono text-slate-500">Mã sách: ${esc(book.ma_vach || '—')}</p>
+                        <label class="block text-xs font-semibold">Tình trạng sau kiểm tra</label>
+                        <select id="reportCondition${i}" onchange="toggleReportDamage(${i})" class="w-full border p-2 text-sm bg-white">
+                            <option value="good">Tốt – Nhập kho</option>
+                            <option value="damaged">Hư hỏng – Lập biên bản</option>
+                        </select>
+                        <div id="reportDamageFields${i}" class="hidden space-y-2 border-l-2 border-rose-400 pl-3">
+                            <label class="block text-xs font-semibold">Tiền bồi thường (VNĐ)</label>
+                            <input type="number" id="reportFine${i}" min="1" step="1000" placeholder="Nhập số tiền" class="w-full border p-2 text-sm" />
+                            <label class="block text-xs font-semibold">Mô tả hư hỏng</label>
+                            <textarea id="reportReason${i}" rows="2" placeholder="Ví dụ: Rách trang 15, bìa bong tróc..." class="w-full border p-2 text-sm"></textarea>
+                        </div>
+                    </div>`).join('');
+                document.getElementById('reportModal').classList.remove('hidden');
+            } catch (e) { alert(e.message || 'Không mở được đơn nghiệm thu.'); }
         }
-
+        function toggleReportDamage(i) {
+            const damaged = document.getElementById(`reportCondition${i}`).value === 'damaged';
+            document.getElementById(`reportDamageFields${i}`).classList.toggle('hidden', !damaged);
+        }
         function closeReportModal() {
             document.getElementById('reportModal').classList.add('hidden');
+            reportItems = [];
         }
-
         async function submitReportPenalty() {
             const returnId = document.getElementById('reportReturnId').value;
-            const tenSach = document.getElementById('reportBookTitle').value;
-            const mssv = document.getElementById('reportMssv').value;
-            const fine = parseInt(document.getElementById('reportFineAmount').value) || 0;
-            const reason = document.getElementById('reportReason').value.trim();
-            if (!reason) return alert("Vui lòng nhập lý do lập biên bản phạt!");
-            return App.guard('penalty:' + returnId, async () => { 
+            const entries = reportItems.map((_,i) => {
+                const condition = document.getElementById(`reportCondition${i}`).value;
+                return condition === 'damaged' ? {
+                    condition, fine:Number(document.getElementById(`reportFine${i}`).value),
+                    reason:document.getElementById(`reportReason${i}`).value.trim()
+                } : {condition:'good'};
+            });
+            const count = entries.filter(v=>v.condition==='damaged').length;
+            if (!count) {
+                const yes = await App.confirm('Tất cả sách đều tốt. Xác nhận nhập kho toàn bộ?');
+                if (!yes) return;
+            } else {
+                const yes = await App.confirm(`Xác nhận ${count} cuốn hư hỏng, lập ${count} biên bản độc lập và ghi công nợ cho sinh viên?`);
+                if (!yes) return;
+            }
+            return App.guard('penalty:'+returnId, async () => {
                 try {
-                    if (fine <= 0) throw new Error('Số tiền bồi thường phải lớn hơn 0.');
-                    const result = await finishReturn(returnId, { fine, reason, mssv, tenSach });
+                    const result = await finishReturn(returnId, entries);
                     closeReportModal();
-                    alert(`Đã lưu biên bản ${result.penaltyId} và ghi công nợ ${fine.toLocaleString()}đ cho MSSV ${mssv}. Sinh viên sẽ thanh toán sau trên tài khoản.`);
-                    await sendPenaltyEmail(result.penaltyId);
-                } catch (err) { 
-                    console.error("Lỗi lập biên bản:", err); 
-                    alert(err.message || "Không thể lưu biên bản!"); 
-                } 
+                    alert(`Đã nghiệm thu ${result.items.length} cuốn. ${result.damagedCount} cuốn hư hỏng, tổng công nợ ${result.total.toLocaleString('vi-VN')}đ.` +
+                        (result.missing.length ? '\nSách tốt chưa khớp kho: ' + result.missing.join(', ') : ''));
+                    // Email không ảnh hưởng transaction và công nợ; thử gửi từng biên bản.
+                    for (const id of result.penaltyIds) await sendPenaltyEmail(id);
+                } catch (err) {
+                    console.error('Lỗi lập biên bản:',err);
+                    alert(err.message || 'Không thể lưu nghiệm thu.');
+                }
             });
         }
 
