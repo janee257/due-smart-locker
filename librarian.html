@@ -179,6 +179,88 @@ body.due-librarian-ui{font-family:'Be Vietnam Pro',Inter,system-ui,sans-serif;ba
  .due-librarian-ui #libTabContentOrders .due-orders-table th:nth-child(6){width:15%}
 }
 </style>
+
+<!-- DUE MODERN UPGRADE 02–05: modern dashboard theme, cards and data table -->
+<style id="dueModernDashboardV4">
+:root {--due-ui-navy:#003B7A;--due-ui-border:#E2E8F0;--due-ui-surface:#FFFFFF;--due-ui-bg:#F8FAFC;}
+body.due-librarian-ui{background:#F8FAFC;color:#26364B;font-family:'Be Vietnam Pro',Inter,system-ui,sans-serif;}
+.due-librarian-ui .dash-aside.dark{background:linear-gradient(165deg,#002B5C,#003B7A 63%,#123F73);border-right:1px solid #1D4C7C;}
+.due-librarian-ui .dash-aside .dash-nav{min-height:45px;border-radius:13px;padding:11px 13px;transition:background .2s ease,transform .2s ease;}
+.due-librarian-ui .dash-aside .dash-nav.active{background:#F8FAFC;color:#003B7A;box-shadow:0 6px 18px #001D3C1F;}
+.due-librarian-ui .dash-aside .dash-nav:hover:not(.active){background:#FFFFFF20;transform:translateX(2px)}
+.due-librarian-ui .dash-topbar{height:76px;display:flex;gap:16px;align-items:center;padding:0 28px;background:#FFFFFF;border-bottom:1px solid #E2E8F0;box-shadow:0 1px 14px #11376608;}
+.due-topbar-title{display:flex;flex-direction:column;gap:3px;min-width:0;line-height:1.4;}
+.due-topbar-title strong{font-size:16px;font-weight:850;color:#003B7A;letter-spacing:-.025em;}
+#dueLiveDate{color:#64748B;font-size:11px;font-weight:550;}
+.due-cloud-state{display:inline-flex;align-items:center;gap:8px;margin-left:auto;padding:8px 12px;border-radius:999px;background:#F1F5F9;border:1px solid #E2E8F0;color:#58687D;font-size:11px;font-weight:750;white-space:nowrap;}
+.due-cloud-dot{width:8px;height:8px;border-radius:50%;background:#94A3B8;box-shadow:0 0 0 3px #94A3B822;}
+.due-cloud-state[data-state="connected"]{background:#ECFDF5;color:#047857;border-color:#A7F3D0;}
+.due-cloud-state[data-state="connected"] .due-cloud-dot{background:#10B981;box-shadow:0 0 0 3px #10B98125;}
+.due-cloud-state[data-state="error"]{background:#FFF1F2;color:#BE123C;border-color:#FECDD3;}
+.due-cloud-state[data-state="error"] .due-cloud-dot{background:#E11D48;}
+.due-librarian-ui .dash-main main{max-width:none;width:100%;min-width:0;padding:26px clamp(16px,2vw,34px) 60px;}
+.due-librarian-ui #libPageTitle{font-size:20px;line-height:1.4;color:#003B7A;font-weight:850;}
+/* Modern stat cards */
+.due-librarian-ui .due-kpi-card{background:#FFFFFF!important;border:1px solid #E2E8F0!important;border-radius:18px!important;box-shadow:0 4px 20px rgba(0,0,0,.04)!important;min-height:132px;padding:20px!important;gap:15px!important;transition:transform .2s,box-shadow .2s;}
+.due-librarian-ui .due-kpi-card:hover{transform:translateY(-2px);box-shadow:0 10px 28px #123B6420!important;}
+.due-librarian-ui .due-kpi-card .due-kpi-icon{border-radius:17px!important;width:56px;height:56px;flex-shrink:0;font-size:22px;}
+.due-librarian-ui .due-kpi-card:nth-child(1) .due-kpi-icon{background:#FFF4DA;color:#B76A03;}
+.due-librarian-ui .due-kpi-card:nth-child(2) .due-kpi-icon{background:#E8F1FF;color:#0B4EA2;}
+.due-librarian-ui .due-kpi-card:nth-child(3) .due-kpi-icon{background:#DFFAF1;color:#047857;}
+.due-librarian-ui .due-kpi-card:nth-child(4) .due-kpi-icon{background:#FFEAF0;color:#BE345E;}
+.due-librarian-ui .due-kpi-card [id^="kpi"]{font-size:clamp(25px,2vw,32px)!important;font-weight:900!important;line-height:1.2;letter-spacing:-.05em;color:#003B7A!important;}
+.due-librarian-ui .due-kpi-card:nth-child(4) [id^="kpi"]{color:#AF2857!important;}
+.due-librarian-ui .due-kpi-label,.due-librarian-ui .due-kpi-card p.text-\[11px\]{font-size:12px;color:#60738B;}
+.due-stat-caption{font-size:10px;color:#94A3B8;line-height:1.4;margin-top:6px;display:block;}
+/* Full width orders workspace: no mini locker */
+.due-librarian-ui #libTabContentOrders,.due-librarian-ui #libTabContentOrders .due-orders-layout,.due-librarian-ui #libTabContentOrders .due-orders-card{width:100%;max-width:none;min-width:0;display:block;}
+.due-librarian-ui #libTabContentOrders .due-orders-card{padding:clamp(18px,1.8vw,28px)!important;background:white;border:1px solid #E2E8F0!important;border-radius:18px!important;box-shadow:0 4px 20px rgba(0,0,0,.04)!important;}
+.due-librarian-ui #libTabContentOrders .due-orders-card>div:first-child{display:flex;flex-wrap:wrap;gap:14px;padding-bottom:16px;border-color:#E2E8F0;}
+.due-librarian-ui #libTabContentOrders .due-orders-card h2{font-size:15px;letter-spacing:.01em;color:#003B7A;font-weight:850;}
+.due-librarian-ui #orderCount{border-radius:999px;background:#FFF4E6;color:#A84E12;font-size:11px;border:1px solid #FED7AA;padding:6px 11px;white-space:nowrap;}
+/* User search/filter generated dynamically by original JS */
+.due-librarian-ui #orderFilters,.due-librarian-ui .due-order-filters,.due-librarian-ui #libTabContentOrders .due-order-toolbar{display:flex;flex-wrap:wrap;gap:10px;align-items:center;min-width:0;}
+.due-librarian-ui #libTabContentOrders input[type="search"],.due-librarian-ui #libTabContentOrders input[type="text"],.due-librarian-ui #libTabContentOrders input[type="date"],.due-librarian-ui #libTabContentOrders select{border:1px solid #DCE5EF!important;border-radius:12px!important;background:#FFF;color:#334155;min-height:42px;padding:10px 12px;outline:none;max-width:100%;}
+.due-librarian-ui #libTabContentOrders #orderSearch{flex:2 1 270px;min-width:200px;padding-left:38px!important;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='18' height='18' fill='none' stroke='%2394A3B8' stroke-width='2' viewBox='0 0 24 24'%3E%3Ccircle cx='11' cy='11' r='7'/%3E%3Cpath d='m16 16 5 5'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:12px center;background-size:16px;}
+.due-librarian-ui #libTabContentOrders #orderStatus,.due-librarian-ui #libTabContentOrders #orderSort{flex:0 1 175px;}
+.due-librarian-ui #libTabContentOrders #orderDate{flex:0 1 164px;}
+.due-librarian-ui #libTabContentOrders #orderReset{border-radius:12px!important;background:#F1F5F9!important;color:#475569!important;border:1px solid #E2E8F0;min-height:42px;padding:10px 16px;}
+/* Table columns and rows */
+.due-librarian-ui #libTabContentOrders .due-orders-table-wrap{overflow-x:visible!important;width:100%;max-width:100%;}
+.due-librarian-ui #libTabContentOrders .due-orders-table{width:100%;table-layout:fixed;border-collapse:separate;border-spacing:0;}
+.due-librarian-ui #libTabContentOrders .due-orders-table thead tr{background:#F1F5F9!important;}
+.due-librarian-ui #libTabContentOrders .due-orders-table thead th{font-size:11px!important;font-weight:800!important;text-transform:uppercase;letter-spacing:.06em;color:#64748B!important;padding:15px 11px!important;border-bottom:1px solid #E2E8F0;}
+.due-librarian-ui #libTabContentOrders .due-orders-table th:nth-child(1){width:12%}
+.due-librarian-ui #libTabContentOrders .due-orders-table th:nth-child(2){width:18%}
+.due-librarian-ui #libTabContentOrders .due-orders-table th:nth-child(3){width:28%}
+.due-librarian-ui #libTabContentOrders .due-orders-table th:nth-child(4){width:14%}
+.due-librarian-ui #libTabContentOrders .due-orders-table th:nth-child(5){width:12%}
+.due-librarian-ui #libTabContentOrders .due-orders-table th:nth-child(6){width:16%}
+.due-librarian-ui #libTabContentOrders .due-orders-table tbody tr{transition:background .16s ease;}
+.due-librarian-ui #libTabContentOrders .due-orders-table tbody tr:hover{background:#F8FBFF!important;}
+.due-librarian-ui #libTabContentOrders .due-orders-table tbody td{padding:16px 10px!important;color:#334155;overflow-wrap:break-word;word-break:normal;}
+.due-librarian-ui #libTabContentOrders .due-orders-table tbody td:nth-child(2)>div:first-child{display:flex;align-items:center;gap:9px;color:#172C46;}
+.due-student-avatar{display:inline-flex;align-items:center;justify-content:center;border-radius:12px;background:#E8F1FC;color:#003B7A;flex:0 0 32px;width:32px;height:32px;font-size:13px;font-weight:900;}
+.due-librarian-ui #libTabContentOrders .due-orders-table tbody td:nth-child(3)>div>div{flex-wrap:wrap;gap:6px!important;}
+.due-librarian-ui #libTabContentOrders .due-orders-table tbody td:nth-child(3) .bg-slate-100{background:#FFF4E9!important;color:#A64C09!important;border:1px solid #FED7AA!important;border-radius:7px!important;}
+.due-librarian-ui #libTabContentOrders .due-orders-table tbody td:nth-child(5) span{display:inline-flex;align-items:center;justify-content:center;padding:6px 10px;border-radius:999px!important;border:1px solid #DFE6EF;font-weight:750;line-height:1.35;white-space:normal;text-align:center;}
+.due-librarian-ui #libTabContentOrders .due-orders-table tbody td:nth-child(6){text-align:right;white-space:normal!important;}
+.due-librarian-ui #libTabContentOrders .due-orders-table tbody td:nth-child(6) button{display:inline-flex;justify-content:center;align-items:center;min-height:35px;border-radius:9px!important;font-size:11px;font-weight:750;margin:3px 2px!important;padding:8px 10px!important;white-space:nowrap;box-shadow:none!important;}
+.due-librarian-ui #libTabContentOrders .due-orders-table tbody td:nth-child(6) button.bg-emerald-600{background:#003B7A!important;color:#FFF!important;}
+.due-librarian-ui #libTabContentOrders .due-orders-table tbody td:nth-child(6) button.bg-slate-100{background:#FFFFFF!important;border:1px solid #CBD5E1!important;color:#334155!important;}
+.due-librarian-ui #libTabContentOrders .due-orders-table tbody td:nth-child(6) button.bg-rose-50{background:#FFF1F2!important;border:1px solid #FECDD3!important;color:#BE123C!important;}
+/* Friendly empty state, only applied if JS renders one row spanning all columns */
+.due-librarian-ui #libTabContentOrders .due-orders-table tbody td[colspan="6"]{padding:36px 18px!important;text-align:center!important;color:#64748B!important;font-size:12px!important;}
+.due-librarian-ui #libTabContentOrders .due-orders-table tbody td[colspan="6"]:before{content:' ';display:block;width:68px;height:68px;margin:0 auto 13px;border-radius:20px;background:#EFF6FF url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64' fill='none' stroke='%2384A7D0' stroke-width='2.4' stroke-linejoin='round'%3E%3Cpath d='M16 13h22l10 10v28H16z'/%3E%3Cpath d='M38 13v12h10M23 35h18M23 42h13'/%3E%3C/svg%3E") center/42px no-repeat;}
+.due-librarian-ui #ordersPager{display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:14px;padding:16px 2px 0;color:#64748B;font-size:12px;}
+.due-librarian-ui #ordersPager button{border-radius:10px!important;padding:8px 13px!important;border:1px solid #DCE5EF!important;background:#FFF!important;color:#003B7A!important;}
+.due-librarian-ui #ordersPager button:disabled{opacity:.4;cursor:not-allowed;}
+@media(max-width:1150px){.due-librarian-ui #libTabContentOrders .due-orders-table thead th{font-size:10px!important;padding:12px 7px!important}.due-librarian-ui #libTabContentOrders .due-orders-table tbody td{padding:12px 7px!important;font-size:12px}}
+@media(max-width:850px){.due-librarian-ui .dash-topbar{padding:0 14px;height:70px}.due-librarian-ui .dash-main main{padding:16px 12px 40px}.due-librarian-ui #libTabContentOrders .due-orders-table-wrap{overflow-x:auto!important}.due-librarian-ui #libTabContentOrders .due-orders-table{min-width:850px}}
+@media(max-width:550px){.due-cloud-state{padding:7px 9px;font-size:10px}.due-topbar-title strong{font-size:13px}#dueLiveDate{font-size:10px}}
+@media(prefers-reduced-motion:reduce){.due-librarian-ui .due-kpi-card,.due-librarian-ui .dash-aside .dash-nav{transition:none!important}}
+</style>
+
 </head>
 <body class="due-librarian-ui bg-slate-100 min-h-screen text-slate-800 font-sans pb-16">
 
@@ -242,14 +324,16 @@ body.due-librarian-ui{font-family:'Be Vietnam Pro',Inter,system-ui,sans-serif;ba
     <div class="dash-main">
     <div class="dash-topbar">
         <button class="burger w-10 h-10 rounded-none bg-orange-50 text-orange-700 text-lg" onclick="toggleSidebar()" aria-label="Mở menu">☰</button>
-        <p class="font-bold text-slate-800 text-sm">Bàn làm việc Thủ thư</p>
+        <!-- DUE MODERN UPGRADE 01: header / clock / live status -->
+<div class="due-topbar-title"><strong>Bàn làm việc Thủ thư</strong><span id="dueLiveDate" aria-label="Ngày giờ hiện tại">Đang cập nhật thời gian...</span></div>
+<div class="due-cloud-state" id="dueFirestoreStatus" role="status" aria-live="polite"><span class="due-cloud-dot"></span><span id="dueCloudLabel">Đang kiểm tra Firestore</span></div>
     </div>
     <main class="max-w-6xl mx-auto p-4 sm:p-6 space-y-6">
         <div class="grid grid-cols-2 xl:grid-cols-4 gap-3">
-            <div class="due-kpi-card bg-white rounded-none border border-slate-200 shadow-sm p-4 flex items-center gap-3"><div class="due-kpi-icon w-11 h-11 rounded-none bg-amber-100 flex items-center justify-center text-xl"><i class="fa-solid fa-clipboard-list" aria-hidden="true"></i></div><div class="min-w-0"><p class="text-[11px] text-slate-500 font-semibold">Đơn cần soạn</p><p id="kpiOrders" class="text-xl font-black text-slate-800 truncate">0</p></div></div>
-            <div class="due-kpi-card bg-white rounded-none border border-slate-200 shadow-sm p-4 flex items-center gap-3"><div class="due-kpi-icon w-11 h-11 rounded-none bg-blue-100 flex items-center justify-center text-xl"><i class="fa-solid fa-book-open" aria-hidden="true"></i></div><div class="min-w-0"><p class="text-[11px] text-slate-500 font-semibold">Sách đang mượn ngoài</p><p id="kpiBorrow" class="text-xl font-black text-slate-800 truncate">0</p></div></div>
-            <div class="due-kpi-card bg-white rounded-none border border-slate-200 shadow-sm p-4 flex items-center gap-3"><div class="due-kpi-icon w-11 h-11 rounded-none bg-emerald-100 flex items-center justify-center text-xl"><i class="fa-solid fa-box-open" aria-hidden="true"></i></div><div class="min-w-0"><p class="text-[11px] text-slate-500 font-semibold">Hộc tủ đang trống</p><p id="kpiLockers" class="text-xl font-black text-slate-800 truncate">0</p></div></div>
-            <div class="due-kpi-card bg-white rounded-none border border-slate-200 shadow-sm p-4 flex items-center gap-3"><div class="due-kpi-icon w-11 h-11 rounded-none bg-rose-100 flex items-center justify-center text-xl"><i class="fa-solid fa-receipt" aria-hidden="true"></i></div><div class="min-w-0"><p class="text-[11px] text-slate-500 font-semibold">Tiền phạt chưa thu</p><p id="kpiFines" class="text-xl font-black text-slate-800 truncate">0</p></div></div>
+            <div class="due-kpi-card bg-white rounded-none border border-slate-200 shadow-sm p-4 flex items-center gap-3"><div class="due-kpi-icon w-11 h-11 rounded-none bg-amber-100 flex items-center justify-center text-xl"><i class="fa-solid fa-clipboard-list" aria-hidden="true"></i></div><div class="min-w-0"><p class="text-[11px] text-slate-500 font-semibold">Đơn cần soạn</p><p id="kpiOrders" class="text-xl font-black text-slate-800 truncate">0</p><span class="due-stat-caption">Đồng bộ số đơn cần xử lý</span></div></div>
+            <div class="due-kpi-card bg-white rounded-none border border-slate-200 shadow-sm p-4 flex items-center gap-3"><div class="due-kpi-icon w-11 h-11 rounded-none bg-blue-100 flex items-center justify-center text-xl"><i class="fa-solid fa-book-open" aria-hidden="true"></i></div><div class="min-w-0"><p class="text-[11px] text-slate-500 font-semibold">Sách đang mượn ngoài</p><p id="kpiBorrow" class="text-xl font-black text-slate-800 truncate">0</p><span class="due-stat-caption">Đang lưu thông ngoài thư viện</span></div></div>
+            <div class="due-kpi-card bg-white rounded-none border border-slate-200 shadow-sm p-4 flex items-center gap-3"><div class="due-kpi-icon w-11 h-11 rounded-none bg-emerald-100 flex items-center justify-center text-xl"><i class="fa-solid fa-box-open" aria-hidden="true"></i></div><div class="min-w-0"><p class="text-[11px] text-slate-500 font-semibold">Hộc tủ đang trống</p><p id="kpiLockers" class="text-xl font-black text-slate-800 truncate">0</p><span class="due-stat-caption">Sẵn sàng tiếp nhận sách</span></div></div>
+            <div class="due-kpi-card bg-white rounded-none border border-slate-200 shadow-sm p-4 flex items-center gap-3"><div class="due-kpi-icon w-11 h-11 rounded-none bg-rose-100 flex items-center justify-center text-xl"><i class="fa-solid fa-receipt" aria-hidden="true"></i></div><div class="min-w-0"><p class="text-[11px] text-slate-500 font-semibold">Tiền phạt chưa thu</p><p id="kpiFines" class="text-xl font-black text-slate-800 truncate">0</p><span class="due-stat-caption">Theo dõi công nợ cần thu</span></div></div>
         </div>
         <div class="flex flex-wrap items-center justify-between gap-2">
             <h2 id="libPageTitle" class="text-lg font-black text-slate-800">Chờ soạn sách / Nạp hộc</h2>
@@ -1602,5 +1686,63 @@ body.due-librarian-ui{font-family:'Be Vietnam Pro',Inter,system-ui,sans-serif;ba
 })();
 
     </script>
+
+<!-- DUE MODERN UPGRADE 06: presentation-only date/status/avatar enhancements; no business logic altered -->
+<script id="dueModernDashboardExtras">
+(() => {
+  'use strict';
+  const timeEl = document.getElementById('dueLiveDate');
+  const statusEl = document.getElementById('dueFirestoreStatus');
+  const statusText = document.getElementById('dueCloudLabel');
+  const tb = document.getElementById('ordersTableBody');
+  if (timeEl) {
+    const updateClock = () => {
+      timeEl.textContent = new Intl.DateTimeFormat('vi-VN', { weekday:'long', day:'2-digit', month:'2-digit', year:'numeric', hour:'2-digit', minute:'2-digit', timeZone:'Asia/Ho_Chi_Minh' }).format(new Date());
+    };
+    updateClock(); setInterval(updateClock, 30000);
+  }
+  if (statusEl && statusText) {
+    const mark = (state, label) => { statusEl.dataset.state = state; statusText.textContent = label; };
+    try {
+      if (typeof App !== 'undefined' && App.auth && App.db) {
+        let detach = null;
+        App.auth.onAuthStateChanged(user => {
+          if (detach) { detach(); detach = null; }
+          if (!user) { mark('checking', 'Chưa đăng nhập'); return; }
+          mark('checking', 'Đang kiểm tra Firestore');
+          detach = App.db.collection('lockers').limit(1).onSnapshot(
+            () => mark('connected', 'Firestore đã kết nối'),
+            () => mark('error', 'Không đọc được Firestore')
+          );
+        });
+      } else mark('error', 'Chưa sẵn sàng kết nối');
+    } catch (_) { mark('error','Không kiểm tra được kết nối'); }
+  }
+  // Decorate Firestore-generated rows without changing renderOrders or its handlers.
+  if (tb) {
+    const decorate = () => {
+      Array.from(tb.children).forEach(row => {
+        const studentCell = row.cells && row.cells[1];
+        const nameEl = studentCell && studentCell.firstElementChild;
+        if (nameEl && !nameEl.querySelector('.due-student-avatar')) {
+          const name = nameEl.textContent.trim();
+          const badge = document.createElement('span');
+          badge.className = 'due-student-avatar';
+          badge.setAttribute('aria-hidden','true');
+          badge.textContent = (name.split(/\s+/).pop() || 'S').charAt(0).toLocaleUpperCase('vi-VN');
+          nameEl.insertBefore(badge,nameEl.firstChild);
+        }
+        const emptyCell = row.querySelector('td[colspan="6"]');
+        if (emptyCell && emptyCell.textContent.trim() === 'Chưa có đơn mượn nào.') {
+          emptyCell.textContent = 'Tuyệt vời! Hiện tại không có đơn nào cần xử lý.';
+        }
+      });
+    };
+    new MutationObserver(decorate).observe(tb,{childList:true});
+    decorate();
+  }
+})();
+</script>
+
 </body>
 </html>
