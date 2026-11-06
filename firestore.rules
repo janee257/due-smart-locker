@@ -29,10 +29,20 @@ service cloud.firestore {
     }
     match /returns/{id} {
       allow read: if isStaff() || isMine();
-      allow create: if newIsMine();
-      // Sinh viên chỉ được HỦY mã trả chưa dùng (chờ bỏ sách -> da_huy)
-      allow update: if isStaff() || (isMine() && resource.data.trang_thai in ['cho_bo_sach', 'cho_tra_tai_kiosk'] && request.resource.data.trang_thai == 'da_huy'
-        && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['trang_thai', 'thoi_gian_huy']));
+      // Không cho client tự tạo trạng thái paid; chỉ Firebase Admin từ backend được ghi.
+      allow create: if newIsMine() && !request.resource.data.keys().hasAny(['payment_status', 'paid_amount', 'payment_txn_id']);
+      // Các thuộc tính ngân hàng do backend xác minh, không sửa bằng client.
+      function noClientPaymentApproval() {
+        return !request.resource.data.diff(resource.data).affectedKeys().hasAny([
+          'paid_amount', 'paid_at', 'payment_txn_id'
+        ]) && !(request.resource.data.diff(resource.data).affectedKeys().hasAny(['payment_status'])
+          && request.resource.data.payment_status == 'paid');
+      }
+      allow update: if noClientPaymentApproval() && (
+        isStaff() || (isMine() && resource.data.trang_thai in ['cho_bo_sach', 'cho_tra_tai_kiosk']
+          && request.resource.data.trang_thai == 'da_huy'
+          && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['trang_thai', 'thoi_gian_huy']))
+      );
     }
     match /penalties/{id}  { allow read, write: if isLib(); }
   }

@@ -153,9 +153,9 @@
 
                     <div id="fineInfo" class="text-[11px] text-left text-slate-300 space-y-1 bg-slate-950/80 p-3.5 border border-slate-800"></div>
 
-                    <button id="payBtn" onclick="confirmPayment()" class="w-full py-3.5 bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-sm tracking-wide shadow-lg shadow-emerald-900/40 transition">
-                        ✓ ĐÃ THANH TOÁN (MỞ HỘC TỦ TRẢ SÁCH)
-                    </button>
+                    <p id="paymentWaiting" class="w-full py-3.5 bg-slate-800 border border-slate-600 text-slate-200 text-sm font-bold">
+                        <i class="fa-solid fa-spinner fa-spin mr-2"></i> Đang chờ ngân hàng xác nhận thanh toán...
+                    </p>
                 </div>
             </div>
         </div>
@@ -331,8 +331,8 @@
         const FINE_PAYMENT_CONFIG = {
             bankId: 'mbbank', bankName: 'MB Bank', accountNo: '0905673987', accountName: 'PHAM NHAT HA', template: 'compact',
             memo: (mssv, barcode) => `PHAT ${mssv} ${barcode}`,
-            generateQrUrl(amount, mssv, barcode) {
-                return `https://img.vietqr.io/image/${this.bankId}-${this.accountNo}-${this.template}.png?amount=${amount}&addInfo=${encodeURIComponent(this.memo(mssv, barcode))}&accountName=${encodeURIComponent(this.accountName)}`;
+            generateQrUrl(amount, paymentCode) {
+                return `https://img.vietqr.io/image/${this.bankId}-${this.accountNo}-${this.template}.png?amount=${amount}&addInfo=${encodeURIComponent(paymentCode)}&accountName=${encodeURIComponent(this.accountName)}`;
             }
         };
         let ret = null;   // ret = phiên đối soát đang mở
@@ -393,42 +393,83 @@
         }
         let unsubFineListener = null;
 
-        function finishScan() {
-            ret.total = ret.rows.reduce((t, r) => t + r.fine, 0);
-            if (!ret.total) return completeReturn(); // Gate 2 = đúng hạn -> mở tủ luôn
+        // R2a: tạo mã thanh toán duy nhất của đơn trả, lưu lên Firestore trước khi hiển thị VietQR.
+        let paymentUiBusy = false;
+        async function finishScan() {
+            const session = ret;
+            if (!session || paymentUiBusy) return;
+            session.total = session.rows.reduce((sum, row) => sum + row.fine, 0);
+            if (!session.total) return completeReturn();
+            paymentUiBusy = true;
+            try {
+                // Firestore tự cấp ID cho returns; dùng ID này để tạo mã đối soát duy nhất.
+                const payCode = 'DUEP' + session.id.toUpperCase();
+                await db.runTransaction(async tx => {
+                    const snap = await tx.get(session.ref);
+                    if (!snap.exists || !WAIT_DROP.includes(snap.data().trang_thai))
+                        throw new Error('Đơn trả đã hết hiệu lực.');
+                    const existing = snap.data();
+                    if (existing.payment_status === 'paid') {
+                        if (existing.payment_code !== payCode || Number(existing.payment_amount) !== session.total)
+                            throw new Error('Đơn trả có thông tin thanh toán không nhất quán.');
+                        return;
+                    }
+                    tx.update(session.ref, {
+                        payment_code: payCode,
+                        payment_amount: session.total,
+                        payment_status: 'pending'
+                    });
+                });
+                session.paymentCode = payCode;
+                $('fineQr').src = FINE_PAYMENT_CONFIG.generateQrUrl(session.total, payCode);
+                $('fineAmount').innerText = vnd(session.total);
+                $('fineInfo').innerHTML = [
+                    ['Ngân hàng', FINE_PAYMENT_CONFIG.bankName],
+                    ['Số tài khoản', FINE_PAYMENT_CONFIG.accountNo],
+                    ['Chủ tài khoản', FINE_PAYMENT_CONFIG.accountName],
+                    ['Nội dung CK', payCode]
+                ].map(([k, v]) => `<div class="flex justify-between gap-3"><span class="text-slate-400">${k}</span><b class="text-right text-white">${escH(v)}</b></div>`).join('');
+                $('finePanel').classList.remove('hidden');
+                backToQrCam();
 
-            const late = ret.rows.filter(r => r.fine), memoCode = late[0].ma_vach + (late.length > 1 ? '+' + (late.length - 1) : '');
-            $('fineQr').src = FINE_PAYMENT_CONFIG.generateQrUrl(ret.total, ret.mssv, memoCode);
-            $('fineAmount').innerText = vnd(ret.total);
-            $('fineInfo').innerHTML = [['Ngân hàng', FINE_PAYMENT_CONFIG.bankName], ['Số tài khoản', FINE_PAYMENT_CONFIG.accountNo], ['Chủ tài khoản', FINE_PAYMENT_CONFIG.accountName],
-                ['Nội dung CK', FINE_PAYMENT_CONFIG.memo(ret.mssv, memoCode)]]
-                .map(([k, v]) => `<div class="flex justify-between gap-3"><span class="text-slate-400">${k}</span><b class="text-right text-white">${escH(v)}</b></div>`).join('');
-            
-            $('finePanel').classList.remove('hidden');
-            backToQrCam();
-
-            // 🚀 REAL-TIME AUTO-TRIGGER: Lắng nghe biến động từ Webhook/Ngân hàng
-            if (unsubFineListener) unsubFineListener();
-            unsubFineListener = ret.ref.onSnapshot(doc => {
-                const data = doc.data();
-                // Khi phát hiện đơn này đã được xác nhận tiền về (qua Webhook SePAY/n8n)
-                if (data && (data.da_thu_phi === true || data.trang_thai === 'cho_kiem_tra')) {
-                    if (unsubFineListener) { unsubFineListener(); unsubFineListener = null; }
-                    showToast.success('Thanh toán thành công', 'Hệ thống đã nhận được tiền phạt từ Ngân hàng!');
-                    completeReturn(); // Tự động đóng modal và mở tủ ngay lập tức!
-                }
-            });
+                // Chỉ backend SePay đã đối soát mới có quyền đặt payment_status='paid'.
+                if (unsubFineListener) unsubFineListener();
+                unsubFineListener = session.ref.onSnapshot(doc => {
+                    if (!ret || ret.id !== session.id) return;
+                    const data = doc.data();
+                    if (data && data.payment_status === 'paid' &&
+                        data.payment_code === session.paymentCode &&
+                        Number(data.payment_amount) === session.total &&
+                        Number(data.paid_amount) === session.total) {
+                        if (unsubFineListener) { unsubFineListener(); unsubFineListener = null; }
+                        $('finePanel').classList.add('hidden');
+                        showToast.success('Thanh toán thành công', 'Ngân hàng đã xác nhận khoản phạt.');
+                        completeReturn();
+                    }
+                }, err => {
+                    console.error('Lỗi lắng nghe thanh toán:', err);
+                    showToast.error('Lỗi cập nhật thanh toán', 'Hãy liên hệ thủ thư để kiểm tra giao dịch.');
+                });
+            } catch(err) {
+                console.error('Lỗi khởi tạo thanh toán:', err);
+                showToast.error('Không tạo được VietQR', err.message || 'Vui lòng thử lại.');
+            } finally {
+                paymentUiBusy = false;
+            }
         }
-        function confirmPayment() { if (ret && ret.total) completeReturn(); }   // giả lập webhook "đã nhận thanh toán"
 
         // R2b: mở hộc, ghi nhận (kèm khoản phạt đã thu) trong 1 transaction
         async function completeReturn() {
             const s = ret; if (!s || s.busy) return; s.busy = true;
-            const pay = $('payBtn'); pay.disabled = true;
             try {
                 const out = await db.runTransaction(async tx => {
                     const r = (await tx.get(s.ref)).data(), name = r.so_hoc;
                     if (!WAIT_DROP.includes(r.trang_thai)) return { err: "Mã trả sách này đã được sử dụng hoặc đã xử lý!" };
+                    if (s.total > 0 && !(r.payment_status === 'paid' &&
+                        r.payment_code === s.paymentCode &&
+                        Number(r.payment_amount) === s.total &&
+                        Number(r.paid_amount) === s.total))
+                        return { err: 'Ngân hàng chưa xác nhận đủ số tiền phạt.' };
                     tx.update(s.ref, { trang_thai: 'cho_kiem_tra', thoi_gian_bo_tu: FV(), tien_phat_thu: s.total });
                     tx.set(App.lockerRef(name), { so_hoc: name, trang_thai: 'dang_mo', cap_nhat_luc: FV() }, { merge: true });
                     s.rows.forEach(row => row.borrow_id && tx.set(db.collection('borrowings').doc(row.borrow_id),
@@ -441,7 +482,7 @@
                 openedLockerName = out.name;
                 showNotice(`ĐANG MỞ ${out.name}! Hãy đặt ${out.n} cuốn sách vào hộc và đóng cửa tủ.`, "success");
                 releaseLockerLater(out.name, 'chua_sach_tra', s.token);
-            } catch (err) { console.error(err); s.busy = false; pay.disabled = false; showNotice("Lỗi trả sách: " + err.message, "error"); }
+            } catch (err) { console.error(err); s.busy = false; showNotice("Lỗi trả sách: " + err.message, "error"); }
         }
 
         function closeReturnSession() { 
@@ -450,7 +491,6 @@
             ret = null; 
             $('returnSession').classList.add('hidden'); 
             $('finePanel').classList.add('hidden'); 
-            $('payBtn').disabled = false; 
         }
         // ---------- Thông báo trạng thái: tiêu đề + mô tả + hướng dẫn bước tiếp theo ----------
         const NOTICE_MAP = [
