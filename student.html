@@ -777,7 +777,7 @@
                 const isInCart = cart.some(item => item.id === b.id);
 
                 list.innerHTML += `
-                    <div class="bg-white p-4 sm:p-5 rounded-none border border-slate-200 shadow-sm flex flex-col justify-between gap-3 hover:border-orange-300 transition">
+                    <div onclick="openBookDetails('${b.id}')" class="group bg-white p-4 sm:p-5 rounded-none border border-slate-200 shadow-sm flex flex-col justify-between gap-3 hover:border-blue-400 cursor-pointer transition select-none">
                         <div class="space-y-1.5">
                             <div class="flex items-center justify-between gap-2">
                                 <span class="text-[10px] font-mono bg-slate-100 text-slate-600 px-2 py-0.5 rounded font-bold">${b.ma_vach}</span>
@@ -785,17 +785,17 @@
                                     ${isAvailable ? `Còn: ${b.so_luong_con} cuốn` : 'Tạm hết'}
                                 </span>
                             </div>
-                            <button type="button" onclick="openBookDetails('${b.id}')" class="block w-full text-left font-bold text-slate-800 text-xs sm:text-sm leading-snug hover:text-orange-600 hover:underline" title="Xem thông tin sách">${esc(b.ten_sach)}</button>
+                            <div class="font-bold text-slate-800 text-xs sm:text-sm leading-snug group-hover:text-blue-700 transition">${esc(b.ten_sach)}</div>
                             <p class="text-[11px] text-slate-400">${b.tac_gia} • <span class="text-orange-600 font-semibold">${b.vi_tri_ke}</span></p>
                         </div>
 
                         <div class="pt-2 border-t flex justify-end">
                             ${isAvailable ? (
                                 isInCart ? 
-                                `<button onclick="removeFromCart('${b.id}')" class="px-3.5 py-1.5 bg-rose-50 border border-rose-200 text-rose-600 rounded-none text-xs font-bold transition flex items-center gap-1.5">
+                                `<button type="button" onclick="event.stopPropagation(); removeFromCart('${b.id}')" class="px-3.5 py-1.5 bg-rose-50 border border-rose-200 text-rose-600 rounded-none text-xs font-bold transition flex items-center gap-1.5">
                                     <i class="fa-solid fa-check"></i> Đã chọn
                                 </button>` :
-                                `<button onclick="addToCart('${b.id}')" class="px-3.5 py-1.5 bg-orange-600 hover:bg-orange-700 text-white rounded-none text-xs font-bold shadow-md transition flex items-center gap-1.5">
+                                `<button type="button" onclick="event.stopPropagation(); addToCart('${b.id}')" class="px-3.5 py-1.5 bg-orange-600 hover:bg-orange-700 text-white rounded-none text-xs font-bold shadow-md transition flex items-center gap-1.5">
                                     <i class="fa-solid fa-plus"></i> Chọn mượn
                                 </button>`
                             ) : `<span class="px-3 py-1.5 bg-slate-100 text-slate-400 rounded-none text-xs font-semibold">Tạm hết</span>`}
