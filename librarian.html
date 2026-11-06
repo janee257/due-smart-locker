@@ -30,8 +30,108 @@
     <script src="ui.js" defer></script>
     <script src="app-core.js"></script>
     <script>const { auth, db } = App; const loginWithFirebase = App.login;</script>
+    <!-- LIBRARIAN UI UPGRADE: Design System CSS only, preserved original scripts -->
+    <style id="dueLibrarianDesignSystem">
+
+/* ===== DUE LIBRARIAN UI UPGRADE 01: Brand tokens & dashboard shell ===== */
+:root{--due-navy:#003B7A;--due-blue:#0B4EA2;--due-accent:#EA580C;--due-ink:#172b48;--due-muted:#60738b;--due-bg:#F8FAFC;--due-border:#dce6f1;--due-radius:16px}
+body.due-librarian-ui{font-family:'Be Vietnam Pro',Inter,system-ui,sans-serif;background:var(--due-bg);color:var(--due-ink);font-size:14px}
+.due-librarian-ui .dash-aside.dark{background:linear-gradient(180deg,#003B7A 0%,#092d57 68%,#061d3c 100%);border-right:1px solid #1e507e;box-shadow:8px 0 32px rgba(6,29,60,.07)}
+.due-librarian-ui .dash-aside.dark>div:first-child{border-color:rgba(255,255,255,.18)}
+.due-librarian-ui .dash-aside .dash-nav{color:#d5e7fa;padding:12px 13px;border-radius:12px;gap:12px;font-weight:650;font-size:12px;min-height:46px}
+.due-librarian-ui .dash-aside .dash-nav:hover{background:rgba(255,255,255,.12);color:#fff;transform:none}
+.due-librarian-ui .dash-aside .dash-nav.active{background:#fff;color:#003B7A;box-shadow:0 7px 22px rgba(2,20,44,.16);transform:none}
+.due-librarian-ui .dash-aside .dash-nav.active .badge{background:#fff0df;color:#ad4b0a}
+.due-librarian-ui .dash-nav .badge:not(.zero){background:#fff0db;color:#a94a00;border-radius:999px;font-size:10px;min-width:23px;padding:3px 7px}
+.due-librarian-ui .dash-aside .due-nav-ico{width:19px;text-align:center;font-size:15px;flex-shrink:0;opacity:.88}
+.due-librarian-ui .dash-aside .due-nav-text{flex:1;min-width:0}
+.due-librarian-ui .dash-topbar{height:68px;padding:0 26px;background:rgba(255,255,255,.97);border-bottom:1px solid var(--due-border);box-shadow:0 1px 12px rgba(15,40,75,.03)}
+.due-librarian-ui .dash-topbar>p{font-size:15px;color:var(--due-navy);font-weight:800}
+.due-librarian-ui .dash-main main{max-width:1580px;padding:26px 28px 50px}
+.due-librarian-ui #libPageTitle{font-size:20px;color:var(--due-navy);letter-spacing:-.03em}
+.due-librarian-ui .dash-topbar .burger{background:#e7f1ff;color:var(--due-navy);border-radius:11px}
+.due-librarian-ui #librarianLoginSection{background:radial-gradient(circle at 20% 18%,#1f5eaa,#072956 65%,#041d3e)}
+.due-librarian-ui #librarianLoginSection>div{border-radius:22px;padding:28px;box-shadow:0 20px 55px rgba(0,18,57,.28)}
+.due-librarian-ui #libLogoutBtnContainer button{border-radius:12px;background:#003B7A}
+/* ===== UPGRADE 02: KPI tiles ===== */
+.due-librarian-ui .due-kpi-card{border-radius:17px!important;min-height:112px;padding:18px 17px!important;border:1px solid #e0e8f3!important;box-shadow:0 5px 22px rgba(25,55,95,.045)!important;gap:14px}
+.due-librarian-ui .due-kpi-card .due-kpi-icon{width:53px;height:53px;border-radius:15px;flex-shrink:0;font-size:22px;display:flex;align-items:center;justify-content:center}
+.due-librarian-ui .due-kpi-card [id^="kpi"]{font-size:30px;line-height:1.12;font-weight:850;letter-spacing:-.04em;color:#003B7A;margin-top:5px}
+.due-librarian-ui .due-kpi-card:nth-child(4) [id^="kpi"]{color:#9c2850}
+.due-librarian-ui .due-kpi-card .due-kpi-label{font-size:11px;font-weight:650;color:#617289;line-height:1.5}
+/* ===== UPGRADE 03: Tables, toolbars, statuses & action buttons ===== */
+.due-librarian-ui main section.bg-white{border-radius:18px!important;border:1px solid var(--due-border)!important;box-shadow:0 6px 20px rgba(18,49,92,.04)!important;overflow:hidden}
+.due-librarian-ui main section.bg-white h2{color:#003B7A;font-weight:800}
+.due-librarian-ui main section.bg-white thead tr{background:#eff5fc!important;color:#546e8c!important;border-bottom:1px solid #d9e5f2!important}
+.due-librarian-ui main section.bg-white thead th{font-size:10px;letter-spacing:.055em;text-transform:uppercase;white-space:nowrap;font-weight:800;padding:15px 12px!important}
+.due-librarian-ui main section.bg-white tbody td{vertical-align:middle;line-height:1.5}
+.due-librarian-ui main section.bg-white tbody tr{border-color:#edf1f6}
+.due-librarian-ui main section.bg-white tbody tr:hover{background:#f5f9fe!important}
+.due-librarian-ui main section.bg-white .rounded-none,.due-librarian-ui main section.bg-white input,.due-librarian-ui main section.bg-white select{border-radius:10px!important}
+.due-librarian-ui main section.bg-white input:focus,.due-librarian-ui main section.bg-white select:focus,.due-librarian-ui textarea:focus{outline:2px solid rgba(11,78,162,.22)!important;outline-offset:1px;--tw-ring-color:rgba(11,78,162,.2)!important}
+.due-librarian-ui button:not(.dash-nav){transition:transform .18s ease,background-color .18s ease,box-shadow .18s ease,filter .18s ease}
+.due-librarian-ui main button:not(.filter-chip){border-radius:9px!important;min-height:35px}
+.due-librarian-ui main button:not(.filter-chip):active{transform:scale(.98)}
+.due-librarian-ui main button.bg-orange-600,.due-librarian-ui main button.bg-emerald-600,.due-librarian-ui main button.bg-purple-600{background:#003B7A!important;color:#fff!important}
+.due-librarian-ui main button.bg-orange-600:hover,.due-librarian-ui main button.bg-emerald-600:hover,.due-librarian-ui main button.bg-purple-600:hover{background:#0B4EA2!important}
+.due-librarian-ui main button.bg-rose-600{background:#af3554!important}
+.due-librarian-ui .filter-chip.active{background:#003B7A!important;border-color:#003B7A!important;color:white}
+.due-librarian-ui .filter-chip:not(.active):hover{background:#ebf3fe}
+.due-librarian-ui main .bg-orange-100{background:#fff0df!important;color:#9c4908!important}
+.due-librarian-ui main .bg-blue-100{background:#e8f2ff!important}
+.due-librarian-ui .due-mini-label{font-size:11px;font-weight:750;color:#62788f;letter-spacing:.04em;text-transform:uppercase}
+.due-librarian-ui .due-filter-reset{font-size:12px;font-weight:700;color:#0B4EA2;border:1px solid #c7daee;background:#fff;padding:9px 13px;border-radius:10px}
+.due-librarian-ui .due-filter-reset:hover{background:#edf5ff}
+.due-librarian-ui #borrowSearchInput,.due-librarian-ui #fineSearch,.due-librarian-ui #libSearchInput{min-height:42px;background:white;border:1px solid #cddbea}
+.due-librarian-ui #borrowStatusFilter,.due-librarian-ui #fineStatusFilter,.due-librarian-ui #libSortSelect{min-height:22px}
+.due-librarian-ui .due-date-filter{height:42px;padding:0 12px;border:1px solid #d0dceb;border-radius:10px;background:white;font-size:12px;color:#39536e}
+.due-librarian-ui .due-search-tools{display:flex;align-items:center;gap:10px;flex-wrap:wrap}
+.due-librarian-ui .due-search-tools input[type="search"]{flex:1;min-width:240px}
+/* Badge styles for injected dynamic statuses remain CSS-only, no status text replacement */
+.due-librarian-ui main tbody [class*="bg-amber-"],.due-librarian-ui main tbody [class*="bg-orange-"]{border-radius:999px!important}
+.due-librarian-ui main tbody [class*="bg-blue-"],.due-librarian-ui main tbody [class*="bg-emerald-"],.due-librarian-ui main tbody [class*="bg-rose-"]{border-radius:999px!important}
+/* ===== UPGRADE 04: Mini locker live matrix alongside orders ===== */
+.due-librarian-ui .due-orders-layout{display:grid;grid-template-columns:minmax(0,1fr) 292px;gap:16px;align-items:start}
+.due-librarian-ui .due-orders-layout>section{min-width:0}
+.due-librarian-ui .due-mini-locker-panel{padding:18px;border:1px solid #dce7f4;border-radius:18px;background:#fff;box-shadow:0 6px 20px rgba(18,49,92,.05);position:sticky;top:86px}
+.due-librarian-ui .due-mini-locker-head{display:flex;align-items:flex-start;justify-content:space-between;gap:8px;margin-bottom:14px}
+.due-librarian-ui .due-mini-locker-grid{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:6px}
+.due-librarian-ui .due-mini-cell{min-height:41px;border-radius:9px;border:1px solid #cad7e7;background:#f6f9fd;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:1px;font-weight:800;font-size:12px;color:#355673;position:relative}
+.due-librarian-ui .due-mini-cell i{font-size:9px}
+.due-librarian-ui .due-mini-cell[data-state="trong"]{color:#047857;background:#edfcf6;border-color:#b7ecd5}
+.due-librarian-ui .due-mini-cell[data-state="cho_nhan"]{color:#ae6800;background:#fff7e4;border-color:#f3d694}
+.due-librarian-ui .due-mini-cell[data-state="cho_tra"],.due-librarian-ui .due-mini-cell[data-state="chua_sach_tra"]{color:#1d5fbd;background:#edf5ff;border-color:#bbd4fa}
+.due-librarian-ui .due-mini-cell[data-state="dang_mo"]{color:#ad2b57;background:#fff0f4;border-color:#e9a6b9}
+.due-librarian-ui .due-mini-legend{display:flex;flex-wrap:wrap;gap:8px;font-size:10px;color:#587188;margin-top:13px}
+.due-librarian-ui .due-mini-legend span{display:inline-flex;align-items:center;gap:4px}
+.due-librarian-ui .due-dot{display:inline-block;width:7px;height:7px;border-radius:50%;background:#10b981}
+.due-librarian-ui .due-dot.wait{background:#f59e0b}.due-librarian-ui .due-dot.check{background:#3b82f6}.due-librarian-ui .due-dot.open{background:#ef476f}
+/* ===== UPGRADE 05: Inspection modal, quick amounts, empty state ===== */
+.due-librarian-ui #reportModal>div{border-radius:22px;max-width:760px;max-height:min(88dvh,850px);border:1px solid #dce8f3}
+.due-librarian-ui #reportBookRows>div{background:#f8fbff;border-radius:14px;border:1px solid #dae6f3;padding:17px}
+.due-librarian-ui #reportBookRows select,.due-librarian-ui #reportBookRows input,.due-librarian-ui #reportBookRows textarea{border-radius:10px;min-height:40px;border:1px solid #cbdbea}
+.due-librarian-ui .due-damage-presets{display:flex;gap:7px;flex-wrap:wrap;margin:3px 0 10px}
+.due-librarian-ui .due-preset-button{font-size:11px;font-weight:750;color:#004b99;background:#eaf3ff;border:1px solid #b9d4f1;border-radius:9px;padding:9px 11px}
+.due-librarian-ui .due-preset-button:hover{background:#d7eaff}
+.due-librarian-ui .due-preset-note{font-size:10px;color:#64748b;line-height:1.5}
+.due-librarian-ui #reportModal button.bg-rose-600{border-radius:10px;background:#003B7A!important}
+.due-librarian-ui .due-empty-state.hidden{display:none}
+.due-librarian-ui .due-empty-state{display:flex;flex-direction:column;align-items:center;text-align:center;justify-content:center;gap:8px;padding:34px 16px;background:#fbfdff;color:#6b8098}
+.due-librarian-ui .due-empty-state .due-empty-ico{display:grid;place-items:center;width:58px;height:58px;background:#edf4fd;border-radius:18px;color:#0B4EA2;font-size:23px}
+.due-librarian-ui .due-empty-state strong{font-size:14px;color:#365477}
+/* ===== UPGRADE 06: Toast display layer (only replaces native alert; confirmations unchanged) ===== */
+#dueLibToastStack{position:fixed;right:20px;top:80px;z-index:9999;width:min(370px,calc(100vw - 24px));display:flex;flex-direction:column;gap:10px;pointer-events:none}
+.due-lib-toast{pointer-events:auto;background:#fff;border-radius:14px;border:1px solid #dbe7f2;padding:14px 16px;box-shadow:0 16px 45px rgba(4,31,67,.17);display:flex;gap:11px;align-items:flex-start;color:#173454;font-size:12px;animation:dueToastIn .2s ease}
+.due-lib-toast.is-success{border-left:4px solid #10b981}.due-lib-toast.is-error{border-left:4px solid #e34c63}.due-lib-toast.is-warn{border-left:4px solid #f59e0b}
+.due-lib-toast .due-toast-dismiss{color:#72859a;flex-shrink:0;border:0;background:none;font-size:16px;margin-left:auto}
+@keyframes dueToastIn{from{opacity:0;transform:translateX(14px)}to{opacity:1;transform:none}}
+@media(max-width:1360px){.due-librarian-ui .due-orders-layout{grid-template-columns:minmax(0,1fr) 250px}.due-librarian-ui .due-mini-locker-panel{padding:12px}}
+@media(max-width:1150px){.due-librarian-ui .due-orders-layout{grid-template-columns:1fr}.due-librarian-ui .due-mini-locker-panel{position:static}.due-librarian-ui .due-mini-locker-grid{grid-template-columns:repeat(10,minmax(0,1fr))}}
+@media(max-width:767px){.due-librarian-ui .dash-main main{padding:18px 12px}.due-librarian-ui .dash-topbar{padding:0 14px;height:58px}.due-librarian-ui .due-kpi-card{padding:14px!important;min-height:95px}.due-librarian-ui .due-kpi-card [id^="kpi"]{font-size:23px}.due-librarian-ui .due-kpi-card .due-kpi-icon{width:39px;height:39px;font-size:16px}.due-librarian-ui main section.bg-white{padding:15px!important}.due-librarian-ui .due-mini-locker-grid{grid-template-columns:repeat(5,minmax(0,1fr))}}
+
+    </style>
 </head>
-<body class="bg-slate-100 min-h-screen text-slate-800 font-sans pb-16">
+<body class="due-librarian-ui bg-slate-100 min-h-screen text-slate-800 font-sans pb-16">
 
     <!-- ================= MÀN HÌNH ĐĂNG NHẬP THỦ THƯ ================= -->
     <div id="librarianLoginSection" style="z-index:100" class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950">
@@ -72,20 +172,20 @@
     <aside class="dash-aside dark" id="dashAside">
         <div class="p-5 border-b border-slate-800">
             <div class="flex items-center gap-2 mb-4">
-                <img src="/logo_due.png" alt="DUE" class="h-8 w-auto bg-white p-1 rounded-sm object-contain" onerror="this.onerror=null; this.src='https://due.udn.vn/Portals/0/logo-due.png';">
+                <img src="/logo_due.png" alt="DUE" class="h-11 w-auto bg-white p-1 rounded-xl object-contain" onerror="this.onerror=null; this.src='https://due.udn.vn/Portals/0/logo-due.png';">
                 <div class="leading-tight"><p class="font-bold text-sm text-white">Thư viện DUE</p><p class="text-[10px] text-slate-400">Smart Locker · Quản trị</p></div>
             </div>
-            <span class="inline-block bg-gradient-to-r from-orange-600 to-amber-500 text-white text-[11px] font-bold px-3 py-1 rounded-sm">Cán bộ Thư viện DUE</span>
+            <span class="inline-block bg-white/15 border border-white/20 text-blue-50 text-[11px] font-bold px-3 py-1.5 rounded-lg">Cán bộ Thư viện DUE</span>
             <p id="libAdminEmail" class="mt-2 text-xs text-slate-300 truncate">thuthu@due.udn.vn</p>
-            <button onclick="handleLibrarianLogout()" class="mt-3 w-full py-2 rounded-none bg-slate-800 hover:bg-rose-600 text-white text-xs font-bold transition">Đăng xuất</button>
+            <button onclick="handleLibrarianLogout()" class="mt-3 w-full py-2 rounded-lg bg-white/10 hover:bg-white/20 text-white text-xs font-bold transition border border-white/20">Đăng xuất</button>
         </div>
         <nav class="p-3 space-y-1.5 flex-1">
-            <button onclick="switchLibTab('orders')" id="libTabBtnOrders" class="dash-nav"><span>Chờ soạn sách / Nạp hộc</span><span id="navOrders" class="badge zero">0</span></button>
-            <button onclick="switchLibTab('inspect')" id="libTabBtnInspect" class="dash-nav"><span>Nghiệm thu trả sách</span><span id="navInspect" class="badge zero">0</span></button>
-            <button onclick="switchLibTab('lockers')" id="libTabBtnLockers" class="dash-nav"><span>Giám sát hộc tủ</span></button>
-            <button onclick="switchLibTab('warehouse')" id="libTabBtnWarehouse" class="dash-nav"><span>Quản lý kho sách</span></button>
-            <button onclick="switchLibTab('borrows')" id="libTabBtnBorrows" class="dash-nav"><span>Danh sách mượn trả</span></button>
-            <button onclick="switchLibTab('fines')" id="libTabBtnFines" class="dash-nav"><span>Xử lý phạt & Thu phí</span><span id="navFines" class="badge zero">0</span></button>
+            <button onclick="switchLibTab('orders')" id="libTabBtnOrders" class="dash-nav"><i aria-hidden="true" class="fa-solid fa-clipboard-list due-nav-ico"></i><span>Chờ soạn sách / Nạp hộc</span><span id="navOrders" class="badge zero">0</span></button>
+            <button onclick="switchLibTab('inspect')" id="libTabBtnInspect" class="dash-nav"><i aria-hidden="true" class="fa-solid fa-clipboard-check due-nav-ico"></i><span>Nghiệm thu trả sách</span><span id="navInspect" class="badge zero">0</span></button>
+            <button onclick="switchLibTab('lockers')" id="libTabBtnLockers" class="dash-nav"><i aria-hidden="true" class="fa-solid fa-table-cells-large due-nav-ico"></i><span>Giám sát hộc tủ</span></button>
+            <button onclick="switchLibTab('warehouse')" id="libTabBtnWarehouse" class="dash-nav"><i aria-hidden="true" class="fa-solid fa-book due-nav-ico"></i><span>Quản lý kho sách</span></button>
+            <button onclick="switchLibTab('borrows')" id="libTabBtnBorrows" class="dash-nav"><i aria-hidden="true" class="fa-solid fa-book-open-reader due-nav-ico"></i><span>Danh sách mượn trả</span></button>
+            <button onclick="switchLibTab('fines')" id="libTabBtnFines" class="dash-nav"><i aria-hidden="true" class="fa-solid fa-file-invoice-dollar due-nav-ico"></i><span>Xử lý phạt & Thu phí</span><span id="navFines" class="badge zero">0</span></button>
             <span id="totalOrdersBadge" class="hidden"></span>
         </nav>
     </aside>
@@ -97,10 +197,10 @@
     </div>
     <main class="max-w-6xl mx-auto p-4 sm:p-6 space-y-6">
         <div class="grid grid-cols-2 xl:grid-cols-4 gap-3">
-            <div class="bg-white rounded-none border border-slate-200 shadow-sm p-4 flex items-center gap-3"><div class="w-11 h-11 rounded-none bg-amber-100 flex items-center justify-center text-xl"></div><div class="min-w-0"><p class="text-[11px] text-slate-500 font-semibold">Đơn cần soạn</p><p id="kpiOrders" class="text-xl font-black text-slate-800 truncate">0</p></div></div>
-            <div class="bg-white rounded-none border border-slate-200 shadow-sm p-4 flex items-center gap-3"><div class="w-11 h-11 rounded-none bg-blue-100 flex items-center justify-center text-xl"></div><div class="min-w-0"><p class="text-[11px] text-slate-500 font-semibold">Sách đang mượn ngoài</p><p id="kpiBorrow" class="text-xl font-black text-slate-800 truncate">0</p></div></div>
-            <div class="bg-white rounded-none border border-slate-200 shadow-sm p-4 flex items-center gap-3"><div class="w-11 h-11 rounded-none bg-emerald-100 flex items-center justify-center text-xl"></div><div class="min-w-0"><p class="text-[11px] text-slate-500 font-semibold">Hộc tủ đang trống</p><p id="kpiLockers" class="text-xl font-black text-slate-800 truncate">0</p></div></div>
-            <div class="bg-white rounded-none border border-slate-200 shadow-sm p-4 flex items-center gap-3"><div class="w-11 h-11 rounded-none bg-rose-100 flex items-center justify-center text-xl"></div><div class="min-w-0"><p class="text-[11px] text-slate-500 font-semibold">Tiền phạt chưa thu</p><p id="kpiFines" class="text-xl font-black text-slate-800 truncate">0</p></div></div>
+            <div class="due-kpi-card bg-white rounded-none border border-slate-200 shadow-sm p-4 flex items-center gap-3"><div class="due-kpi-icon w-11 h-11 rounded-none bg-amber-100 flex items-center justify-center text-xl"><i class="fa-solid fa-clipboard-list" aria-hidden="true"></i></div><div class="min-w-0"><p class="text-[11px] text-slate-500 font-semibold">Đơn cần soạn</p><p id="kpiOrders" class="text-xl font-black text-slate-800 truncate">0</p></div></div>
+            <div class="due-kpi-card bg-white rounded-none border border-slate-200 shadow-sm p-4 flex items-center gap-3"><div class="due-kpi-icon w-11 h-11 rounded-none bg-blue-100 flex items-center justify-center text-xl"><i class="fa-solid fa-book-open" aria-hidden="true"></i></div><div class="min-w-0"><p class="text-[11px] text-slate-500 font-semibold">Sách đang mượn ngoài</p><p id="kpiBorrow" class="text-xl font-black text-slate-800 truncate">0</p></div></div>
+            <div class="due-kpi-card bg-white rounded-none border border-slate-200 shadow-sm p-4 flex items-center gap-3"><div class="due-kpi-icon w-11 h-11 rounded-none bg-emerald-100 flex items-center justify-center text-xl"><i class="fa-solid fa-box-open" aria-hidden="true"></i></div><div class="min-w-0"><p class="text-[11px] text-slate-500 font-semibold">Hộc tủ đang trống</p><p id="kpiLockers" class="text-xl font-black text-slate-800 truncate">0</p></div></div>
+            <div class="due-kpi-card bg-white rounded-none border border-slate-200 shadow-sm p-4 flex items-center gap-3"><div class="due-kpi-icon w-11 h-11 rounded-none bg-rose-100 flex items-center justify-center text-xl"><i class="fa-solid fa-receipt" aria-hidden="true"></i></div><div class="min-w-0"><p class="text-[11px] text-slate-500 font-semibold">Tiền phạt chưa thu</p><p id="kpiFines" class="text-xl font-black text-slate-800 truncate">0</p></div></div>
         </div>
         <div class="flex flex-wrap items-center justify-between gap-2">
             <h2 id="libPageTitle" class="text-lg font-black text-slate-800">Chờ soạn sách / Nạp hộc</h2>
@@ -112,6 +212,8 @@
 
         <!-- ================= TAB 1: THÔNG TIN TỦ & SOẠN ĐƠN ================= -->
         <div id="libTabContentOrders" class="space-y-6">
+          <!-- LIBRARIAN UI UPGRADE 04: Mini locker visualization; never writes Firestore -->
+          <div class="due-orders-layout">
             <section class="bg-white p-5 rounded-none border border-slate-200 shadow-sm space-y-4">
                 <div class="flex justify-between items-center border-b pb-3">
                     <div>
@@ -139,6 +241,16 @@
                     </table>
                 </div>
             </section>
+            <aside class="due-mini-locker-panel" aria-label="Sơ đồ hộc tủ thu nhỏ">
+              <div class="due-mini-locker-head">
+                <div><h3 class="font-extrabold text-sm text-[#003B7A]"><i class="fa-solid fa-table-cells-large mr-1"></i> 20 hộc tủ trực tuyến</h3>
+                <p class="text-[10px] text-slate-500 mt-1">Đồng bộ từ bảng giám sát hiện có</p></div>
+                <button type="button" class="text-[11px] font-bold text-[#0B4EA2]" onclick="switchLibTab('lockers')">Xem tất cả</button>
+              </div>
+              <div id="dueMiniLockerGrid" class="due-mini-locker-grid" role="group" aria-label="Trạng thái 20 hộc tủ"></div>
+              <div class="due-mini-legend"><span><i class="due-dot"></i>Trống</span><span><i class="due-dot wait"></i>Chờ lấy</span><span><i class="due-dot check"></i>Chờ trả / kiểm tra</span><span><i class="due-dot open"></i>Đang mở</span></div>
+            </aside>
+          </div>
         </div>
 
         <!-- ================= NGHIỆM THU TRẢ SÁCH ================= -->
@@ -200,7 +312,7 @@
                                 <option value="dang_muon">Đang mượn (Giữ sách)</option>
                                 <option value="cho_kiem_tra">Chờ kiểm tra (Đã bỏ vào tủ)</option>
                                 <option value="hoan_tat">Đã hoàn tất trả</option>
-                            </select>
+                            </select><label class="flex items-center gap-2 text-[11px] text-slate-500 font-semibold">Ngày mượn <input id="dueBorrowDate" class="due-date-filter" type="date" aria-label="Lọc theo ngày mượn" /></label><button type="button" class="due-filter-reset" onclick="document.getElementById('borrowSearchInput').value='';document.getElementById('borrowStatusFilter').value='all';document.getElementById('dueBorrowDate').value='';renderActiveBorrowsTable()"><i class="fa-solid fa-rotate-left mr-1"></i> Xóa lọc</button>
                         </div>
                     </div>
                 </div>
@@ -245,6 +357,7 @@
                 <div class="bg-slate-50 border border-slate-200 p-3 flex flex-col sm:flex-row gap-2 mb-3">
                     <input type="search" id="fineSearch" oninput="finePage=1;renderFines()" placeholder="Tìm MSSV, sách, lý do, mã biên bản..." class="flex-1 p-2 border text-xs">
                     <select id="fineStatusFilter" onchange="finePage=1;renderFines()" class="p-2 border text-xs"><option value="all">Tất cả trạng thái</option><option value="pending">Chưa thanh toán</option><option value="paid">Đã thanh toán</option></select>
+<button type="button" class="due-filter-reset" onclick="document.getElementById('fineSearch').value='';document.getElementById('fineStatusFilter').value='all';finePage=1;renderFines()"><i class="fa-solid fa-rotate-left mr-1"></i> Xóa lọc</button>
                 </div>
                 <table class="w-full text-left text-sm">
                     <thead>
@@ -296,7 +409,7 @@
                             <label class="flex items-center gap-1.5 bg-white border border-slate-200 px-2.5 py-2 rounded-none text-xs font-semibold cursor-pointer select-none hover:bg-slate-100 transition">
                                 <input type="checkbox" id="libOnlyAvailableCheck" onchange="renderFilteredLibrarianBooks()" class="accent-orange-600 rounded">
                                 <span class="hidden sm:inline">Chỉ sách</span> còn
-                            </label>
+                            </label><button type="button" class="due-filter-reset" onclick="document.getElementById('libSearchInput').value='';document.getElementById('libSortSelect').value='az';document.getElementById('libOnlyAvailableCheck').checked=false;renderFilteredLibrarianBooks()"><i class="fa-solid fa-rotate-left mr-1"></i> Xóa lọc</button>
                         </div>
                     </div>
 
@@ -1350,6 +1463,133 @@
                 alert("Lỗi khi thêm sách!");
             }
         }
+    </script>
+    <script id="dueLibrarianPresentationExtras">
+
+/* ===== DUE LIBRARIAN UI UPGRADE 04–06: Presentation adapters ONLY =====
+   Original Firebase, Auth, stock, locker, inspection and email scripts above are unchanged. */
+(function () {
+  'use strict';
+  const $ = (id) => document.getElementById(id);
+  const ready = (fn) => document.readyState === 'loading' ? document.addEventListener('DOMContentLoaded', fn) : fn();
+  ready(() => {
+    /* Mini locker matrix mirrors UI's realtime state; no new backend listener */
+    const mini = $('dueMiniLockerGrid');
+    if (mini) {
+      for (let i=1;i<=20;i++) {
+        const cell=document.createElement('div'); cell.className='due-mini-cell';cell.dataset.state='trong';
+        cell.innerHTML='<span>'+String(i).padStart(2,'0')+'</span><i class="fa-solid fa-lock" aria-hidden="true"></i>';
+        cell.title='Hộc '+String(i).padStart(2,'0')+' · Trống';mini.appendChild(cell);
+      }
+      function paintMini() {
+        // dashLockers is original dashboard data, refreshed by its existing Firestore realtime listener.
+        let lockers=[];
+        try { if (typeof dashLockers !== 'undefined' && Array.isArray(dashLockers)) lockers=dashLockers; } catch (_) {}
+        const by=new Map(lockers.map(x=>[String(x.so_hoc || ''),x]));
+        mini.querySelectorAll('.due-mini-cell').forEach((cell,i)=>{
+          const idx=i+1;
+          let name='Hộc '+String(idx).padStart(2,'0');
+          try { if (typeof App?.lockerName==='function') name=App.lockerName(idx); } catch (_) {}
+          const item=by.get(name); const state=item?.trang_thai || 'trong';
+          cell.dataset.state=state;
+          const states={trong:'Trống',cho_nhan:'Sách chờ lấy',cho_tra:'Chờ trả',chua_sach_tra:'Sách trả chờ kiểm tra',dang_mo:'Đang mở'};
+          cell.title=name+' · '+(states[state]||state);
+          cell.setAttribute('aria-label',cell.title);
+          const ico=cell.querySelector('i');if(ico)ico.className='fa-solid '+(state==='dang_mo'?'fa-lock-open':state==='trong'?'fa-lock':'fa-box');
+        });
+      }
+      // Original renderLockers() already redraws lockerGrid every snapshot.
+      const full=$('lockerGrid');
+      if(full && typeof MutationObserver!=='undefined') new MutationObserver(paintMini).observe(full,{childList:true});
+      paintMini();
+    }
+    /* Quick presets appended to per-book fields created by original openReportModal() */
+    const inspection=$('reportBookRows');
+    if(inspection && typeof MutationObserver!=='undefined') {
+      const addPresets=()=>{
+        inspection.querySelectorAll('[id^="reportDamageFields"]').forEach(panel=>{
+          if(panel.querySelector('.due-damage-presets'))return;
+          const index=panel.id.replace('reportDamageFields','');
+          if(!/^\d+$/.test(index))return;
+          const input=$('reportFine'+index),reason=$('reportReason'+index);
+          if(!input||!reason)return;
+          const row=document.createElement('div');row.className='due-damage-presets';
+          row.innerHTML='<span class="due-mini-label" style="width:100%;margin-bottom:2px">Mức độ hư hỏng · Gợi ý</span>'+
+            '<button type="button" class="due-preset-button" data-due-preset="cover">Rách bìa · 20.000đ</button>'+
+            '<button type="button" class="due-preset-button" data-due-preset="pages">Vẽ bẩn / Mất trang · 50.000đ</button>'+
+            '<button type="button" class="due-preset-button" data-due-preset="lost">Mất sách · Nhập giá bìa</button>'+
+            '<small class="due-preset-note">Mức tiền chỉ để thao tác nhanh, không thay thế quy định bồi thường của thư viện. Thủ thư cần kiểm tra và xác nhận.</small>';
+          const label=panel.querySelector('label');if(label)label.before(row);else panel.prepend(row);
+          row.addEventListener('click',e=>{
+            const btn=e.target.closest('[data-due-preset]'); if(!btn)return;
+            const choice=btn.dataset.duePreset;
+            if(choice==='cover'){input.value='20000';reason.value='Rách bìa';}
+            if(choice==='pages'){input.value='50000';reason.value='Vẽ bẩn hoặc mất trang';}
+            if(choice==='lost'){input.value='';reason.value='Mất sách – bồi thường theo giá bìa; cần xác minh số tiền';input.focus();}
+            input.dispatchEvent(new Event('input',{bubbles:true}));
+            reason.dispatchEvent(new Event('input',{bubbles:true}));
+          });
+        });
+      };
+      const mo=new MutationObserver(addPresets);mo.observe(inspection,{childList:true,subtree:false});addPresets();
+    }
+    /* Empty-state illustration when no rendered rows. Never inserts business data. */
+    for (const [id,title] of [
+      ['ordersTableBody','Tất cả đơn đã được xử lý xong!'],
+      ['inspectTableBody','Hiện không có sách cần nghiệm thu'],
+      ['activeBorrowsTableBody','Chưa có giao dịch phù hợp'],
+      ['finesTableBody','Không có biên bản trong bộ lọc này']
+    ]) {
+      const tbody=$(id);if(!tbody)continue;
+      const host=tbody.closest('.overflow-x-auto')||tbody.closest('section');if(!host)continue;
+      let empty=host.querySelector('[data-due-empty-for="'+id+'"]');
+      if(!empty){empty=document.createElement('div');empty.className='due-empty-state hidden';empty.dataset.dueEmptyFor=id;
+        empty.innerHTML='<span class="due-empty-ico"><i class="fa-regular fa-folder-open" aria-hidden="true"></i></span><strong>'+title+'</strong><span class="text-xs">Dữ liệu sẽ hiển thị tự động khi có giao dịch mới.</span>';
+        (tbody.closest('table')||tbody).after(empty);}
+      let updating=false;
+      const refresh=()=>{
+        if(updating)return;updating=true;
+        const tr=Array.from(tbody.querySelectorAll(':scope > tr'));
+        const hasReal=tr.some(r=>r.querySelectorAll('td').length>1 || r.querySelector('button') || r.querySelector('a'));
+        empty.classList.toggle('hidden',hasReal);
+        // Hide simple empty placeholder rows; don't touch business rows.
+        tr.forEach(r=>{if(!hasReal && r.querySelectorAll('td').length===1)r.style.display='none';else r.style.display='';});
+        updating=false;
+      };
+      new MutationObserver(refresh).observe(tbody,{childList:true});refresh();
+    }
+    /* Date filter: presentation-level filter for borrow table rows, does not alter query or data */
+    const date=$('dueBorrowDate'),borrowBody=$('activeBorrowsTableBody');
+    if(date&&borrowBody){
+      function filterByDate(){
+        const value=date.value;
+        const key=value?value.split('-').reverse().join('/'):'';
+        const alt=value;
+        const rows=borrowBody.querySelectorAll(':scope > tr');
+        rows.forEach(r=>{r.hidden=Boolean(key) && !r.textContent.includes(key) && !r.textContent.includes(alt);});
+      }
+      date.addEventListener('change',filterByDate);
+      new MutationObserver(filterByDate).observe(borrowBody,{childList:true});
+    }
+    /* Toast adapter: native alert is replaced for status notifications; App.confirm remains untouched. */
+    const stack=document.createElement('div');stack.id='dueLibToastStack';stack.setAttribute('aria-live','polite');document.body.appendChild(stack);
+    const nativeAlert=window.alert.bind(window);
+    window.alert=function(message){
+      if(!stack || !document.body)return nativeAlert(message);
+      const m=String(message??'');const bad=/lỗi|không thể|thất bại|không hợp lệ|sai |hết sách|thiếu/i.test(m);
+      const warn=!bad && /chưa|cảnh báo|quá hạn|nợ/i.test(m);
+      const toast=document.createElement('div');toast.className='due-lib-toast '+(bad?'is-error':warn?'is-warn':'is-success');toast.setAttribute('role',bad?'alert':'status');
+      const icon=document.createElement('i');icon.className='fa-solid '+(bad?'fa-circle-xmark text-rose-500':warn?'fa-triangle-exclamation text-amber-500':'fa-circle-check text-emerald-600');icon.style.marginTop='2px';
+      const label=document.createElement('span');label.textContent=m;label.style.whiteSpace='pre-line';label.style.flex='1';
+      const close=document.createElement('button');close.type='button';close.className='due-toast-dismiss';close.setAttribute('aria-label','Đóng thông báo');close.textContent='×';
+      toast.append(icon,label,close);stack.prepend(toast);
+      const remove=()=>{toast.remove()};close.addEventListener('click',remove);
+      setTimeout(remove,bad?8500:6000);
+      while(stack.childElementCount>4)stack.lastElementChild.remove();
+    };
+  });
+})();
+
     </script>
 </body>
 </html>
