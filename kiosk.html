@@ -200,6 +200,101 @@
         .due-kiosk-ui .kiosk-action span { font-size:12px!important; }
         .due-kiosk-ui .kiosk-action small { font-size:9px!important; }
       }
+
+      /* KIOSK UI FIX 08–12: fit-screen layout, square camera guide, overlay keypad.
+         Không đổi JavaScript nghiệp vụ, ID hoặc class liên kết hiện có. */
+      html, body.due-kiosk-ui { height:100%; margin:0; }
+      body.due-kiosk-ui { height:100vh; height:100dvh; min-height:0!important; overflow:hidden!important; display:flex; flex-direction:column; }
+      .due-kiosk-ui *, .due-kiosk-ui *::before, .due-kiosk-ui *::after { box-sizing:border-box; }
+      .due-kiosk-ui .kiosk-header { flex:0 0 69px; height:69px; min-height:0!important; padding:8px 20px!important; }
+      .due-kiosk-ui .kiosk-header img { height:40px!important; }
+      .due-kiosk-ui .kiosk-header h1 { font-size:clamp(15px,1.4vw,19px)!important; }
+      .due-kiosk-ui .kiosk-main { flex:1 1 0!important; min-height:0; height:auto; overflow:hidden; width:100%; max-width:1640px!important; padding:12px 16px 8px!important; gap:14px!important; align-items:stretch!important; grid-template-rows:minmax(0,1fr); }
+      .due-kiosk-ui .kiosk-main > div:first-child { min-height:0; height:100%; display:flex; flex-direction:column; gap:9px!important; overflow-y:auto; overflow-x:hidden; scrollbar-width:thin; }
+      .due-kiosk-ui .kiosk-panel { min-height:0; }
+      .due-kiosk-ui .kiosk-scan-panel { flex:0 0 auto; display:flex; flex-direction:column; gap:9px!important; padding:13px!important; }
+      .due-kiosk-ui .kiosk-scan-panel h2 { font-size:16px!important; margin:0!important; line-height:1.3!important; }
+      .due-kiosk-ui .kiosk-action-grid { order:0; margin:0!important; padding:0!important; gap:10px!important; }
+      .due-kiosk-ui .kiosk-action { min-height:60px!important; height:60px!important; padding:9px 15px!important; flex-direction:row!important; flex-wrap:nowrap!important; justify-content:center!important; align-items:center!important; gap:10px!important; font-size:15px!important; border-radius:13px!important; }
+      .due-kiosk-ui .kiosk-action i { font-size:22px!important; width:auto!important; }
+      .due-kiosk-ui .kiosk-action span { font-size:15px!important; white-space:nowrap; }
+      .due-kiosk-ui .kiosk-action small { display:none!important; }
+      .due-kiosk-ui .kiosk-camera-frame { order:1; aspect-ratio:16/9!important; flex:0 0 auto; width:min(100%,497px); max-width:100%; height:auto!important; min-height:280px!important; max-height:280px; margin-inline:auto; position:relative; border-radius:14px!important; }
+      .due-kiosk-ui .kiosk-camera-frame #reader { position:absolute; inset:0; width:100%; height:100%; overflow:hidden; z-index:1; }
+      .due-kiosk-ui .kiosk-camera-frame #reader video { max-height:100%!important; object-fit:cover!important; }
+      .due-kiosk-ui .kiosk-camera-frame #reader img { max-height:100%; object-fit:contain; }
+      .due-kiosk-ui #camModeBadge { z-index:5!important; }
+      .due-kiosk-ui .due-scan-target { position:absolute; left:50%; top:50%; width:190px; height:190px; aspect-ratio:1/1; transform:translate(-50%,-50%); pointer-events:none; z-index:4; display:grid; place-items:center; }
+      .due-kiosk-ui .due-scan-corner { position:absolute; width:35px; height:35px; border-color:#fff; border-style:solid; border-width:0; filter:drop-shadow(0 0 3px rgba(0,0,0,.65)); }
+      .due-kiosk-ui .due-scan-corner.tl { top:0; left:0; border-top-width:5px; border-left-width:5px; border-top-left-radius:5px; }
+      .due-kiosk-ui .due-scan-corner.tr { top:0; right:0; border-top-width:5px; border-right-width:5px; border-top-right-radius:5px; }
+      .due-kiosk-ui .due-scan-corner.bl { bottom:0; left:0; border-bottom-width:5px; border-left-width:5px; border-bottom-left-radius:5px; }
+      .due-kiosk-ui .due-scan-corner.br { bottom:0; right:0; border-bottom-width:5px; border-right-width:5px; border-bottom-right-radius:5px; }
+      .due-kiosk-ui .due-scan-placeholder { font-size:30px; color:#e3ecf6; text-shadow:0 2px 12px #001b36; opacity:.85; }
+      .due-kiosk-ui .due-scan-laser { position:absolute; left:14px; right:14px; top:18px; height:2px; background:#22d3ee; box-shadow:0 0 9px #22d3ee; animation:due-scan-sweep 2.5s ease-in-out infinite alternate; }
+      @keyframes due-scan-sweep { from {transform:translateY(0)} to {transform:translateY(150px)} }
+      .due-kiosk-ui .kiosk-camera-frame:has(#reader video) .due-scan-placeholder { opacity:0; }
+      .due-kiosk-ui .kiosk-scan-panel > .space-y-3 { order:2; display:flex; flex-direction:column; gap:6px!important; }
+      .due-kiosk-ui .kiosk-scan-panel > .space-y-3 > .kiosk-field-label { font-size:11px!important; }
+      .due-kiosk-ui .kiosk-input-shell { gap:7px!important; }
+      .due-kiosk-ui #manualInput { height:48px!important; min-height:48px!important; font-family:ui-monospace,SFMono-Regular,Consolas,monospace!important; font-size:16px!important; padding:8px 10px!important; }
+      .due-kiosk-ui .kiosk-clear { height:48px!important; min-width:48px!important; }
+      .due-kiosk-ui .kiosk-keypad.is-collapsed { margin:0!important; padding:0!important; border:0!important; background:transparent!important; border-radius:0!important; }
+      .due-kiosk-ui .kiosk-keypad.is-collapsed .kiosk-keypad-head { margin:0!important; }
+      .due-kiosk-ui .kiosk-keypad.is-collapsed #dueKeypadToggle { min-height:34px; }
+      .due-kiosk-ui .due-keypad-backdrop { display:none; }
+      .due-kiosk-ui:has(#dueKeypadPanel:not(.is-collapsed)) .due-keypad-backdrop { display:block; position:fixed; inset:0; background:rgba(8,25,46,.54); z-index:85; }
+      .due-kiosk-ui .kiosk-keypad:not(.is-collapsed) { position:fixed!important; z-index:86; bottom:clamp(12px,3vh,25px); left:50%; transform:translateX(-50%); width:min(420px,calc(100vw - 28px)); max-height:calc(100dvh - 50px); overflow-y:auto; margin:0!important; padding:17px!important; border:1px solid #cedeed!important; border-radius:20px!important; background:#f4f8fd!important; box-shadow:0 24px 90px rgba(0,21,54,.34)!important; }
+      .due-kiosk-ui .kiosk-keypad:not(.is-collapsed) .kiosk-keypad-head { margin-bottom:12px!important; }
+      .due-kiosk-ui .kiosk-keypad:not(.is-collapsed) .kiosk-keys { margin-top:8px!important; }
+      .due-kiosk-ui .kiosk-keypad:not(.is-collapsed) .kiosk-key { min-height:44px!important; }
+      .due-kiosk-ui .kiosk-lockers-panel { height:100%; min-height:0; display:flex; flex-direction:column; overflow:hidden; padding:15px!important; }
+      .due-kiosk-ui .kiosk-lockers-title { flex:0 0 auto; margin-bottom:10px!important; }
+      .due-kiosk-ui #lockersGrid { flex:1 1 0; min-height:0; height:100%; display:grid!important; grid-template-columns:repeat(5,minmax(0,1fr))!important; grid-template-rows:repeat(4,minmax(0,1fr)); gap:8px!important; }
+      .due-kiosk-ui #lockersGrid > div { min-height:0!important; height:100%!important; max-height:none; display:flex; flex-direction:column; align-items:center; justify-content:center; gap:2px; overflow:hidden; padding:5px 2px!important; }
+      .due-kiosk-ui #lockersGrid > div > i { font-size:clamp(16px,1.6vw,23px)!important; }
+      .due-kiosk-ui #lockersGrid > div > span:nth-of-type(1) { font-size:clamp(11px,1vw,14px)!important; }
+      .due-kiosk-ui #lockersGrid > div > span:nth-of-type(2) { font-size:clamp(8px,.72vw,10px)!important; }
+      .due-kiosk-ui .due-kiosk-footer { height:52px; min-height:52px; flex:0 0 52px; width:100%; display:flex; align-items:center; justify-content:center; gap:16px; padding:6px 18px; border-top:1px solid #d9e5f1; background:#fff; }
+      .due-kiosk-ui .due-step-label { color:#64748b; font-size:10px; font-weight:800; letter-spacing:.08em; }
+      .due-kiosk-ui #kioskSteps { flex:0 1 750px; width:min(100%,750px); display:flex!important; justify-content:center; flex-wrap:nowrap!important; min-width:0; padding:5px 12px!important; border-radius:11px!important; background:#f6f9fc; }
+      .due-kiosk-ui #kioskSteps > div { min-width:0; white-space:nowrap; font-size:11px!important; }
+      .due-kiosk-ui #kioskSteps > div > span:first-child { width:24px!important; height:24px!important; flex:0 0 24px; }
+      .due-kiosk-ui #kioskSteps .text-slate-500 { color:#60748e!important; }
+      .due-kiosk-ui #statusBox { flex:0 0 auto; padding:10px!important; font-size:11px!important; }
+      .due-kiosk-ui #returnSession { flex:0 0 auto; padding:12px!important; border-radius:14px!important; }
+      .due-kiosk-ui #returnSession #retRows { max-height:150px; overflow-y:auto; }
+      .due-kiosk-ui #kioskLogoutBtnContainer { bottom:58px!important; }
+      /* Strict one-viewport shell for desktop kiosk 16:9. Internal exception content may scroll within its column. */
+      @media (min-width:1024px) and (max-height:820px) {
+        .due-kiosk-ui .kiosk-header { flex-basis:62px; height:62px; }
+        .due-kiosk-ui .kiosk-main { padding:9px 14px 6px!important; gap:12px!important; }
+        .due-kiosk-ui .kiosk-scan-panel { padding:10px 12px!important; gap:7px!important; }
+        .due-kiosk-ui .kiosk-camera-frame { width:min(100%,480px); min-height:270px!important; max-height:270px; }
+        .due-kiosk-ui .due-kiosk-footer { flex-basis:46px; height:46px; min-height:46px; }
+      }
+      @media (max-width:1023px) {
+        .due-kiosk-ui .kiosk-header { min-height:62px!important; height:auto; flex-basis:auto; }
+        .due-kiosk-ui .kiosk-main { overflow-y:auto; display:grid; grid-template-columns:1fr; grid-template-rows:auto auto; }
+        .due-kiosk-ui .kiosk-main > div:first-child { overflow:visible; height:auto; }
+        .due-kiosk-ui .kiosk-lockers-panel { height:auto; min-height:420px; }
+        .due-kiosk-ui #lockersGrid { min-height:355px; }
+        .due-kiosk-ui .kiosk-camera-frame { width:min(100%,497px); min-height:280px!important; max-height:280px; }
+      }
+      @media (max-width:620px) {
+        .due-kiosk-ui .kiosk-header .kiosk-legend { display:none; }
+        .due-kiosk-ui .due-step-label { display:none; }
+        .due-kiosk-ui #kioskSteps { padding:3px!important; gap:3px!important; }
+        .due-kiosk-ui #kioskSteps > div { font-size:9px!important; gap:3px!important; }
+        .due-kiosk-ui #kioskSteps > div > span:first-child { width:18px!important; height:18px!important; flex-basis:18px; }
+        .due-kiosk-ui .kiosk-action { padding:7px!important; gap:4px!important; }
+        .due-kiosk-ui .kiosk-action span { font-size:12px!important; }
+        .due-kiosk-ui .kiosk-action i { font-size:17px!important; }
+        .due-kiosk-ui .kiosk-camera-frame { max-width:100%; min-height:240px!important; max-height:240px; }
+        .due-kiosk-ui .due-scan-target { width:180px; height:180px; }
+        .due-kiosk-ui .due-scan-laser { animation:none; }
+      }
+      @media (prefers-reduced-motion:reduce) { .due-kiosk-ui .due-scan-laser { animation:none; } }
     </style>
 </head>
 <body class="bg-slate-900 text-white min-h-screen flex flex-col font-sans due-kiosk-ui">
@@ -267,10 +362,27 @@
                     <i class="fa-solid fa-qrcode"></i> QUÉT MÃ NHẬN / TRẢ SÁCH
                 </h2>
                 
+                <!-- KIOSK UI FIX 08: Chọn Nhận/Trả trước camera. Giữ nguyên onclick gốc. -->
+                    <div class="grid grid-cols-2 gap-3 pt-2 kiosk-action-grid">
+                        <button onclick="handlePickup()" class="py-3 bg-orange-600 hover:bg-orange-500 font-bold text-sm rounded-none transition flex items-center justify-center gap-2 shadow-sm kiosk-action kiosk-action--pickup">
+                            <i class="fa-solid fa-box-open"></i><span>NHẬN SÁCH</span><small>Quét QR để lấy sách</small>
+                        </button>
+                        <button onclick="handleReturn()" class="py-3 bg-blue-600 hover:bg-blue-500 font-bold text-sm rounded-none transition flex items-center justify-center gap-2 shadow-sm kiosk-action kiosk-action--return">
+                            <i class="fa-solid fa-arrow-right-to-bracket"></i><span>TRẢ SÁCH</span><small>Quét mã để gửi trả</small>
+                        </button>
+                    </div>
+
                 <!-- Khung camera -->
                 <div class="relative bg-black rounded-none overflow-hidden aspect-video border border-slate-600 flex items-center justify-center kiosk-camera-frame">
                     <div id="camModeBadge" class="absolute top-2 left-2 z-10 px-2.5 py-1 text-[11px] font-bold text-white bg-orange-600">CHẾ ĐỘ: QUÉT MÃ QR</div>
                     <div id="reader" class="w-full h-full"></div>
+                    <!-- KIOSK UI FIX 09: Lớp ngắm vuông 190x190, không chặn tương tác camera. -->
+                    <div class="due-scan-target" aria-hidden="true">
+                      <span class="due-scan-corner tl"></span><span class="due-scan-corner tr"></span>
+                      <span class="due-scan-corner bl"></span><span class="due-scan-corner br"></span>
+                      <i class="fa-solid fa-camera due-scan-placeholder"></i>
+                      <span class="due-scan-laser"></span>
+                    </div>
                 </div>
 
                 <div class="space-y-3">
@@ -281,6 +393,7 @@
                         <button class="kiosk-clear" type="button" id="dueClearCode" aria-label="Xóa toàn bộ mã"><i class="fa-solid fa-xmark"></i></button>
                     </div>
                     <!-- KIOSK UI UPGRADE 03: Touch keypad. Original #manualInput and handlePickup / handleReturn are unchanged. -->
+                    <div id="dueKeypadBackdrop" class="due-keypad-backdrop" aria-hidden="true"></div>
                     <div class="kiosk-keypad is-collapsed" id="dueKeypadPanel">
                       <div class="kiosk-keypad-head"><span><i class="fa-solid fa-keyboard mr-1"></i> Bàn phím cảm ứng</span><button type="button" class="kiosk-keypad-toggle" id="dueKeypadToggle" aria-controls="dueKeypadKeys" aria-expanded="false">Mở bàn phím <i class="fa-solid fa-chevron-down"></i></button></div>
                       <div class="kiosk-keys" id="dueKeypadKeys">
@@ -293,14 +406,7 @@
                       </div>
                       <p class="kiosk-keypad-help" style="font-size:11px;color:#57738b;margin-top:10px;line-height:1.5">Mã có chữ: chạm vào ô phía trên để dùng bàn phím thiết bị. Khi đang đối soát sách trả, nút Xác nhận sẽ kiểm tra mã vạch.</p>
                     </div>
-                    <div class="grid grid-cols-2 gap-3 pt-2 kiosk-action-grid">
-                        <button onclick="handlePickup()" class="py-3 bg-orange-600 hover:bg-orange-500 font-bold text-sm rounded-none transition flex items-center justify-center gap-2 shadow-sm kiosk-action kiosk-action--pickup">
-                            <i class="fa-solid fa-box-open"></i><span>NHẬN SÁCH</span><small>Quét QR để lấy sách</small>
-                        </button>
-                        <button onclick="handleReturn()" class="py-3 bg-blue-600 hover:bg-blue-500 font-bold text-sm rounded-none transition flex items-center justify-center gap-2 shadow-sm kiosk-action kiosk-action--return">
-                            <i class="fa-solid fa-arrow-right-to-bracket"></i><span>TRẢ SÁCH</span><small>Quét mã để gửi trả</small>
-                        </button>
-                    </div>
+
                 </div>
             </div>
 
@@ -358,7 +464,6 @@
         </div>
 
             <!-- Bảng hiển thị thông báo kết quả -->
-            <div id="kioskSteps" class="flex items-center gap-2" aria-label="Tiến trình giao dịch"></div>
             <div id="statusBox" role="status" aria-live="polite" class="hidden p-4 rounded-none border text-sm font-medium"></div>
         </div>
 
@@ -373,6 +478,12 @@
             </div>
         </div>
     </div>
+
+    <!-- KIOSK UI FIX 10: Stepper nằm riêng ở chân trang, không tràn cột trái. -->
+    <footer class="due-kiosk-footer" aria-label="Tiến trình xử lý">
+      <div class="due-step-label">QUY TRÌNH</div>
+      <div id="kioskSteps" class="flex items-center gap-2" aria-label="Tiến trình giao dịch"></div>
+    </footer>
 
     <script>
         const $ = (id) => document.getElementById(id);
@@ -875,6 +986,17 @@
         toggle.setAttribute('aria-expanded', String(!collapsed));
         toggle.innerHTML = collapsed ? 'Mở bàn phím <i class="fa-solid fa-chevron-down"></i>' : 'Thu gọn <i class="fa-solid fa-chevron-up"></i>';
       });
+    })();
+    </script>
+    <!-- KIOSK UI FIX 12: Chỉ đóng bàn phím nổi; không can thiệp vào các hàm nghiệp vụ. -->
+    <script id="due-kiosk-sheet-close">
+    (() => {
+      const backdrop = document.getElementById('dueKeypadBackdrop');
+      const panel = document.getElementById('dueKeypadPanel');
+      const toggle = document.getElementById('dueKeypadToggle');
+      const dismiss = () => { if (panel && !panel.classList.contains('is-collapsed')) toggle?.click(); };
+      backdrop?.addEventListener('click', dismiss);
+      document.addEventListener('keydown', e => { if (e.key === 'Escape') dismiss(); });
     })();
     </script>
 </body>
