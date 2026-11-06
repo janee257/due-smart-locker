@@ -90,22 +90,7 @@ body.due-librarian-ui{font-family:'Be Vietnam Pro',Inter,system-ui,sans-serif;ba
 /* Badge styles for injected dynamic statuses remain CSS-only, no status text replacement */
 .due-librarian-ui main tbody [class*="bg-amber-"],.due-librarian-ui main tbody [class*="bg-orange-"]{border-radius:999px!important}
 .due-librarian-ui main tbody [class*="bg-blue-"],.due-librarian-ui main tbody [class*="bg-emerald-"],.due-librarian-ui main tbody [class*="bg-rose-"]{border-radius:999px!important}
-/* ===== UPGRADE 04: Mini locker live matrix alongside orders ===== */
-.due-librarian-ui .due-orders-layout{display:grid;grid-template-columns:minmax(0,1fr) 292px;gap:16px;align-items:start}
-.due-librarian-ui .due-orders-layout>section{min-width:0}
-.due-librarian-ui .due-mini-locker-panel{padding:18px;border:1px solid #dce7f4;border-radius:18px;background:#fff;box-shadow:0 6px 20px rgba(18,49,92,.05);position:sticky;top:86px}
-.due-librarian-ui .due-mini-locker-head{display:flex;align-items:flex-start;justify-content:space-between;gap:8px;margin-bottom:14px}
-.due-librarian-ui .due-mini-locker-grid{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:6px}
-.due-librarian-ui .due-mini-cell{min-height:41px;border-radius:9px;border:1px solid #cad7e7;background:#f6f9fd;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:1px;font-weight:800;font-size:12px;color:#355673;position:relative}
-.due-librarian-ui .due-mini-cell i{font-size:9px}
-.due-librarian-ui .due-mini-cell[data-state="trong"]{color:#047857;background:#edfcf6;border-color:#b7ecd5}
-.due-librarian-ui .due-mini-cell[data-state="cho_nhan"]{color:#ae6800;background:#fff7e4;border-color:#f3d694}
-.due-librarian-ui .due-mini-cell[data-state="cho_tra"],.due-librarian-ui .due-mini-cell[data-state="chua_sach_tra"]{color:#1d5fbd;background:#edf5ff;border-color:#bbd4fa}
-.due-librarian-ui .due-mini-cell[data-state="dang_mo"]{color:#ad2b57;background:#fff0f4;border-color:#e9a6b9}
-.due-librarian-ui .due-mini-legend{display:flex;flex-wrap:wrap;gap:8px;font-size:10px;color:#587188;margin-top:13px}
-.due-librarian-ui .due-mini-legend span{display:inline-flex;align-items:center;gap:4px}
-.due-librarian-ui .due-dot{display:inline-block;width:7px;height:7px;border-radius:50%;background:#10b981}
-.due-librarian-ui .due-dot.wait{background:#f59e0b}.due-librarian-ui .due-dot.check{background:#3b82f6}.due-librarian-ui .due-dot.open{background:#ef476f}
+/* ===== UPGRADE 04: Orders table uses the entire workspace ===== */
 /* ===== UPGRADE 05: Inspection modal, quick amounts, empty state ===== */
 .due-librarian-ui #reportModal>div{border-radius:22px;max-width:760px;max-height:min(88dvh,850px);border:1px solid #dce8f3}
 .due-librarian-ui #reportBookRows>div{background:#f8fbff;border-radius:14px;border:1px solid #dae6f3;padding:17px}
@@ -125,11 +110,75 @@ body.due-librarian-ui{font-family:'Be Vietnam Pro',Inter,system-ui,sans-serif;ba
 .due-lib-toast.is-success{border-left:4px solid #10b981}.due-lib-toast.is-error{border-left:4px solid #e34c63}.due-lib-toast.is-warn{border-left:4px solid #f59e0b}
 .due-lib-toast .due-toast-dismiss{color:#72859a;flex-shrink:0;border:0;background:none;font-size:16px;margin-left:auto}
 @keyframes dueToastIn{from{opacity:0;transform:translateX(14px)}to{opacity:1;transform:none}}
-@media(max-width:1360px){.due-librarian-ui .due-orders-layout{grid-template-columns:minmax(0,1fr) 250px}.due-librarian-ui .due-mini-locker-panel{padding:12px}}
-@media(max-width:1150px){.due-librarian-ui .due-orders-layout{grid-template-columns:1fr}.due-librarian-ui .due-mini-locker-panel{position:static}.due-librarian-ui .due-mini-locker-grid{grid-template-columns:repeat(10,minmax(0,1fr))}}
 @media(max-width:767px){.due-librarian-ui .dash-main main{padding:18px 12px}.due-librarian-ui .dash-topbar{padding:0 14px;height:58px}.due-librarian-ui .due-kpi-card{padding:14px!important;min-height:95px}.due-librarian-ui .due-kpi-card [id^="kpi"]{font-size:23px}.due-librarian-ui .due-kpi-card .due-kpi-icon{width:39px;height:39px;font-size:16px}.due-librarian-ui main section.bg-white{padding:15px!important}.due-librarian-ui .due-mini-locker-grid{grid-template-columns:repeat(5,minmax(0,1fr))}}
 
-    </style>
+    
+/* ===== LIBRARIAN UI UPGRADE 07: Full-width, no-horizontal-scroll order list ===== */
+.due-librarian-ui #libTabContentOrders,
+.due-librarian-ui #libTabContentOrders .due-orders-fullwidth,
+.due-librarian-ui #libTabContentOrders .due-orders-card{width:100%;max-width:100%;min-width:0}
+.due-librarian-ui #libTabContentOrders .due-orders-fullwidth{display:block}
+.due-librarian-ui #libTabContentOrders .due-orders-card{border-radius:16px;padding:clamp(14px,1.6vw,24px)}
+.due-librarian-ui #libTabContentOrders .due-orders-table-wrap{width:100%;overflow-x:visible!important;min-width:0}
+.due-librarian-ui #libTabContentOrders .due-orders-table{width:100%;table-layout:fixed;border-collapse:separate;border-spacing:0}
+.due-librarian-ui #libTabContentOrders .due-orders-table th,
+.due-librarian-ui #libTabContentOrders .due-orders-table td{padding:12px 10px;min-width:0;overflow-wrap:anywhere;word-break:normal;vertical-align:middle}
+.due-librarian-ui #libTabContentOrders .due-orders-table th{background:#eff5fc;color:#385a82;font-weight:800;font-size:11px;letter-spacing:.035em;line-height:1.4}
+.due-librarian-ui #libTabContentOrders .due-orders-table th:first-child{border-top-left-radius:10px}
+.due-librarian-ui #libTabContentOrders .due-orders-table th:last-child{border-top-right-radius:10px}
+/* 6 columns: locker, student, book/shelf, schedule, status, actions */
+.due-librarian-ui #libTabContentOrders .due-orders-table th:nth-child(1){width:13%}
+.due-librarian-ui #libTabContentOrders .due-orders-table th:nth-child(2){width:16%}
+.due-librarian-ui #libTabContentOrders .due-orders-table th:nth-child(3){width:29%}
+.due-librarian-ui #libTabContentOrders .due-orders-table th:nth-child(4){width:13%;text-align:center}
+.due-librarian-ui #libTabContentOrders .due-orders-table th:nth-child(5){width:12%;text-align:center}
+.due-librarian-ui #libTabContentOrders .due-orders-table th:nth-child(6){width:17%;text-align:right}
+.due-librarian-ui #libTabContentOrders .due-orders-table td:nth-child(3) .flex{flex-wrap:wrap;gap:6px;align-items:center}
+.due-librarian-ui #libTabContentOrders .due-orders-table td:nth-child(3) .font-bold{min-width:0;overflow-wrap:anywhere;line-height:1.5}
+.due-librarian-ui #libTabContentOrders .due-orders-table td:nth-child(3) span[class*="font-mono"]{white-space:normal;overflow-wrap:anywhere;flex-shrink:1;border-radius:7px}
+.due-librarian-ui #libTabContentOrders .due-orders-table td:nth-child(4){text-align:center;white-space:normal}
+.due-librarian-ui #libTabContentOrders .due-orders-table td:nth-child(5){text-align:center;white-space:normal}
+.due-librarian-ui #libTabContentOrders .due-orders-table td:nth-child(5)>span{display:inline-flex;white-space:normal;justify-content:center;max-width:100%;border-radius:999px}
+.due-librarian-ui #libTabContentOrders .due-orders-table td:nth-child(6){white-space:normal!important;text-align:right;font-size:0;line-height:1.2}
+.due-librarian-ui #libTabContentOrders .due-orders-table td:nth-child(6)>button{min-height:36px;padding:8px 10px;margin:3px 0 3px 6px;line-height:1.2;border-radius:8px;font-size:11px;white-space:normal;max-width:100%;transition:background .15s ease,transform .15s ease}
+.due-librarian-ui #libTabContentOrders .due-orders-table td:nth-child(6)>button:hover{transform:translateY(-1px)}
+/* Existing JS still inserts the real functional toolbar immediately before the table. */
+.due-librarian-ui #libTabContentOrders #orderToolbar{display:grid!important;grid-template-columns:minmax(220px,2.3fr) repeat(3,minmax(118px,1fr)) auto;gap:10px;align-items:center;min-width:0}
+.due-librarian-ui #libTabContentOrders #orderToolbar>*{box-sizing:border-box;min-width:0!important;width:100%;height:40px;border:1px solid #d5e1ee;border-radius:9px;background:#f8fbff;color:#29425e;font-size:12px;padding:8px 11px;outline-offset:2px}
+.due-librarian-ui #libTabContentOrders #orderToolbar #orderSearch{flex:initial}
+.due-librarian-ui #libTabContentOrders #orderToolbar #orderReset{width:auto;white-space:nowrap;background:#e7f0fc;color:#003B7A;border-color:#c9dcf4;font-weight:800}
+.due-librarian-ui #libTabContentOrders #ordersPager{gap:12px;flex-wrap:wrap}
+@media(max-width:1350px){
+ .due-librarian-ui #libTabContentOrders #orderToolbar{grid-template-columns:minmax(190px,2fr) repeat(2,minmax(105px,1fr)) auto}
+ .due-librarian-ui #libTabContentOrders #orderToolbar #orderSort{grid-column:2}
+ .due-librarian-ui #libTabContentOrders #orderToolbar #orderReset{grid-column:4}
+}
+@media(max-width:1050px){
+ .due-librarian-ui #libTabContentOrders #orderToolbar{grid-template-columns:repeat(2,minmax(0,1fr))}
+ .due-librarian-ui #libTabContentOrders #orderToolbar #orderSearch{grid-column:1/-1}
+ .due-librarian-ui #libTabContentOrders #orderToolbar #orderSort,.due-librarian-ui #libTabContentOrders #orderToolbar #orderReset{grid-column:auto}
+ .due-librarian-ui #libTabContentOrders .due-orders-table th,.due-librarian-ui #libTabContentOrders .due-orders-table td{padding:9px 6px;font-size:11px}
+ .due-librarian-ui #libTabContentOrders .due-orders-table th:nth-child(1){width:13%}
+ .due-librarian-ui #libTabContentOrders .due-orders-table th:nth-child(2){width:16%}
+ .due-librarian-ui #libTabContentOrders .due-orders-table th:nth-child(3){width:28%}
+ .due-librarian-ui #libTabContentOrders .due-orders-table th:nth-child(4){width:14%}
+ .due-librarian-ui #libTabContentOrders .due-orders-table th:nth-child(5){width:13%}
+ .due-librarian-ui #libTabContentOrders .due-orders-table th:nth-child(6){width:16%}
+ .due-librarian-ui #libTabContentOrders .due-orders-table td:nth-child(6)>button{margin:3px 0 3px 3px;padding:7px;font-size:10px}
+}
+@media(max-width:680px){
+ .due-librarian-ui #libTabContentOrders #orderToolbar{grid-template-columns:1fr 1fr}
+ .due-librarian-ui #libTabContentOrders #orderToolbar #orderSearch{grid-column:1/-1}
+ .due-librarian-ui #libTabContentOrders .due-orders-table{font-size:10px}
+ .due-librarian-ui #libTabContentOrders .due-orders-table th,.due-librarian-ui #libTabContentOrders .due-orders-table td{padding:7px 3px;font-size:10px}
+ .due-librarian-ui #libTabContentOrders .due-orders-table th:nth-child(1){width:12%}
+ .due-librarian-ui #libTabContentOrders .due-orders-table th:nth-child(2){width:17%}
+ .due-librarian-ui #libTabContentOrders .due-orders-table th:nth-child(3){width:30%}
+ .due-librarian-ui #libTabContentOrders .due-orders-table th:nth-child(4){width:13%}
+ .due-librarian-ui #libTabContentOrders .due-orders-table th:nth-child(5){width:13%}
+ .due-librarian-ui #libTabContentOrders .due-orders-table th:nth-child(6){width:15%}
+}
+</style>
 </head>
 <body class="due-librarian-ui bg-slate-100 min-h-screen text-slate-800 font-sans pb-16">
 
@@ -212,9 +261,9 @@ body.due-librarian-ui{font-family:'Be Vietnam Pro',Inter,system-ui,sans-serif;ba
 
         <!-- ================= TAB 1: THÔNG TIN TỦ & SOẠN ĐƠN ================= -->
         <div id="libTabContentOrders" class="space-y-6">
-          <!-- LIBRARIAN UI UPGRADE 04: Mini locker visualization; never writes Firestore -->
-          <div class="due-orders-layout">
-            <section class="bg-white p-5 rounded-none border border-slate-200 shadow-sm space-y-4">
+          <!-- LIBRARIAN UI UPGRADE 04: Full-width orders workspace; no mini-locker duplication -->
+          <div class="due-orders-layout due-orders-fullwidth">
+            <section class="bg-white p-5 rounded-none border border-slate-200 shadow-sm space-y-4 due-orders-card">
                 <div class="flex justify-between items-center border-b pb-3">
                     <div>
                         <h2 class="text-base font-bold flex items-center gap-2 text-slate-800">
@@ -225,8 +274,8 @@ body.due-librarian-ui{font-family:'Be Vietnam Pro',Inter,system-ui,sans-serif;ba
                     <span id="orderCount" class="bg-orange-100 text-orange-700 px-3 py-1 rounded-sm text-xs font-bold">0 đơn</span>
                 </div>
 
-                <div class="overflow-x-auto">
-                    <table class="w-full text-left text-sm">
+                <div class="overflow-x-auto due-orders-table-wrap">
+                    <table class="w-full text-left text-sm due-orders-table">
                         <thead>
                             <tr class="text-xs text-slate-500 font-bold border-b bg-slate-50">
                                 <th class="p-3.5">Hộc tủ</th>
@@ -241,15 +290,7 @@ body.due-librarian-ui{font-family:'Be Vietnam Pro',Inter,system-ui,sans-serif;ba
                     </table>
                 </div>
             </section>
-            <aside class="due-mini-locker-panel" aria-label="Sơ đồ hộc tủ thu nhỏ">
-              <div class="due-mini-locker-head">
-                <div><h3 class="font-extrabold text-sm text-[#003B7A]"><i class="fa-solid fa-table-cells-large mr-1"></i> 20 hộc tủ trực tuyến</h3>
-                <p class="text-[10px] text-slate-500 mt-1">Đồng bộ từ bảng giám sát hiện có</p></div>
-                <button type="button" class="text-[11px] font-bold text-[#0B4EA2]" onclick="switchLibTab('lockers')">Xem tất cả</button>
-              </div>
-              <div id="dueMiniLockerGrid" class="due-mini-locker-grid" role="group" aria-label="Trạng thái 20 hộc tủ"></div>
-              <div class="due-mini-legend"><span><i class="due-dot"></i>Trống</span><span><i class="due-dot wait"></i>Chờ lấy</span><span><i class="due-dot check"></i>Chờ trả / kiểm tra</span><span><i class="due-dot open"></i>Đang mở</span></div>
-            </aside>
+
           </div>
         </div>
 
@@ -1473,36 +1514,6 @@ body.due-librarian-ui{font-family:'Be Vietnam Pro',Inter,system-ui,sans-serif;ba
   const $ = (id) => document.getElementById(id);
   const ready = (fn) => document.readyState === 'loading' ? document.addEventListener('DOMContentLoaded', fn) : fn();
   ready(() => {
-    /* Mini locker matrix mirrors UI's realtime state; no new backend listener */
-    const mini = $('dueMiniLockerGrid');
-    if (mini) {
-      for (let i=1;i<=20;i++) {
-        const cell=document.createElement('div'); cell.className='due-mini-cell';cell.dataset.state='trong';
-        cell.innerHTML='<span>'+String(i).padStart(2,'0')+'</span><i class="fa-solid fa-lock" aria-hidden="true"></i>';
-        cell.title='Hộc '+String(i).padStart(2,'0')+' · Trống';mini.appendChild(cell);
-      }
-      function paintMini() {
-        // dashLockers is original dashboard data, refreshed by its existing Firestore realtime listener.
-        let lockers=[];
-        try { if (typeof dashLockers !== 'undefined' && Array.isArray(dashLockers)) lockers=dashLockers; } catch (_) {}
-        const by=new Map(lockers.map(x=>[String(x.so_hoc || ''),x]));
-        mini.querySelectorAll('.due-mini-cell').forEach((cell,i)=>{
-          const idx=i+1;
-          let name='Hộc '+String(idx).padStart(2,'0');
-          try { if (typeof App?.lockerName==='function') name=App.lockerName(idx); } catch (_) {}
-          const item=by.get(name); const state=item?.trang_thai || 'trong';
-          cell.dataset.state=state;
-          const states={trong:'Trống',cho_nhan:'Sách chờ lấy',cho_tra:'Chờ trả',chua_sach_tra:'Sách trả chờ kiểm tra',dang_mo:'Đang mở'};
-          cell.title=name+' · '+(states[state]||state);
-          cell.setAttribute('aria-label',cell.title);
-          const ico=cell.querySelector('i');if(ico)ico.className='fa-solid '+(state==='dang_mo'?'fa-lock-open':state==='trong'?'fa-lock':'fa-box');
-        });
-      }
-      // Original renderLockers() already redraws lockerGrid every snapshot.
-      const full=$('lockerGrid');
-      if(full && typeof MutationObserver!=='undefined') new MutationObserver(paintMini).observe(full,{childList:true});
-      paintMini();
-    }
     /* Quick presets appended to per-book fields created by original openReportModal() */
     const inspection=$('reportBookRows');
     if(inspection && typeof MutationObserver!=='undefined') {
