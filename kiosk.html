@@ -476,6 +476,68 @@ body.due-kiosk-ui { color:var(--cyber-text)!important;
   .due-kiosk-ui .due-scan-laser { animation:none!important; }
 }
 
+
+/* KIOSK CAMERA FIX 06 — duy nhất một khung ngắm QR, không sửa script/quét mã. */
+.due-kiosk-ui .kiosk-camera-frame #qr-shaded-region,
+.due-kiosk-ui .kiosk-camera-frame #reader #qr-shaded-region {
+  display: none !important; /* Overlay trắng do html5-qrcode tự tạo; video/canvas vẫn hoạt động */
+}
+.due-kiosk-ui .kiosk-camera-frame #reader__scan_region {
+  border: 0 !important;
+  outline: 0 !important;
+  box-shadow: none !important;
+}
+.due-kiosk-ui .kiosk-camera-frame .due-scan-target {
+  position: absolute !important;
+  top: 50% !important;
+  left: 50% !important;
+  transform: translate(-50%, -50%) !important;
+  width: 200px !important;
+  height: 200px !important;
+  min-width: 200px !important;
+  min-height: 200px !important;
+  aspect-ratio: 1 / 1 !important;
+  z-index: 4 !important;
+  pointer-events: none !important;
+  overflow: hidden;
+  display: grid;
+  place-items: center;
+  border: 0 !important;
+  outline: 0 !important;
+  box-shadow: none !important;
+}
+.due-kiosk-ui .kiosk-camera-frame .due-scan-corner {
+  border-color: #00f0ff !important;
+  filter: drop-shadow(0 0 5px rgba(0,240,255,.85)) !important;
+}
+.due-kiosk-ui .kiosk-camera-frame .due-scan-placeholder {
+  position: absolute !important;
+  top: 50% !important;
+  left: 50% !important;
+  transform: translate(-50%, -50%) !important;
+  color: #dbeafe !important;
+  opacity: .72 !important;
+  font-size: 30px;
+}
+.due-kiosk-ui .kiosk-camera-frame .due-scan-laser {
+  position: absolute !important;
+  top: 0 !important;
+  left: 0 !important;
+  right: 0 !important;
+  width: 100% !important;
+  height: 2px !important;
+  background: #00f0ff !important;
+  box-shadow: 0 0 10px #00f0ff, 0 0 18px rgba(0,240,255,.55) !important;
+  animation: due-single-scan 2.4s linear infinite !important;
+}
+@keyframes due-single-scan {
+  from { transform: translateY(0); }
+  to { transform: translateY(198px); }
+}
+@media (prefers-reduced-motion: reduce) {
+  .due-kiosk-ui .kiosk-camera-frame .due-scan-laser { animation: none !important; }
+}
+
     </style>
 </head>
 <body class="bg-slate-900 text-white min-h-screen flex flex-col font-sans due-kiosk-ui">
