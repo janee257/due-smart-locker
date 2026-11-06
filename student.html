@@ -39,6 +39,82 @@
             border-color: #ea580c;
         }
     </style>
+
+    <!-- UI UPGRADE 04: CSS riêng Student, không đụng ui.css/dash.css của Thủ thư & Kiosk -->
+    <style id="due-student-ui-v2">
+      :root{--due-navy:#003B7A;--due-blue:#0B4EA2;--due-orange:#EA580C;--due-surface:#F8FAFC;--due-line:#DFE7F1;--due-text:#142943}
+      body.page-student,body{font-family:'Be Vietnam Pro',Inter,system-ui,sans-serif}
+      body.page-student{background:var(--due-surface)!important;color:var(--due-text)}
+      body.page-student #loginSection{background:radial-gradient(circle at 78% 10%,#1d69ac 0%,transparent 38%),linear-gradient(135deg,#002954,#003b7a 58%,#08294b)!important}
+      body.page-student #loginSection>.bg-white{border-radius:22px!important;padding:32px!important;box-shadow:0 30px 70px rgba(0,23,56,.25)!important}
+      body.page-student #loginSection input:focus{border-color:var(--due-blue)!important;box-shadow:0 0 0 3px rgba(11,78,162,.12)!important}
+      body.page-student #loginSection button[type=submit]{background:var(--due-navy)!important;border-radius:12px!important;font-size:13px}
+      body.page-student #loginSection button[type=submit]:hover{background:var(--due-blue)!important}
+      .due-sidebar.dash-aside{width:276px;background:white!important;border-right:1px solid var(--due-line)}
+      .due-sidebar-brand{padding:26px 19px 22px;background:linear-gradient(145deg,#003B7A,#0B4EA2)!important;color:#fff!important;border-bottom:0!important}
+      .due-brand-lockup{display:flex;gap:12px;align-items:center}.due-brand-lockup img{width:52px;height:54px;object-fit:contain;background:#fff;border-radius:13px;padding:6px;flex-shrink:0}
+      .due-brand-lockup strong{display:block;font-size:14px;letter-spacing:.07em}.due-brand-lockup span{display:block;color:#c5dbfa;font-size:11px;font-weight:700;letter-spacing:.14em;margin-top:3px}
+      .due-sidebar-brand>p{font-size:11px;line-height:1.7;color:#dbeafe;margin-top:16px;max-width:235px}
+      .due-nav{padding:20px 12px;flex:1;overflow-y:auto}.due-nav-caption{font-size:10px;font-weight:800;letter-spacing:.12em;color:#94a3b8;margin:20px 12px 8px}
+      .due-nav-caption:first-child{margin-top:2px}.due-nav-group{padding:7px 5px;background:#f8fafc;border:1px solid #eaf0f7;border-radius:14px}
+      .due-nav-group-title{display:flex;align-items:center;gap:11px;padding:9px 10px;color:#003B7A;font-weight:800;font-size:12px}
+      .due-nav-group-title i{width:18px;text-align:center}.due-sidebar .dash-nav{min-height:42px;padding:10px 12px!important;border-radius:10px!important;font-size:12px!important;gap:11px}
+      .due-sidebar .dash-nav i{width:17px;text-align:center;color:#7890ac}.due-sidebar .dash-nav:hover{background:#ecf4ff!important;color:var(--due-navy)!important}
+      .due-sidebar .dash-nav.active{background:var(--due-navy)!important;color:#fff!important;box-shadow:0 7px 14px rgba(0,59,122,.15)!important}
+      .due-sidebar .dash-nav.active i{color:#fff!important}.due-sidebar .dash-nav.active .badge{background:#fff!important;color:var(--due-navy)!important}
+      .due-sidebar .dash-nav .badge{margin-left:auto;background:#f4e6d8;color:#b45309}
+      .due-subnav{margin-top:2px}.due-sidebar-footer{border-top:1px solid var(--due-line);padding:10px 12px 16px}
+      .due-sidebar-footer>p{font-size:10px;color:#94a3b8;padding:8px 11px}
+      .due-main.dash-main{background:#f8fafc!important;min-height:100vh}
+      .due-topbar.dash-topbar{height:auto;min-height:86px;background:#fff!important;padding:12px 24px!important;display:flex;justify-content:space-between;border-bottom:1px solid var(--due-line);box-shadow:0 2px 10px rgba(0,40,90,.025)}
+      .due-topbar-heading{margin-right:auto}.due-topbar-heading small{display:block;font-size:9px;letter-spacing:.14em;color:#7a91ad;font-weight:800}
+      .due-topbar-heading h1{font-size:17px;font-weight:800;color:var(--due-navy);margin-top:2px}
+      .due-burger{width:40px;height:40px;display:grid;place-items:center;background:#eaf3ff;color:var(--due-navy)}
+      .due-student-profile{display:flex;align-items:center;gap:13px;min-width:0}
+      .due-profile-status{border-right:1px solid var(--due-line);padding-right:14px;display:flex;flex-direction:column;align-items:flex-end;gap:4px;font-size:10px;color:#64748b}
+      .due-profile-status span:first-child{color:#15803d;font-weight:700}.due-profile-status b{color:#c2410c;font-weight:800}
+      .due-profile-name{text-align:right;min-width:0}.due-profile-name strong{display:block;font-size:12px;color:#17324f;max-width:175px;overflow:hidden;white-space:nowrap;text-overflow:ellipsis}
+      .due-profile-name small{display:block;font-size:10px;color:#8695a8;margin-top:2px}
+      .due-avatar{display:grid;place-items:center;width:43px;height:43px;border-radius:50%;color:#fff;background:linear-gradient(135deg,var(--due-navy),#418dd6);font-weight:800;border:3px solid #e4f0ff;flex-shrink:0}
+      .due-content{max-width:1210px!important;padding-bottom:112px!important}
+      .due-welcome{position:relative;overflow:hidden;display:flex;justify-content:space-between;align-items:center;min-height:150px;border-radius:20px;padding:26px 30px;color:#fff;background:linear-gradient(105deg,#00376e,#0b4ea2 70%,#3979b9);box-shadow:0 12px 28px rgba(0,59,122,.12)}
+      .due-eyebrow{display:inline-flex;gap:8px;align-items:center;color:#c2defb;letter-spacing:.12em;font-size:10px;font-weight:800}
+      .due-welcome h2{font-size:24px;font-weight:800;margin:10px 0 6px}.due-welcome p{font-size:12px;color:#dfedff;line-height:1.7}
+      .due-welcome-graphic{opacity:.2;font-size:90px;transform:rotate(-12deg);padding-right:28px}
+      .due-search-panel{border-radius:18px!important;padding:19px!important;border-color:var(--due-line)!important;box-shadow:0 6px 18px rgba(30,55,92,.035)!important}
+      .due-search-panel #searchInput{background:#f8fafc!important;border:1px solid #d5e2f2!important;border-radius:12px!important;padding-top:12px!important;padding-bottom:12px!important}
+      .due-search-panel #searchInput:focus{border-color:var(--due-blue)!important;box-shadow:0 0 0 3px rgba(11,78,162,.12)!important}
+      .due-search-panel .fa-magnifying-glass{color:var(--due-blue)!important;top:16px!important}
+      .due-search-panel .filter-chip{background:#fff!important;border:1px solid #dbe5f0!important;border-radius:999px!important;color:#49647e!important}
+      .due-search-panel .filter-chip:hover{border-color:var(--due-blue)!important;color:var(--due-blue)!important}
+      .due-search-panel .filter-chip.active{background:var(--due-navy)!important;border-color:var(--due-navy)!important;color:#fff!important}
+      .due-book-grid{gap:17px!important}
+      .due-book-grid>div{border-radius:18px!important;border:1px solid var(--due-line)!important;overflow:hidden;background:#fff;box-shadow:0 5px 18px rgba(18,50,88,.055)!important;transition:transform .2s,box-shadow .2s,border-color .2s!important;padding:17px!important}
+      .due-book-grid>div:hover{transform:translateY(-4px);border-color:#a8c5e6!important;box-shadow:0 14px 34px rgba(8,53,104,.12)!important}
+      /* Không có trường ảnh bìa trong renderBooks(): tạo bìa minh họa tỉ lệ 3:4 bằng CSS, không gán ảnh sai sách. */
+      .due-book-grid>div:not(.col-span-full)::before{content:'DUE  •  LIBRARY\A  SMART LOCKER\A  ──────────\A  GIÁO TRÌNH';white-space:pre-line;display:flex;align-items:center;justify-content:center;text-align:center;line-height:2.6;letter-spacing:.1em;font-size:11px;font-weight:800;color:rgba(255,255,255,.85);background:linear-gradient(150deg,rgba(255,255,255,.09) 0 2%,transparent 2% 100%),linear-gradient(135deg,#002e63,#125ba4 65%,#407fc4);aspect-ratio:3/4;width:min(58%,180px);margin:3px auto 17px;border-radius:6px 13px 13px 6px;border-left:9px solid #032c58;box-shadow:9px 10px 16px rgba(6,47,93,.15),inset -6px 0 0 rgba(255,255,255,.08)}
+      .due-book-grid span.font-mono{background:#eaf3fb!important;color:var(--due-navy)!important;font-weight:800;border-radius:7px!important}
+      .due-book-grid button[title="Xem thông tin sách"]{font-size:13px!important;line-height:1.65!important;color:#183455!important;text-decoration:none!important}
+      .due-book-grid button[title="Xem thông tin sách"]:hover{color:var(--due-blue)!important}
+      .due-book-grid span.text-orange-600{color:var(--due-blue)!important}
+      .due-book-grid button[onclick^="addToCart"]{background:var(--due-orange)!important;border-radius:9px!important;padding:10px 14px!important}
+      .due-book-grid button[onclick^="addToCart"]:hover{background:#c2410c!important}
+      .due-activity-tabs{display:flex;gap:6px;flex-wrap:wrap;background:#eaf1fa;border:1px solid #dfe9f4;border-radius:14px;padding:6px;margin-bottom:15px}
+      .due-activity-tabs button{padding:10px 16px;border-radius:10px!important;font-size:12px;font-weight:700;color:#526a83}
+      .due-activity-tabs button.is-active{background:var(--due-navy);color:#fff;box-shadow:0 3px 9px rgba(0,59,122,.14)}
+      .due-activity-tabs button:hover:not(.is-active){background:#fff;color:var(--due-navy)}
+      .due-content [id^="tabContent"] .rounded-none{border-radius:14px!important}
+      .due-content [id^="tabContent"] .text-orange-600{color:var(--due-blue)!important}
+      .due-content #tabContentFines #finesTotal{color:#be123c!important}
+      .due-borrow-dock{background:rgba(0,47,100,.97)!important;border:1px solid rgba(139,190,236,.36)!important;border-radius:18px!important;max-width:600px!important;padding:15px 18px!important;box-shadow:0 18px 42px rgba(0,34,72,.28)!important;gap:10px}
+      .due-borrow-dock>div>div:first-child{background:rgba(255,255,255,.12)!important;border-radius:12px!important}
+      .due-borrow-dock button{background:var(--due-orange)!important;padding:11px 15px!important;white-space:nowrap;border-radius:11px!important}
+      .due-borrow-dock button:hover{background:#c2410c!important}
+      .due-borrow-dock #cartCountBadge{color:#fbbf24!important}
+      @media(min-width:1024px){.due-main.dash-main{margin-left:276px!important}}
+      @media(max-width:850px){.due-profile-status{display:none}.due-welcome-graphic{font-size:62px;padding:0}.due-welcome h2{font-size:21px}}
+      @media(max-width:550px){.due-topbar.dash-topbar{padding:9px 12px!important;gap:10px}.due-topbar-heading small{font-size:8px}.due-topbar-heading h1{font-size:13px}.due-profile-name{display:none}.due-avatar{width:36px;height:36px}.due-content{padding:13px!important;padding-bottom:110px!important}.due-welcome{padding:21px;min-height:135px}.due-welcome-graphic{display:none}.due-book-grid>div:not(.col-span-full)::before{width:min(65%,150px)}.due-borrow-dock{left:10px!important;right:10px!important;padding:12px!important}.due-borrow-dock button{font-size:10px!important;padding:10px!important}.due-borrow-dock>div{gap:8px!important}.due-borrow-dock p:last-child{display:none}}
+    </style>
 </head>
 <body class="bg-slate-100 min-h-screen text-slate-800 pb-28 font-sans">
 
@@ -78,48 +154,55 @@
 
     <!-- ================= GIAO DIỆN CHÍNH ================= -->
     <div id="mainApp" class="hidden">
-        <!-- Header -->
-<div class="dash-overlay" id="dashOverlay" onclick="closeSidebar()"></div>
-        <aside class="dash-aside" id="dashAside">
-            <div class="p-5 bg-gradient-to-br from-orange-600 to-amber-500 text-white">
-                <div class="flex items-center gap-2 mb-4">
-                    <img src="/logo_due.png" alt="DUE" class="h-8 w-auto bg-white p-1 rounded-sm object-contain" onerror="this.onerror=null; this.src='https://due.udn.vn/Portals/0/logo-due.png';">
-                    <div class="leading-tight"><p class="font-bold text-sm">Thư viện DUE</p><p class="text-[10px] text-orange-100">Smart Locker Tự Phục Vụ</p></div>
+        <!-- UI UPGRADE 01: DUE Navy / Sidebar chia thành 3 nhóm (giữ nguyên 6 ID tab cho JS) -->
+        <div class="dash-overlay" id="dashOverlay" onclick="closeSidebar()"></div>
+        <aside class="dash-aside due-sidebar" id="dashAside">
+            <div class="due-sidebar-brand">
+                <div class="due-brand-lockup">
+                    <img src="/logo_due.png" alt="Logo Trường Đại học Kinh tế – ĐHĐN" onerror="this.onerror=null;this.src='https://due.udn.vn/Portals/0/logo-due.png';">
+                    <div><strong>THƯ VIỆN DUE</strong><span>SMART LOCKER</span></div>
                 </div>
-                <div class="flex items-center gap-3">
-                    <div id="userAvatar" class="w-14 h-14 shrink-0 rounded-full bg-white/25 ring-2 ring-white/70 flex items-center justify-center text-xl font-black">?</div>
-                    <div class="min-w-0">
-                        <p id="userDisplayName" class="font-bold text-sm truncate">--</p>
-                        <p id="userDisplayMssv" class="text-xs font-mono text-orange-100">--</p>
-                    </div>
-                </div>
-                <div class="mt-3 flex items-center justify-between text-xs">
-                    <span class="bg-white/20 px-2.5 py-1 rounded-sm font-bold">✔ Thẻ hợp lệ</span>
-                    <span>Nợ phạt: <b id="userDisplayDebt">0 đ</b></span>
-                </div>
+                <p>Không gian học liệu thông minh, chủ động trong từng giao dịch.</p>
             </div>
-            <nav class="p-3 space-y-1.5 flex-1">
-                <button onclick="switchTab('borrow')" id="tabBtnBorrow" class="dash-nav"><span>Danh mục sách</span></button>
-                <button onclick="switchTab('orders')" id="tabBtnOrders" class="dash-nav"><span>Mã QR</span><span id="ordersCount" class="badge zero">0</span></button>
-                <button onclick="switchTab('borrowed')" id="tabBtnBorrowed" class="dash-nav"><span>Đang mượn</span><span id="borrowedCount" class="badge zero">0</span></button>
-                <button onclick="switchTab('return')" id="tabBtnReturn" class="dash-nav"><span>Trả sách</span><span id="returnCount" class="badge zero">0</span></button>
-                <button onclick="switchTab('history')" id="tabBtnHistory" class="dash-nav"><span>Lịch sử mượn trả</span></button>
-                <button onclick="switchTab('fines')" id="tabBtnFines" class="dash-nav"><span>Thông báo</span><span id="finesCount" class="badge zero">0</span></button>
+            <nav class="due-nav" aria-label="Điều hướng sinh viên">
+                <p class="due-nav-caption">KHÁM PHÁ</p>
+                <button onclick="switchTab('borrow')" id="tabBtnBorrow" class="dash-nav due-nav-main"><i class="fa-solid fa-book-open" aria-hidden="true"></i><span>Danh mục sách</span></button>
+                <p class="due-nav-caption">MƯỢN VÀ TRẢ</p>
+                <div class="due-nav-group" id="studentActivityNav">
+                    <div class="due-nav-group-title"><i class="fa-solid fa-arrow-right-arrow-left" aria-hidden="true"></i><span>Hoạt động mượn – trả</span></div>
+                    <button onclick="switchTab('orders')" id="tabBtnOrders" class="dash-nav due-subnav"><i class="fa-solid fa-qrcode" aria-hidden="true"></i><span>Mã QR nhận / trả</span><span id="ordersCount" class="badge zero">0</span></button>
+                    <button onclick="switchTab('borrowed')" id="tabBtnBorrowed" class="dash-nav due-subnav"><i class="fa-solid fa-book-bookmark" aria-hidden="true"></i><span>Sách đang mượn</span><span id="borrowedCount" class="badge zero">0</span></button>
+                    <button onclick="switchTab('return')" id="tabBtnReturn" class="dash-nav due-subnav"><i class="fa-solid fa-rotate-left" aria-hidden="true"></i><span>Yêu cầu trả sách</span><span id="returnCount" class="badge zero">0</span></button>
+                </div>
+                <p class="due-nav-caption">THEO DÕI</p>
+                <div class="due-nav-group" id="studentFinanceNav">
+                    <div class="due-nav-group-title"><i class="fa-regular fa-file-lines" aria-hidden="true"></i><span>Lịch sử &amp; Phạt / VietQR</span></div>
+                    <button onclick="switchTab('history')" id="tabBtnHistory" class="dash-nav due-subnav"><i class="fa-solid fa-clock-rotate-left" aria-hidden="true"></i><span>Lịch sử mượn trả</span></button>
+                    <button onclick="switchTab('fines')" id="tabBtnFines" class="dash-nav due-subnav"><i class="fa-solid fa-receipt" aria-hidden="true"></i><span>Nợ phạt &amp; Thông báo</span><span id="finesCount" class="badge zero">0</span></button>
+                </div>
             </nav>
-            <div class="p-3 border-t border-slate-100">
-                <button onclick="handleLogout()" class="dash-nav"><span>Đăng xuất</span></button>
-            </div>
+            <div class="due-sidebar-footer"><button onclick="handleLogout()" class="dash-nav"><i class="fa-solid fa-arrow-right-from-bracket" aria-hidden="true"></i><span>Đăng xuất</span></button><p>© DUE Smart Locker · Cổng sinh viên</p></div>
         </aside>
 
-        <div class="dash-main">
-        <div class="dash-topbar">
-            <button class="burger w-10 h-10 rounded-none bg-orange-50 text-orange-700 text-lg" onclick="toggleSidebar()" aria-label="Mở menu">☰</button>
-            <p class="font-bold text-slate-800 text-sm" id="pageTitle">Danh mục sách</p>
-        </div>
-        <main class="max-w-5xl mx-auto p-4 sm:p-6 space-y-6">
+        <div class="dash-main due-main">
+            <!-- UI UPGRADE 02: Topbar hồ sơ; toàn bộ ID userDisplay* giữ nguyên -->
+            <header class="dash-topbar due-topbar">
+                <button class="burger due-burger" onclick="toggleSidebar()" aria-label="Mở menu"><i class="fa-solid fa-bars"></i></button>
+                <div class="due-topbar-heading"><small>CỔNG DỊCH VỤ SINH VIÊN</small><h1 id="pageTitle">Danh mục sách</h1></div>
+                <div class="due-student-profile" aria-label="Thông tin sinh viên">
+                    <div class="due-profile-status"><span><i class="fa-solid fa-circle-check"></i> Thẻ hợp lệ</span><span>Nợ phạt: <b id="userDisplayDebt">0 đ</b></span></div>
+                    <div class="due-profile-name"><strong id="userDisplayName">--</strong><small id="userDisplayMssv">--</small></div>
+                    <div id="userAvatar" class="due-avatar">?</div>
+                </div>
+            </header>
+            <main class="due-content max-w-6xl mx-auto p-4 sm:p-6 space-y-6">
+                <div class="due-welcome">
+                    <div><span class="due-eyebrow"><i class="fa-solid fa-graduation-cap"></i> DUE UNIVERSITY LIBRARY</span><h2>Học liệu trong tầm tay</h2><p>Tra cứu giáo trình, đăng ký mượn và theo dõi giao dịch tại Smart Locker.</p></div>
+                    <div class="due-welcome-graphic" aria-hidden="true"><i class="fa-solid fa-book-open-reader"></i></div>
+                </div>
             <!-- TAB 1: MƯỢN SÁCH -->
-            <div id="tabContentBorrow" class="space-y-4">
-                <div class="bg-white p-4 rounded-none border border-slate-200 shadow-sm space-y-3">
+            <div id="tabContentBorrow" class="space-y-4 due-catalog">
+                <div class="due-search-panel bg-white p-4 rounded-none border border-slate-200 shadow-sm space-y-3">
                     <div class="flex flex-col sm:flex-row gap-3 items-stretch sm:items-center justify-between">
                         <div class="relative flex-1">
                             <i class="fa-solid fa-magnifying-glass absolute left-3.5 top-3.5 text-slate-400 text-sm"></i>
@@ -161,11 +244,11 @@
                 </div>
 
                 <!-- Thẻ chứa mã QR đơn chờ lấy -->
-                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4" id="booksList"></div>
+                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 due-book-grid" id="booksList"></div>
             </div>
 
             <!-- TAB 2: ĐANG MƯỢN (TRẢ NHIỀU SÁCH CÙNG LÚC) -->
-            <div id="tabContentReturn" class="hidden space-y-4">
+            <div id="tabContentReturn" class="hidden space-y-4"><div class="due-activity-tabs"><button onclick="switchTab('orders')">Mã QR</button><button onclick="switchTab('borrowed')">Sách đang mượn</button><button onclick="switchTab('return')" class="is-active">Trả sách</button></div>
                 <div class="bg-blue-50 border border-blue-200 rounded-none p-4 text-xs sm:text-sm text-blue-900 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3">
                     <div>
                         <p class="font-bold flex items-center gap-1.5"><i class="fa-solid fa-list-check text-blue-600"></i> Quy trình trả nhiều sách cùng lúc:</p>
@@ -196,7 +279,7 @@
             </div>
 
             <!-- MÃ QR: nơi duy nhất lưu mã nhận sách + mã trả sách còn hiệu lực -->
-            <div id="tabContentOrders" class="hidden space-y-4">
+            <div id="tabContentOrders" class="hidden space-y-4"><div class="due-activity-tabs"><button onclick="switchTab('orders')" class="is-active">Mã QR</button><button onclick="switchTab('borrowed')">Sách đang mượn</button><button onclick="switchTab('return')">Trả sách</button></div>
                 <div class="bg-orange-50 border border-orange-200 rounded-none p-4 text-xs sm:text-sm text-orange-900">
                     <p class="font-bold">Mã QR của tôi</p>
                     <p class="text-slate-600 text-xs">Mã QR nhận sách và trả sách đều nằm ở đây, tồn tại cho đến khi bạn quét mở tủ thành công tại Kiosk.</p>
@@ -205,13 +288,13 @@
             </div>
 
             <!-- ĐANG MƯỢN -->
-            <div id="tabContentBorrowed" class="hidden space-y-4">
+            <div id="tabContentBorrowed" class="hidden space-y-4"><div class="due-activity-tabs"><button onclick="switchTab('orders')">Mã QR</button><button onclick="switchTab('borrowed')" class="is-active">Sách đang mượn</button><button onclick="switchTab('return')">Trả sách</button></div>
                 <div class="bg-slate-50 border border-slate-200 rounded-none p-3 text-xs sm:text-sm text-slate-600">Những cuốn sách bạn đang giữ. Muốn trả sách, vào mục <b>Trả sách</b>.</div>
                 <div id="borrowedOnlyList" class="grid grid-cols-1 md:grid-cols-2 gap-4"></div>
             </div>
 
             <!-- NỢ PHẠT & THÔNG BÁO -->
-            <div id="tabContentFines" class="hidden space-y-4">
+            <div id="tabContentFines" class="hidden space-y-4"><div class="due-activity-tabs"><button onclick="switchTab('history')">Lịch sử</button><button onclick="switchTab('fines')" class="is-active">Công nợ / VietQR</button></div>
                 <div class="bg-rose-50 border border-rose-200 rounded-none p-4 flex items-center justify-between">
                     <div><p class="text-xs text-rose-700 font-bold">Tổng nợ phạt chưa thu</p><p class="text-2xl font-black text-rose-700" id="finesTotal">0 đ</p></div>
                     <span class="text-3xl"></span>
@@ -221,7 +304,7 @@
             </div>
 
             <!-- TAB 3: LỊCH SỬ -->
-            <div id="tabContentHistory" class="hidden space-y-4">
+            <div id="tabContentHistory" class="hidden space-y-4"><div class="due-activity-tabs"><button onclick="switchTab('history')" class="is-active">Lịch sử</button><button onclick="switchTab('fines')">Công nợ / VietQR</button></div>
                 <div class="bg-slate-50 border border-slate-200 rounded-none p-3 text-xs sm:text-sm text-slate-600 flex items-center gap-2">
                     <i class="fa-solid fa-clock-rotate-left text-orange-600"></i>
                     <span>Toàn bộ nhật ký mượn & trả sách tại Smart Locker của bạn:</span>
@@ -232,19 +315,19 @@
         </div>
     </div>
 
-    <!-- THANH GIỎ HÀNG NỔI -->
-    <div id="cartBar" class="hidden fixed bottom-4 left-4 right-4 max-w-lg mx-auto bg-slate-900/95 backdrop-blur-md text-white p-3.5 rounded-none shadow-md flex items-center justify-between z-40 border border-slate-700">
+    <!-- UI UPGRADE 03: Floating Borrow Dock (giữ cartBar, cartCountBadge, openBookingCartModal) -->
+    <div id="cartBar" class="hidden due-borrow-dock fixed bottom-4 left-4 right-4 max-w-lg mx-auto bg-slate-900/95 backdrop-blur-md text-white p-3.5 rounded-none shadow-md flex items-center justify-between z-40 border border-slate-700">
         <div class="flex items-center gap-3">
             <div class="w-10 h-10 rounded-none bg-orange-600 flex items-center justify-center font-bold text-sm shadow-md">
                 <i class="fa-solid fa-cart-shopping"></i>
             </div>
             <div>
-                <p class="text-xs sm:text-sm font-bold">Giỏ mượn: <span id="cartCountBadge" class="text-orange-400">0</span> cuốn</p>
+                <p class="text-xs sm:text-sm font-bold">Đã chọn: <span id="cartCountBadge" class="text-orange-400">0</span> cuốn</p>
                 <p class="text-[10px] text-slate-400">Bấm để kiểm tra & chọn khung giờ</p>
             </div>
         </div>
         <button onclick="openBookingCartModal()" class="px-4 py-2 bg-orange-600 hover:bg-orange-500 text-white rounded-none text-xs sm:text-sm font-bold shadow-md transition flex items-center gap-1.5">
-            Xem giỏ & Đặt <i class="fa-solid fa-arrow-right"></i>
+            Xem danh sách &amp; Đặt mượn <i class="fa-solid fa-arrow-right"></i>
         </button>
     </div>
 
@@ -1535,6 +1618,20 @@ function updateCalendarSelectionUI() {
         </div>
     </div>
 </div>
+
+
+    <!-- UI UPGRADE 05: Toast adapter độc lập. KHÔNG thay đổi các hàm nghiệp vụ hiện hữu. -->
+    <script id="due-toast-adapter">
+      (function () {
+        var originalAlert = window.alert.bind(window);
+        window.alert = function (message) {
+          if (typeof window.showToast !== 'function') return originalAlert(message);
+          var messageText = String(message == null ? '' : message);
+          var error = /lỗi|không thể|không hợp lệ|không còn|trống|vui lòng|quá hạn|từ chối/i.test(messageText);
+          window.showToast({type:error?'warning':'success',title:error?'Cần lưu ý':'Thông báo',message:messageText,duration:6500});
+        };
+      })();
+    </script>
 
 </body>
 </html>
