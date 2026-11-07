@@ -115,6 +115,16 @@
       @media(max-width:850px){.due-profile-status{display:none}.due-welcome-graphic{font-size:62px;padding:0}.due-welcome h2{font-size:21px}}
       @media(max-width:550px){.due-topbar.dash-topbar{padding:9px 12px!important;gap:10px}.due-topbar-heading small{font-size:8px}.due-topbar-heading h1{font-size:13px}.due-profile-name{display:none}.due-avatar{width:36px;height:36px}.due-content{padding:13px!important;padding-bottom:110px!important}.due-welcome{padding:21px;min-height:135px}.due-welcome-graphic{display:none}.due-book-grid>div:not(.col-span-full)::before{width:min(65%,150px)}.due-borrow-dock{left:10px!important;right:10px!important;padding:12px!important}.due-borrow-dock button{font-size:10px!important;padding:10px!important}.due-borrow-dock>div{gap:8px!important}.due-borrow-dock p:last-child{display:none}}
     </style>
+
+    <!-- UX UPGRADE 07: Liền mạch xem sách, gia hạn và chọn trả -->
+    <style id="due-borrowed-return-unified">
+      .due-borrowed-return-page #borrowedReturnSection{display:block}
+      .due-borrowed-return-page #borrowedBooksList>div{border-radius:14px!important}
+      .due-borrowed-return-page .due-inline-extend button{border-radius:9px!important;max-width:240px}
+      .due-borrowed-return-page #confirmReturnBar{border-radius:14px!important;z-index:20}
+      .due-borrowed-return-page #returnTracker>div{border-radius:14px!important}
+      @media (max-width:640px){.due-borrowed-return-page #confirmReturnBar{gap:10px;flex-wrap:wrap}.due-borrowed-return-page #confirmReturnBar button{flex:1;justify-content:center}}
+    </style>
 </head>
 <body class="bg-slate-100 min-h-screen text-slate-800 pb-28 font-sans">
 
@@ -171,8 +181,8 @@
                 <div class="due-nav-group" id="studentActivityNav">
                     <div class="due-nav-group-title"><i class="fa-solid fa-arrow-right-arrow-left" aria-hidden="true"></i><span>Hoạt động mượn – trả</span></div>
                     <button onclick="switchTab('orders')" id="tabBtnOrders" class="dash-nav due-subnav"><i class="fa-solid fa-qrcode" aria-hidden="true"></i><span>Mã QR nhận / trả</span><span id="ordersCount" class="badge zero">0</span></button>
-                    <button onclick="switchTab('borrowed')" id="tabBtnBorrowed" class="dash-nav due-subnav"><i class="fa-solid fa-book-bookmark" aria-hidden="true"></i><span>Sách đang mượn</span><span id="borrowedCount" class="badge zero">0</span></button>
-                    <button onclick="switchTab('return')" id="tabBtnReturn" class="dash-nav due-subnav"><i class="fa-solid fa-rotate-left" aria-hidden="true"></i><span>Yêu cầu trả sách</span><span id="returnCount" class="badge zero">0</span></button>
+                    <button onclick="switchTab('borrowed')" id="tabBtnBorrowed" class="dash-nav due-subnav"><i class="fa-solid fa-book-bookmark" aria-hidden="true"></i><span>Sách đang mượn &amp; Trả sách</span><span id="borrowedCount" class="badge zero">0</span></button>
+                    <span id="returnCount" class="hidden" aria-hidden="true">0</span>
                 </div>
                 <p class="due-nav-caption">THEO DÕI</p>
                 <div class="due-nav-group" id="studentFinanceNav">
@@ -247,8 +257,24 @@
                 <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 due-book-grid" id="booksList"></div>
             </div>
 
-            <!-- TAB 2: ĐANG MƯỢN (TRẢ NHIỀU SÁCH CÙNG LÚC) -->
-            <div id="tabContentReturn" class="hidden space-y-4"><div class="due-activity-tabs"><button onclick="switchTab('orders')">Mã QR</button><button onclick="switchTab('borrowed')">Sách đang mượn</button><button onclick="switchTab('return')" class="is-active">Trả sách</button></div>
+            <!-- MÃ QR: nơi duy nhất lưu mã nhận sách + mã trả sách còn hiệu lực -->
+            <div id="tabContentOrders" class="hidden space-y-4">
+                <div class="bg-orange-50 border border-orange-200 rounded-none p-4 text-xs sm:text-sm text-orange-900">
+                    <p class="font-bold">Mã QR của tôi</p>
+                    <p class="text-slate-600 text-xs">Mã QR nhận sách và trả sách đều nằm ở đây, tồn tại cho đến khi bạn quét mở tủ thành công tại Kiosk.</p>
+                </div>
+                <div id="qrList" class="grid grid-cols-1 lg:grid-cols-2 gap-5"></div>
+            </div>
+
+            <!-- UX UPGRADE 07: Sách đang mượn & trả sách trên cùng một trang -->
+            <div id="tabContentBorrowed" class="hidden space-y-5 due-borrowed-return-page">
+                <div class="bg-white border border-slate-200 rounded-xl p-4 shadow-sm">
+                    <h2 class="font-bold text-blue-900 text-base"><i class="fa-solid fa-book-bookmark mr-2"></i>Sách đang mượn &amp; Trả sách</h2>
+                    <p class="text-xs sm:text-sm text-slate-600 mt-1">Xem hạn trả, gia hạn khi đủ điều kiện hoặc chọn sách cần trả ngay bên dưới.</p>
+                </div>
+                <!-- Giữ ID cũ để afterBorrowings() vẫn cập nhật được dữ liệu. Không hiển thị danh sách trùng. -->
+                <div id="borrowedOnlyList" class="hidden" aria-hidden="true"></div>
+            <section id="borrowedReturnSection" class="space-y-4 due-return-workflow">
                 <div class="bg-blue-50 border border-blue-200 rounded-none p-4 text-xs sm:text-sm text-blue-900 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3">
                     <div>
                         <p class="font-bold flex items-center gap-1.5"><i class="fa-solid fa-list-check text-blue-600"></i> Quy trình trả nhiều sách cùng lúc:</p>
@@ -276,21 +302,8 @@
                         <i class="fa-solid fa-qrcode"></i> Tạo Mã QR Trả Sách
                     </button>
                 </div>
-            </div>
+            </section>
 
-            <!-- MÃ QR: nơi duy nhất lưu mã nhận sách + mã trả sách còn hiệu lực -->
-            <div id="tabContentOrders" class="hidden space-y-4"><div class="due-activity-tabs"><button onclick="switchTab('orders')" class="is-active">Mã QR</button><button onclick="switchTab('borrowed')">Sách đang mượn</button><button onclick="switchTab('return')">Trả sách</button></div>
-                <div class="bg-orange-50 border border-orange-200 rounded-none p-4 text-xs sm:text-sm text-orange-900">
-                    <p class="font-bold">Mã QR của tôi</p>
-                    <p class="text-slate-600 text-xs">Mã QR nhận sách và trả sách đều nằm ở đây, tồn tại cho đến khi bạn quét mở tủ thành công tại Kiosk.</p>
-                </div>
-                <div id="qrList" class="grid grid-cols-1 lg:grid-cols-2 gap-5"></div>
-            </div>
-
-            <!-- ĐANG MƯỢN -->
-            <div id="tabContentBorrowed" class="hidden space-y-4"><div class="due-activity-tabs"><button onclick="switchTab('orders')">Mã QR</button><button onclick="switchTab('borrowed')" class="is-active">Sách đang mượn</button><button onclick="switchTab('return')">Trả sách</button></div>
-                <div class="bg-slate-50 border border-slate-200 rounded-none p-3 text-xs sm:text-sm text-slate-600">Những cuốn sách bạn đang giữ. Muốn trả sách, vào mục <b>Trả sách</b>.</div>
-                <div id="borrowedOnlyList" class="grid grid-cols-1 md:grid-cols-2 gap-4"></div>
             </div>
 
             <!-- NỢ PHẠT & THÔNG BÁO -->
@@ -566,8 +579,12 @@
             switchTab('borrow');
         }
 
-        const TABS = { borrow: 'Danh mục sách', orders: 'Mã QR của tôi', borrowed: 'Đang mượn', return: 'Trả sách', history: 'Lịch sử mượn trả', fines: 'Nợ phạt & Thông báo' };
+        // UX UPGRADE 07: Gộp điều hướng Trả sách vào Sách đang mượn.
+        // Alias 'return' giữ tương thích với mọi chỗ gọi switchTab('return') cũ.
+        const TABS = { borrow: 'Danh mục sách', orders: 'Mã QR nhận / trả', borrowed: 'Sách đang mượn & Trả sách', history: 'Lịch sử mượn trả', fines: 'Nợ phạt & Thông báo' };
         function switchTab(tab) {
+            if (tab === 'return') tab = 'borrowed';
+            if (!Object.prototype.hasOwnProperty.call(TABS, tab)) return;
             Object.keys(TABS).forEach(t => {
                 const C = t.charAt(0).toUpperCase() + t.slice(1);
                 document.getElementById('tabBtn' + C).classList.toggle('active', t === tab);
@@ -575,7 +592,7 @@
             });
             document.getElementById('pageTitle').innerText = TABS[tab];
             closeSidebar(); window.scrollTo({ top: 0 });
-            if (tab === 'return' || tab === 'borrowed' || tab === 'fines') fetchBorrowedBooks();
+            if (tab === 'borrowed' || tab === 'fines') fetchBorrowedBooks();
             if (tab === 'history') fetchHistory();
         }
 
@@ -1069,6 +1086,8 @@
                             <p class="font-bold text-slate-800 text-xs sm:text-sm leading-snug">${esc(b.ten_sach)}</p>
                             <p class="text-[11px] text-slate-400">Ngày mượn: <b>${b.ngay_muon || 'Hôm nay'}</b></p>
                             <p class="text-[11px] text-slate-600">Hạn trả: <b class="text-orange-600">${b.han_tra}</b></p>
+                            <!-- UX UPGRADE 07: tái sử dụng hàm gia hạn cũ, không phát sinh thao tác Firestore mới -->
+                            ${b.trang_thai === 'dang_muon' ? `<div onclick="event.stopPropagation()" class="due-inline-extend">${extendHtml(b)}</div>` : ''}
                             ${b.trang_thai === 'cho_kiem_tra' ? `<p class="text-[10px] text-blue-600 font-semibold mt-1">Đã đặt vào ${b.so_hoc_tra || 'hộc tủ'}, chờ Thủ thư nghiệm thu.</p>` : ''}
                         </div>
                     </div>
