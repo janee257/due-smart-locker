@@ -285,14 +285,14 @@
                     </button>
                 </div>
 
+
+                <!-- UI UPDATE 08: Tiến trình trả sách chỉ hiển thị cùng đơn đang hoạt động ở tab Mã QR. -->
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4" id="borrowedBooksList"></div>
+
                 <div id="returnLockBanner" class="hidden bg-amber-50 border-2 border-amber-300 rounded-none p-4 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
                     <p class="text-sm text-amber-900"><b>Bạn đang có đơn trả sách tại <span id="lockHoc"></span> chưa hoàn tất.</b><br><span id="lockHint" class="text-xs"></span></p>
                     <button id="lockBtn" onclick="switchTab('orders')" class="px-4 py-2 bg-amber-600 hover:bg-amber-700 text-white text-xs font-bold rounded-none whitespace-nowrap transition">Xem mã QR trả sách</button>
                 </div>
-                <div id="returnTracker" class="space-y-3"></div>
-
-                <p class="text-xs font-bold text-slate-500 uppercase tracking-wide">Tạo đơn trả mới</p>
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-4" id="borrowedBooksList"></div>
 
                 <div id="confirmReturnBar" class="sticky bottom-4 bg-slate-900 text-white p-3.5 rounded-none shadow-md flex items-center justify-between border border-slate-700">
                     <div class="text-xs">
@@ -631,24 +631,30 @@
 
         const STEPS = ['Đã tạo mã trả', 'Đã gửi sách vào hộc Kiosk', 'Thủ thư đang nghiệm thu', 'Hoàn tất (nhập kho)'];
         const DONE = { cho_bo_sach: 1, cho_tra_tai_kiosk: 1, cho_kiem_tra: 2, hoan_tat: 4, hoan_tat_phat: 4 };
+        // UI UPDATE 08: Tracker không còn tồn tại tại trang Sách đang mượn.
+        // Giữ tên hàm để listener Firestore cũ hoạt động và cập nhật badge (nếu có).
         function renderReturnTracker() {
-            const active = myReturns.filter(r => DONE[r.trang_thai] < 4), recent = myReturns.filter(r => DONE[r.trang_thai] === 4).slice(0, 2);
-            setBadge('returnCount', active.length);
-            const box = document.getElementById('returnTracker');
-            const shown = [...active, ...recent];
-            box.innerHTML = shown.length ? '<p class="text-xs font-bold text-slate-500 uppercase tracking-wide">Tiến trình trả sách</p>' + shown.map(r => {
-                const d = DONE[r.trang_thai] || 0;
-                const steps = STEPS.map((t, i) => {
-                    const st = i < d ? 'done' : (i === d && d < 4 ? 'now' : 'todo');
-                    const dot = st === 'done' ? 'bg-emerald-500 text-white' : st === 'now' ? 'bg-orange-500 text-white animate-pulse' : 'bg-slate-200 text-slate-500';
-                    return `<div class="flex-1 min-w-0 text-center"><div class="mx-auto w-7 h-7 rounded-full flex items-center justify-center text-xs font-black ${dot}">${st === 'done' ? '✓' : i + 1}</div>
-                        <p class="mt-1 text-[10px] sm:text-xs leading-tight ${st === 'todo' ? 'text-slate-400' : 'text-slate-700 font-semibold'}">${t}</p></div>`;
-                }).join('<div class="h-0.5 bg-slate-200 mt-3.5 flex-none w-3 sm:w-6"></div>');
-                return `<div class="bg-white rounded-none border border-slate-200 shadow-sm p-4 space-y-3">
-                    <div class="flex justify-between text-xs"><b class="font-mono text-slate-700">${esc(r.qr_token)}</b><span class="text-slate-500">${Number(r.so_luong) || (r.items || []).length} cuốn · ${esc(r.so_hoc)}</span></div>
-                    <div class="flex items-start">${steps}</div>
-                    ${r.trang_thai === 'hoan_tat_phat' ? '<p class="text-xs text-rose-600 font-semibold">Có biên bản phạt, xem mục Nợ phạt & Thông báo.</p>' : ''}</div>`;
-            }).join('') : '';
+            setBadge('returnCount', myReturns.filter(r => ACTIVE_RETURN.includes(r.trang_thai)).length);
+        }
+
+        // UI UPDATE 08: Tiến trình ngắn gọn, chỉ dành cho đơn trả chưa hoàn tất.
+        // Không tạo mã QR có thể dùng được cho đơn đã gửi sách vào hộc.
+        function returnProgressHtml(r) {
+            const waitingInspect = r.trang_thai === 'cho_kiem_tra';
+            const labels = ['Đã tạo mã', 'Bỏ sách vào hộc', 'Thủ thư nghiệm thu'];
+            const step = waitingInspect ? 2 : 1;
+            return `<div class="rounded-xl border border-blue-100 bg-blue-50/70 p-3 text-left space-y-2" aria-label="Tiến trình trả sách">
+                <div class="flex items-center justify-between gap-2">
+                    <span class="text-[11px] font-bold text-blue-900">Tiến trình trả sách</span>
+                    <span class="text-[10px] font-semibold text-blue-700">${waitingInspect ? 'Đang chờ thủ thư nghiệm thu' : 'Chờ gửi sách vào hộc'}</span>
+                </div>
+                <div class="grid grid-cols-3 gap-2">
+                    ${labels.map((label,i) => `<div class="flex items-center gap-1.5 min-w-0">
+                        <span class="w-5 h-5 flex-none rounded-full flex items-center justify-center text-[10px] font-bold ${i < step ? 'bg-emerald-500 text-white' : 'bg-blue-600 text-white'}">${i < step ? '✓' : i + 1}</span>
+                        <span class="text-[10px] leading-tight ${i === step ? 'font-bold text-blue-900' : 'text-slate-600'}">${label}</span>
+                    </div>`).join('')}
+                </div>
+            </div>`;
         }
 
         // Gọi mỗi khi 'borrowings' của sinh viên thay đổi
@@ -937,34 +943,51 @@
         function showReturnQr() { window.scrollTo({ top: 0, behavior: 'smooth' }); }
         function hideQrCards() { orderStates = {}; returnStates = {}; myOrders = []; myReturns = []; qrSig = ''; ['ordersCount','borrowedCount','returnCount','finesCount'].forEach(i => setBadge(i, 0)); const b = document.getElementById('qrList'); if (b) b.innerHTML = ''; }
 
+        // UI UPDATE 08: QR và tiến trình của từng đơn trả đang hoạt động nằm cùng một thẻ.
+        // Đơn hoàn tất chỉ xuất hiện ở Lịch sử; đơn chờ nghiệm thu không còn hiển thị mã quét.
         function renderQrTab() {
             const pick = myOrders.filter(o => o.trang_thai_don === 'cho_soan' || o.trang_thai_don === 'da_soan_xong');
-            const ret = myReturns.filter(r => WAIT_DROP.includes(r.trang_thai));
+            const ret = myReturns.filter(r => ACTIVE_RETURN.includes(r.trang_thai));
             setBadge('ordersCount', pick.length + ret.length);
             const sig = JSON.stringify([pick.map(o => [o.id, o.trang_thai_don]), ret.map(r => [r.id, r.trang_thai])]);
             if (sig === qrSig) return; qrSig = sig;
             const box = document.getElementById('qrList');
-            if (!pick.length && !ret.length) { box.innerHTML = '<p class="col-span-full text-center text-sm text-slate-400 py-10">Bạn chưa có mã QR nào đang hiệu lực.</p>'; return; }
+            if (!box) return;
+            if (!pick.length && !ret.length) {
+                box.innerHTML = '<p class="col-span-full text-center text-sm text-slate-400 py-10">Bạn chưa có mã QR hoặc đơn trả đang xử lý.</p>';
+                return;
+            }
             const row = (k, v) => `<div class="flex justify-between gap-3"><span class="text-slate-500">${k}</span><b class="text-slate-800 text-right">${v}</b></div>`;
             const card = (kind, x) => {
                 const isRet = kind === 'return', books = (isRet ? x.items : x.books) || [];
-                const status = isRet ? 'Chờ bỏ sách vào hộc tại Kiosk' : (x.trang_thai_don === 'da_soan_xong' ? 'Sách đã sẵn sàng, quét mã tại Kiosk' : 'Chờ thủ thư nạp sách vào hộc');
+                const inspected = isRet && x.trang_thai === 'cho_kiem_tra';
+                const status = isRet
+                    ? (inspected ? 'Đã gửi sách vào hộc, đang chờ thủ thư nghiệm thu' : 'Chờ bỏ sách vào hộc tại Kiosk')
+                    : (x.trang_thai_don === 'da_soan_xong' ? 'Sách đã sẵn sàng, quét mã tại Kiosk' : 'Chờ thủ thư nạp sách vào hộc');
                 const due = isRet ? fmtDT(tms(x) + 864e5) : `${esc(x.ngay_hen)} (${esc(x.khung_gio)})`;
-                return `<div class="bg-white rounded-none border-2 ${isRet ? 'border-blue-400' : 'border-orange-400'} shadow-sm p-5 space-y-3 text-center">
-                    <span class="inline-block px-3 py-1 rounded-sm text-xs font-bold ${isRet ? 'bg-blue-100 text-blue-700' : 'bg-orange-100 text-orange-700'}">${isRet ? 'QR TRẢ SÁCH' : 'QR NHẬN SÁCH'}</span>
-                    <div class="p-3 bg-slate-50 rounded-none inline-block border border-slate-200"><div id="qr_${esc(x.id)}" class="qr-box flex justify-center"></div></div>
-                    <p class="font-mono font-black text-lg text-slate-800">${esc(x.qr_token)}</p>
-                    <div class="text-xs space-y-1 text-left bg-slate-50 rounded-none p-3">
-                        ${row('Hộc tủ', esc(x.so_hoc))}${row(isRet ? 'Hạn mở tủ' : 'Hạn lấy', due)}${row('Trạng thái', status)}
+                const qrArea = inspected
+                    ? `<div class="rounded-xl border border-blue-200 bg-blue-50 p-4 text-sm text-blue-800 font-semibold">✓ Sách đã gửi vào hộc. Không cần quét lại mã QR.</div>`
+                    : `<div class="p-3 bg-slate-50 rounded-none inline-block border border-slate-200"><div id="qr_${esc(x.id)}" class="qr-box flex justify-center"></div></div>
+                       <p class="font-mono font-black text-lg text-slate-800">${esc(x.qr_token)}</p>`;
+                return `<div class="bg-white rounded-xl border-2 ${isRet ? 'border-blue-400' : 'border-orange-400'} shadow-sm p-5 space-y-3 text-center">
+                    <span class="inline-block px-3 py-1 rounded-md text-xs font-bold ${isRet ? 'bg-blue-100 text-blue-700' : 'bg-orange-100 text-orange-700'}">${isRet ? (inspected ? 'ĐƠN TRẢ ĐANG NGHIỆM THU' : 'QR TRẢ SÁCH') : 'QR NHẬN SÁCH'}</span>
+                    ${qrArea}
+                    <div class="text-xs space-y-1 text-left bg-slate-50 rounded-md p-3">
+                        ${row('Hộc tủ', esc(x.so_hoc))}${!inspected ? row(isRet ? 'Hạn mở tủ' : 'Hạn lấy', due) : ''}${row('Trạng thái', status)}
                     </div>
                     <ul class="text-xs text-left text-slate-700 space-y-0.5">${books.map(b => `<li>• ${esc(b.ten_sach)}</li>`).join('')}</ul>
-                    <div class="flex gap-2">
-                        <button onclick="downloadQr('${kind}','${esc(x.id)}')" class="flex-1 py-2 bg-slate-900 hover:bg-slate-700 text-white text-xs font-bold rounded-none transition">⬇ Tải mã QR</button>
-                        ${isRet ? `<button onclick="cancelReturnOrder('${esc(x.id)}')" class="px-3 py-2 bg-rose-50 hover:bg-rose-100 text-rose-600 text-xs font-bold rounded-none transition">Hủy mã</button>` : ''}
-                    </div></div>`;
+                    ${isRet ? returnProgressHtml(x) : ''}
+                    ${!inspected ? `<div class="flex gap-2">
+                        <button onclick="downloadQr('${kind}','${esc(x.id)}')" class="flex-1 py-2 bg-slate-900 hover:bg-slate-700 text-white text-xs font-bold rounded-md transition">⬇ Tải mã QR</button>
+                        ${isRet ? `<button onclick="cancelReturnOrder('${esc(x.id)}')" class="px-3 py-2 bg-rose-50 hover:bg-rose-100 text-rose-600 text-xs font-bold rounded-md transition">Hủy mã</button>` : ''}
+                    </div>` : ''}
+                </div>`;
             };
             box.innerHTML = [...pick.map(o => card('pickup', o)), ...ret.map(r => card('return', r))].join('');
-            [...pick, ...ret].forEach(x => { const el = document.getElementById('qr_' + x.id); if (el) new QRCode(el, { text: x.qr_token, width: 240, height: 240 }); });
+            [...pick, ...ret.filter(r => WAIT_DROP.includes(r.trang_thai))].forEach(x => {
+                const el = document.getElementById('qr_' + x.id);
+                if (el) new QRCode(el, { text: x.qr_token, width: 240, height: 240 });
+            });
         }
 
         // Tải ảnh PNG gồm mã QR + thông tin (hộc, hạn, danh sách sách)
